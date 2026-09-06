@@ -6,7 +6,7 @@
 
 **Document status:** Approved for implementation  
 **Last updated:** 2026-09-06  
-**Next phase:** Phase 3, Discord transport hardening
+**Next phase:** Phase 4, workspaces and approvals
 
 ## Instructions for AI Coding Agents
 
@@ -596,7 +596,7 @@ database.
 
 ## Phase 3: Discord Transport Hardening
 
-**Status:** IN PROGRESS
+**Status:** DONE
 
 **Goal:** Make the free Discord transport safe and reliable on desktop and mobile.
 
@@ -622,6 +622,55 @@ database.
 - Long responses remain readable and valid Markdown.
 - Oversized or unsafe attachments fail with a clear message.
 - No inbound network port or paid Discord feature is required.
+
+**Implementation record (2026-09-06):**
+
+- Hardened message creation with Discord nonces so transient retries are
+  idempotent, suppressed all generated mentions, logged Gateway disconnect,
+  reconnect, resume, and REST rate-limit events without request data, and kept
+  database message IDs as the replay deduplication boundary.
+- Added Discord-CDN-only attachment handling with manual redirect rejection,
+  download timeouts, streamed size enforcement, MIME/header checks, image magic
+  signatures, UTF-8 and JSON validation, generated filenames, mode `0600`, and
+  guaranteed temporary-directory cleanup. Images use Discord's free 10 MiB
+  ceiling; text, Markdown, CSV, and JSON use a 256 KiB model-context ceiling.
+- Isolated conversation threads in a dedicated temporary working directory,
+  allowlisted the Codex child environment, enumerated and disabled every
+  configured MCP server, and disabled shell, web, apps, hooks, browser,
+  subagent, skill, and other local tools. Text attachments are injected as
+  bounded untrusted data and images use native local-image input. Phase 4 will
+  deliberately re-enable tools only inside enrolled workspaces and approvals.
+- Added queue draining and repeated active-turn interruption during shutdown so
+  attachment files are removed even when the daemon stops mid-turn. Separated
+  turn failure rendering from final Discord delivery so a persistence failure
+  cannot overwrite an already visible response.
+- Expanded `README.md` with private application/server/category setup, the sole
+  Message Content privileged intent, current least-privilege bot permissions,
+  explicit category isolation, Keychain rotation guidance, mobile behavior,
+  free-tier limits, and supported attachment types.
+- Live Discord checks accepted and read a text attachment, accepted an image,
+  rejected ZIP with a clear error, removed temporary files after normal and
+  interrupted turns, and rendered the normal channel controls at a 390x844
+  viewport. Forced and subsequent natural Gateway reconnects resumed with
+  replayed events; the RECONNECT prompt and response remained exactly one row
+  each. No Discord rate-limit errors occurred.
+- Existing no-Administrator and category isolation settings remain in place.
+  The Node daemon opens no listening socket and requires no Nitro or paid bot
+  hosting. Its Codex child was verified not to inherit `GAIA_DISCORD_TOKEN`,
+  `DATABASE_URL`, or `OPENAI_API_KEY`.
+- Added focused attachment metadata/byte, context-size, Unicode, extended-fence,
+  queue, authorization, duplicate, and persistence checks. Checks passed under
+  Node `24.8.0`: `npm run typecheck`, `npm test`, `npm run test:db`, `npm audit`,
+  `docker compose config --quiet`, listener inspection, secret-environment
+  inspection, and the live checks above.
+- Deliberate limits: image signatures are checked without adding decoder
+  dependencies; add full decoders if malformed-image handling becomes a real
+  issue. Nonce retries cover Discord REST failures without a durable outbox;
+  add one with Phase 9 crash recovery if measured failures require it.
+- Files changed: `src/codex.ts`, `src/db.ts`, `src/discord.ts`, `src/index.ts`,
+  `tests/discord.test.ts`, `tests/db.integration.ts`, `README.md`, and this plan.
+  This directory is still not a Git repository, so no commit was possible or
+  attempted.
 
 ## Phase 4: Workspaces and Approvals
 
@@ -838,6 +887,7 @@ not delete prior rows.
 | 2026-09-06 | Phase 0 | DONE | Added a typed stdio app-server spike and generated protocol bindings; proved streaming, exact approval handling, workspace changes, restart/resume, coding and personal prompts, and one custom agent from two working directories | `npm run protocol:generate`; `npm run typecheck`; `npm run spike`; `npm audit`; Codex version/auth checks | ChatGPT OAuth now uses macOS Keychain; install versioned fixed agents into `~/.codex/agents/`; next is Phase 1; directory is not yet a Git repository |
 | 2026-09-06 | Phase 1 | DONE | Added the local Discord daemon, fail-closed source authorization, Keychain token loading, live status command, pinned loopback-only pgvector service, schema, and repeatable migrations; created the private GAIA server and installed the least-privilege bot | `npm run dev`; `npm run typecheck`; `npm test`; `npm run test:db`; `npm audit`; Compose validation; live `/gaia status`; graceful shutdown and listener checks | Natural chat and persistent Codex app-server lifecycle begin in Phase 2; human Discord web-session token appeared in diagnostic output and the owner deferred rotation; directory is not yet a Git repository |
 | 2026-09-06 | Phase 2 | DONE | Added persistent per-channel Codex chat, durable visible messages and turn IDs, throttled streaming, safe Markdown splitting, bounded queues, `/gaia new`, `/gaia stop`, and process recovery; added and configured the private `work` channel | Node 24 `npm run typecheck`; `npm test`; `npm run test:db`; `npm audit`; Compose validation; live two-channel concurrency/isolation, daemon resume, cancellation/recovery, `/gaia new`, and Codex child restart | Chat is read-only until Phase 4; idempotent Discord operations retry but message creation is not blindly retried; next is Phase 3; directory is not yet a Git repository |
+| 2026-09-06 | Phase 3 | DONE | Hardened reconnects, nonce retries, mentions, Markdown, attachment validation/download/cleanup, shutdown draining, Codex environment and tool isolation, and private Discord setup documentation | Node 24 typecheck/unit/DB/audit/Compose checks; live text/image acceptance, ZIP rejection, forced Gateway resume with replay deduplication, shutdown cleanup, mobile viewport, secret-env and listener checks | Text context is capped at 256 KiB; image validation uses signatures; durable outbox remains Phase 9 territory; next is Phase 4; directory is not yet a Git repository |
 
 ## Authoritative References
 

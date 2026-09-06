@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createPool, getOrCreateChannel, runMigrations, saveMessage, setChannelThread, setMessageTurn } from "../src/db.ts";
+import { createPool, getOrCreateChannel, messageExists, runMigrations, saveMessage, setChannelThread, setMessageTurn } from "../src/db.ts";
 
 test("foundation migrations are repeatable", async (context) => {
   const pool = createPool();
@@ -37,6 +37,7 @@ test("channel threads and visible messages persist without duplicates", async (c
   assert.equal(await getOrCreateChannel(pool, channelId, "renamed"), "thread-test");
   assert.equal(await saveMessage(pool, { discordId: messageId, channelId, role: "user", content: "hello" }), true);
   assert.equal(await saveMessage(pool, { discordId: messageId, channelId, role: "user", content: "hello" }), false);
+  assert.equal(await messageExists(pool, messageId), true);
   await setMessageTurn(pool, messageId, "turn-test");
 
   const stored = await pool.query("SELECT name, codex_thread_id FROM channels WHERE discord_channel_id = $1", [channelId]);

@@ -307,3 +307,137 @@ color: purple;
 font-weight: bold;
 color: purple;
  Finished draining message from queue LogId:5912 QueueLength: 0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 6316459ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECT] wss://gateway-us-east1-c.discord.gg, encoding: json, version: 9, compression: zlib-stream @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 6316686ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECTED] wss://gateway-us-east1-c.discord.gg/?encoding=json&v=9&compress=zlib-stream in 228 ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 6316687ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUME] resuming session e702d26d8ecacd0be25f984ab2bbe796, seq: 94 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 6316896ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching CONNECTION_RESUMED @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 6316909ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUMED] took 450ms, replayed 0 events, new seq: 95 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 6322340ms] [LOG] %c[discord_protos.discord_users.v1.FrecencyUserSettings] 
+font-weight: bold;
+color: purple;
+ Scheduling save from markDirty @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 6322341ms] [LOG] %c[discord_protos.discord_users.v1.FrecencyUserSettings] 
+font-weight: bold;
+color: purple;
+ Persisting proto @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 8603595ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECT] wss://gateway-us-east1-c.discord.gg, encoding: json, version: 9, compression: zlib-stream @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 8603859ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECTED] wss://gateway-us-east1-c.discord.gg/?encoding=json&v=9&compress=zlib-stream in 264 ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 8603860ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUME] resuming session e702d26d8ecacd0be25f984ab2bbe796, seq: 97 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 8604052ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching CONNECTION_RESUMED @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[ 8604055ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUMED] took 460ms, replayed 0 events, new seq: 98 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[14414620ms] [INFO] %c[libdiscore] 
+font-weight: bold;
+color: purple;
+ [BlockedDomainsStore] Successfully fetched blocked domains @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21395779ms] [WARNING] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently @ https://discord.com/assets/6d6303f7e2be7bcd.js:0
+[21395836ms] [LOG] %c[CloudUpload.tsx] 
+font-weight: bold;
+color: purple;
+ webp conversion skipped for upload14: insufficient_savings @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21395836ms] [LOG] %c[CloudUpload.tsx] 
+font-weight: bold;
+color: purple;
+ Requesting upload url for upload14 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21396129ms] [LOG] %c[CloudUpload.tsx] 
+font-weight: bold;
+color: purple;
+ Uploading upload14 filename=phase3-image.png @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21396130ms] [LOG] %c[CloudUpload.tsx] 
+font-weight: bold;
+color: purple;
+ Attempting to upload attachment with resumeFrom: 0 and attempts: 1 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21397434ms] [LOG] %c[CloudUpload.tsx] 
+font-weight: bold;
+color: purple;
+ Upload complete for upload14 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21413483ms] [LOG] %c[UploaderBase.tsx] 
+font-weight: bold;
+color: purple;
+ setUploadingTextForUI - total content: 126164 bytes and 1 attachments for Uploader16 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21413485ms] [LOG] %c[UploaderBase.tsx] 
+font-weight: bold;
+color: purple;
+ _handleComplete for Uploader16 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21413486ms] [INFO] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Queueing message to be sent LogId:6985 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21413487ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Draining message from queue LogId:6985 QueueLength: 0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21413487ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Draining Message Queue with:  0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21414212ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Finished draining message from queue LogId:6985 QueueLength: 0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21540129ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECT] wss://gateway-us-east1-c.discord.gg, encoding: json, version: 9, compression: zlib-stream @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21540370ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECTED] wss://gateway-us-east1-c.discord.gg/?encoding=json&v=9&compress=zlib-stream in 240 ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21540370ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUME] resuming session e702d26d8ecacd0be25f984ab2bbe796, seq: 107 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21540571ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching CONNECTION_RESUMED @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21540578ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUMED] took 449ms, replayed 0 events, new seq: 108 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21677115ms] [LOG] %cHold Up! color: #5865f2; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21677120ms] [LOG] %cIf someone told you to copy/paste something here you have an 11/10 chance you're being scammed. font-size: 16px; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21677121ms] [LOG] %cPasting anything in here could give attackers access to your Discord account. font-size: 18px; font-weight: bold; color: red; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21678122ms] [LOG] %cHold Up! color: #5865f2; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21678122ms] [LOG] %cIf someone told you to copy/paste something here you have an 11/10 chance you're being scammed. font-size: 16px; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21678122ms] [LOG] %cPasting anything in here could give attackers access to your Discord account. font-size: 18px; font-weight: bold; color: red; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21679124ms] [LOG] %cHold Up! color: #5865f2; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21679124ms] [LOG] %cIf someone told you to copy/paste something here you have an 11/10 chance you're being scammed. font-size: 16px; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21679125ms] [LOG] %cPasting anything in here could give attackers access to your Discord account. font-size: 18px; font-weight: bold; color: red; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21680127ms] [LOG] %cHold Up! color: #5865f2; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21680127ms] [LOG] %cIf someone told you to copy/paste something here you have an 11/10 chance you're being scammed. font-size: 16px; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21680127ms] [LOG] %cPasting anything in here could give attackers access to your Discord account. font-size: 18px; font-weight: bold; color: red; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21681129ms] [LOG] %cHold Up! color: #5865f2; -webkit-text-stroke: 2px black; font-size: 72px; font-weight: bold; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21681129ms] [LOG] %cIf someone told you to copy/paste something here you have an 11/10 chance you're being scammed. font-size: 16px; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21681129ms] [LOG] %cPasting anything in here could give attackers access to your Discord account. font-size: 18px; font-weight: bold; color: red; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21681129ms] [LOG] %cUnless you understand exactly what you are doing, close this window and stay safe. font-size: 16px; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[21681131ms] [LOG] %cIf you do understand exactly what you are doing, you should come work with us https://discord.com/jobs font-size: 16px; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464

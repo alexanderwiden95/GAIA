@@ -91,6 +91,7 @@ export function validateDiscordAttachment(attachment: AttachmentMetadata): { con
 
 export function validateAttachmentBytes(contentType: string, bytes: Uint8Array): string | undefined {
   const buffer = Buffer.from(bytes);
+  // ponytail: signatures reject disguised images; add full decoders only if malformed-image handling proves necessary.
   const matches =
     contentType === "image/png" ? buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
       : contentType === "image/jpeg" ? buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff
@@ -396,6 +397,7 @@ class DiscordChat {
     try {
       await retryDiscord(() => message.channel.sendTyping());
       const placeholder = await replyWithRetry(message, "Thinking...", message.id);
+      // ponytail: nonce retries cover REST failures; add a durable outbox with Phase 9 crash recovery if needed.
       if (!await saveMessage(this.pool, { discordId: message.id, channelId, role: "user", content: storedContent })) return;
       const typing = setInterval(() => {
         void retryDiscord(() => message.channel.sendTyping()).catch(() => undefined);
