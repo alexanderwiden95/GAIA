@@ -441,3 +441,178 @@ color: purple;
 [21681129ms] [LOG] %cPasting anything in here could give attackers access to your Discord account. font-size: 18px; font-weight: bold; color: red; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
 [21681129ms] [LOG] %cUnless you understand exactly what you are doing, close this window and stay safe. font-size: 16px; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
 [21681131ms] [LOG] %cIf you do understand exactly what you are doing, you should come work with us https://discord.com/jobs font-size: 16px; @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[26740443ms] [LOG] %c[MessageActionCreators] 
+font-weight: bold;
+color: purple;
+ Fetching messages for 1546099227200061472 between undefined and undefined. jump={"jumpType":"ANIMATED"} @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[26740512ms] [LOG] %c[Routing/Utils] 
+font-weight: bold;
+color: purple;
+ transitionTo - Transitioning to /channels/1546099225727864832/1546099227200061472 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[26740685ms] [LOG] %c[MessageActionCreators] 
+font-weight: bold;
+color: purple;
+ Fetched 7 messages for 1546099227200061472 isBefore:false isAfter:false @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[26740686ms] [INFO] %c[ChannelMessages] 
+font-weight: bold;
+color: purple;
+ loadComplete: resetting state for channelId=1546099227200061472, sending.length=0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[26747494ms] [LOG] %c[Routing/Utils] 
+font-weight: bold;
+color: purple;
+ transitionTo - Transitioning to /channels/1546099225727864832/1546108894965927936 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27951771ms] [LOG] [FAST CONNECT] wss://gateway.discord.gg/?encoding=json&v=9&compress=zlib-stream, encoding: json, version: 9 @ https://discord.com/channels/1546099225727864832/1546108894965927936:28
+[27952091ms] [LOG] [FAST CONNECT] connected in 317ms @ https://discord.com/channels/1546099225727864832/1546108894965927936:28
+[27952110ms] [LOG] [FAST CONNECT] sending identify @ https://discord.com/assets/fast-connect.7be0c9926ea098eb.js:0
+[27952282ms] [INFO] %c[libdiscore] 
+font-weight: bold;
+color: purple;
+ [experiment_manager] Loaded experiments from cache @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27952328ms] [LOG] %c[ProcessUtilsElectron] 
+font-weight: bold;
+color: purple;
+ setMemoryInformation not available. @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27952482ms] [LOG] %c[default] 
+font-weight: bold;
+color: purple;
+ [BUILD INFO] Release Channel: stable, Build Number: 607562, Version Hash: f9b13d9eaa95f75e952091b9150d0d2881c02b5d @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27952484ms] [LOG] AppCrashedFatalReport: getLastCrash not supported. @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27952567ms] [INFO] %c[libdiscore] 
+font-weight: bold;
+color: purple;
+ The answer for life the universe and everything is: 42 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953076ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECT] wss://gateway.discord.gg, encoding: json, version: 9, compression: zlib-stream @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953076ms] [LOG] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [FAST CONNECT] successfully took over websocket, state: {open: true, identify: true, gateway: wss://gateway.discord.gg/?encoding=json&v=9&compress=zlib-stream, messages: 4} @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953077ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECTED] wss://gateway.discord.gg/?encoding=json&v=9&compress=zlib-stream in 1 ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953085ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [READY] took 9ms, as 9f9446817ff09d85fa532f99d9932627 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953086ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [READY_SUPPLEMENTAL] took 11ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953133ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching CONNECTION_OPEN @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953136ms] [LOG] %c[DatabaseManager] 
+font-weight: bold;
+color: purple;
+ removing database (user: 1546096029945045033, database: undefined) @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953144ms] [LOG] %c[MessageActionCreators] 
+font-weight: bold;
+color: purple;
+ Fetching messages for 1546108894965927936 between undefined and undefined. jump={"jumpType":"ANIMATED"} @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953400ms] [LOG] %c[Routing/Utils] 
+font-weight: bold;
+color: purple;
+ Replacing route with /channels/1546099225727864832/1546108894965927936 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953643ms] [LOG] %c[MessageActionCreators] 
+font-weight: bold;
+color: purple;
+ Fetched 10 messages for 1546108894965927936 isBefore:false isAfter:false @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953645ms] [INFO] %c[ChannelMessages] 
+font-weight: bold;
+color: purple;
+ loadComplete: resetting state for channelId=1546108894965927936, sending.length=0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27953719ms] [WARNING] [scriptCost] retained URL count exceeded maxUrls (1000); evicting lowest-cost entries. @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27954672ms] [LOG] %c[discord_protos.discord_users.v1.FrecencyUserSettings] 
+font-weight: bold;
+color: purple;
+ Loading proto @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27955178ms] [INFO] %c[OverlayKeybindExperimentManager] 
+font-weight: bold;
+color: purple;
+ Experiments initializing... @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27955186ms] [INFO] %c[OverlayKeybindExperimentManager] 
+font-weight: bold;
+color: purple;
+ Experiments initialized @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27955235ms] [INFO] %c[LibDaveManager] 
+font-weight: bold;
+color: purple;
+ DAVE loaded @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27955235ms] [INFO] %c[LibDaveManager] 
+font-weight: bold;
+color: purple;
+ Successfully initialized DAVE @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27955235ms] [INFO] %c[MediaEngineWebRTC] 
+font-weight: bold;
+color: purple;
+ Successfully initialized DAVE, version: 1 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27955392ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://discord.com/api/v9/users/@me/saved-messages:0
+[27955432ms] [INFO] %c[SignalHelpers.web] 
+font-weight: bold;
+color: purple;
+ signalAllAcceptedCredentials {rpId: discord.com, encodedUserId: MPMD-4wmT1MVdNYlzYQgKQ, allAcceptedCredentialIds: Array(0)} @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27962205ms] [LOG] %c[discord_protos.discord_users.v1.FrecencyUserSettings] 
+font-weight: bold;
+color: purple;
+ Scheduling save from markDirty @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27962206ms] [LOG] %c[discord_protos.discord_users.v1.FrecencyUserSettings] 
+font-weight: bold;
+color: purple;
+ Persisting proto @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27965260ms] [INFO] %c[libdiscore] 
+font-weight: bold;
+color: purple;
+ [BlockedDomainsStore] Successfully fetched blocked domains @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[27986670ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://discord.com/api/v9/users/@me/notes/1546097269613531246:0
+[28064049ms] [INFO] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Queueing message to be sent LogId:8104 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28064050ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Draining message from queue LogId:8104 QueueLength: 0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28064050ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Draining Message Queue with:  0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28064374ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Finished draining message from queue LogId:8104 QueueLength: 0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28176356ms] [INFO] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Queueing message to be sent LogId:8065 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28176356ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Draining message from queue LogId:8065 QueueLength: 0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28176356ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Draining Message Queue with:  0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28176602ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Finished draining message from queue LogId:8065 QueueLength: 0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28206472ms] [INFO] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Queueing message to be sent LogId:947 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28206472ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Draining message from queue LogId:947 QueueLength: 0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28206473ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Draining Message Queue with:  0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28207020ms] [LOG] %c[MessageQueue] 
+font-weight: bold;
+color: purple;
+ Finished draining message from queue LogId:947 QueueLength: 0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464

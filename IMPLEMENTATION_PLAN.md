@@ -6,7 +6,7 @@
 
 **Document status:** Approved for implementation  
 **Last updated:** 2026-09-06  
-**Next phase:** Phase 4, workspaces and approvals
+**Next phase:** Phase 5, GAIA and named agents
 
 ## Instructions for AI Coding Agents
 
@@ -674,7 +674,7 @@ database.
 
 ## Phase 4: Workspaces and Approvals
 
-**Status:** TODO
+**Status:** DONE
 
 **Goal:** Let GAIA act locally while preserving clear boundaries and human
 control.
@@ -699,6 +699,42 @@ control.
 - The owner can approve or deny a pending action from Discord desktop and mobile.
 - Denial returns useful context to the requesting agent.
 - HADES-class actions always require explicit confirmation.
+
+**Implementation record (2026-09-06):**
+
+- Added owner-only `/gaia workspace` and `/gaia unworkspace` controls. Enrollment
+  resolves symlinks to an existing canonical directory, rejects the filesystem
+  root, stores one workspace per channel, and starts fresh Codex context whenever
+  the boundary changes so read-only settings cannot leak across modes.
+- Unenrolled channels keep shell tools disabled and remain read-only. Enrolled
+  channels use their canonical `cwd`, `workspace-write` sandbox, and Codex's
+  stricter `untrusted` approval policy. A live probe found that `on-request`
+  permitted an in-workspace `rm`; `untrusted` is therefore required to make the
+  HADES confirmation boundary mechanical rather than prompt-dependent.
+- Mapped current and legacy Codex command and file-change approvals plus current
+  permission-profile requests to standard Discord buttons. Every prompt shows
+  agent, action, target, reason, and risk; only the configured owner can approve
+  once or deny, requests expire after ten minutes, and decisions are atomic.
+- Added bounded command and file-change summaries. Approval and action records
+  deliberately retain only categorical status/risk metadata, never commands,
+  paths, diffs, file contents, or credentials. Remembered approvals were not
+  added because the available generic session grants are broader than needed.
+- Reused the existing `workspace_path`, `approvals`, and `action_log` schema, so
+  no migration or dependency was added. Updated focused authorization,
+  canonicalization, HADES classification, mapping, and idempotent-decision tests.
+- Live Node 24 Codex checks proved no shell tool in an unenrolled thread, writes
+  inside an enrolled workspace, safe failure outside it, approve and deny paths,
+  file-change approval/activity, useful denial context, and explicit HADES
+  gating. Live Discord checks in `work` enrolled this repository, approved one
+  write, displayed its command summary, denied a HADES-class delete, and kept the
+  target intact using Discord's desktop/mobile-native button components.
+- Checks passed: Node `24.8.0` `npm run typecheck`, `npm test`, `npm run test:db`,
+  `npm audit`, `docker compose config --quiet`, `git diff --check`, daemon restart,
+  no Node listening socket, direct app-server acceptance probes, and the live
+  Discord checks above. Files changed: `src/codex.ts`, `src/db.ts`,
+  `src/discord.ts`, `tests/discord.test.ts`, `tests/db.integration.ts`,
+  `README.md`, and this plan. The repository is now under Git; no commit was
+  requested or made.
 
 ## Phase 5: GAIA and Named Agents
 
@@ -888,6 +924,7 @@ not delete prior rows.
 | 2026-09-06 | Phase 1 | DONE | Added the local Discord daemon, fail-closed source authorization, Keychain token loading, live status command, pinned loopback-only pgvector service, schema, and repeatable migrations; created the private GAIA server and installed the least-privilege bot | `npm run dev`; `npm run typecheck`; `npm test`; `npm run test:db`; `npm audit`; Compose validation; live `/gaia status`; graceful shutdown and listener checks | Natural chat and persistent Codex app-server lifecycle begin in Phase 2; human Discord web-session token appeared in diagnostic output and the owner deferred rotation; directory is not yet a Git repository |
 | 2026-09-06 | Phase 2 | DONE | Added persistent per-channel Codex chat, durable visible messages and turn IDs, throttled streaming, safe Markdown splitting, bounded queues, `/gaia new`, `/gaia stop`, and process recovery; added and configured the private `work` channel | Node 24 `npm run typecheck`; `npm test`; `npm run test:db`; `npm audit`; Compose validation; live two-channel concurrency/isolation, daemon resume, cancellation/recovery, `/gaia new`, and Codex child restart | Chat is read-only until Phase 4; idempotent Discord operations retry but message creation is not blindly retried; next is Phase 3; directory is not yet a Git repository |
 | 2026-09-06 | Phase 3 | DONE | Hardened reconnects, nonce retries, mentions, Markdown, attachment validation/download/cleanup, shutdown draining, Codex environment and tool isolation, and private Discord setup documentation | Node 24 typecheck/unit/DB/audit/Compose checks; live text/image acceptance, ZIP rejection, forced Gateway resume with replay deduplication, shutdown cleanup, mobile viewport, secret-env and listener checks | Text context is capped at 256 KiB; image validation uses signatures; durable outbox remains Phase 9 territory; next is Phase 4; directory is not yet a Git repository |
+| 2026-09-06 | Phase 4 | DONE | Added canonical per-channel workspace enrollment, isolated workspace/read-only thread settings, Discord approve-once/deny components for command/file/permission requests, HADES labeling, bounded activity summaries, and redacted idempotent audit records | Node 24 typecheck/unit/DB/audit/Compose/diff/listener checks; direct app-server workspace, outside-boundary, command/file approve-deny, and HADES probes; live Discord enrollment, approve, deny, and activity checks | Workspace changes start fresh context; strict `untrusted` replaced `on-request` after a live `rm` bypass; broad remembered approvals deferred; next is Phase 5 |
 
 ## Authoritative References
 

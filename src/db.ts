@@ -11,18 +11,64 @@ export function createPool(connectionString = process.env.DATABASE_URL ?? DEFAUL
   return new Pool({ connectionString, max: 5 });
 }
 
-export async function getOrCreateChannel(pool: Pool, channelId: string, name: string): Promise<string | null> {
-  const result = await pool.query<{ codex_thread_id: string | null }>(`
+export type ChannelState = { threadId: string | null; workspacePath: string | null };
+
+export async function getOrCreateChannel(pool: Pool, channelId: string, name: string): Promise<ChannelState> {
+  const result = await pool.query<{ codex_thread_id: string | null; workspace_path: string | null }>(`
     INSERT INTO channels (discord_channel_id, name)
     VALUES ($1, $2)
     ON CONFLICT (discord_channel_id) DO UPDATE SET name = EXCLUDED.name, updated_at = now()
-    RETURNING codex_thread_id
+    RETURNING codex_thread_id, workspace_path
   `, [channelId, name]);
-  return result.rows[0]?.codex_thread_id ?? null;
+  return {
+    threadId: result.rows[0]?.codex_thread_id ?? null,
+    workspacePath: result.rows[0]?.workspace_path ?? null,
+  };
 }
 
 export async function setChannelThread(pool: Pool, channelId: string, threadId: string | null): Promise<void> {
   await pool.query("UPDATE channels SET codex_thread_id = $2, updated_at = now() WHERE discord_channel_id = $1", [channelId, threadId]);
+}
+
+export async function setChannelWorkspace(pool: Pool, channelId: string, workspacePath: string | null): Promise<void> {
+  await pool.query("UPDATE channels SET workspace_path = $2, codex_thread_id = NULL, updated_at = now() WHERE discord_channel_id = $1", [channelId, workspacePath]);
+}
+
+export async function createApproval(
+  pool: Pool,
+  approval: { requestId: string; channelId: string; kind: string; agent: string; risk: string },
+): Promise<void> {
+  await pool.query(`
+    INSERT INTO approvals (request_id, channel_id, status, request)
+    VALUES ($1, $2, 'pending', $3)
+  `, [approval.requestId, approval.channelId, {
+    kind: approval.kind,
+    agent: approval.agent,
+    risk: approval.risk,
+  }]);
+}
+
+export async function decideApproval(
+  pool: Pool,
+  requestId: string,
+  status: "approved" | "denied" | "expired",
+): Promise<boolean> {
+  const result = await pool.query(`
+    UPDATE approvals
+    SET status = $2, decision = $3, decided_at = now()
+    WHERE request_id = $1 AND status = 'pending'
+  `, [requestId, status, { status }]);
+  return result.rowCount === 1;
+}
+
+export async function logAction(
+  pool: Pool,
+  entry: { channelId: string; agent: string; action: string; details?: Record<string, unknown> },
+): Promise<void> {
+  await pool.query(`
+    INSERT INTO action_log (channel_id, agent, action, details)
+    VALUES ($1, $2, $3, $4)
+  `, [entry.channelId, entry.agent, entry.action, entry.details ?? {}]);
 }
 
 export async function saveMessage(

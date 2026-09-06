@@ -1,11 +1,16 @@
 import { execFile as execFileCallback } from "node:child_process";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { randomUUID } from "node:crypto";
+import { mkdtemp, realpath, rm, stat, writeFile } from "node:fs/promises";
+import { homedir, tmpdir } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
 
 import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   Client,
+  ComponentType,
   Events,
   GatewayIntentBits,
   MessageFlags,
@@ -17,8 +22,18 @@ import {
 } from "discord.js";
 import type { Pool } from "pg";
 
-import { CodexClient, type CodexAttachment } from "./codex.ts";
-import { getOrCreateChannel, messageExists, saveMessage, setChannelThread, setMessageTurn } from "./db.ts";
+import { CodexClient, type CodexActivity, type CodexApproval, type CodexAttachment } from "./codex.ts";
+import {
+  createApproval,
+  decideApproval,
+  getOrCreateChannel,
+  logAction,
+  messageExists,
+  saveMessage,
+  setChannelThread,
+  setChannelWorkspace,
+  setMessageTurn,
+} from "./db.ts";
 
 const execFile = promisify(execFileCallback);
 const KEYCHAIN_ACCOUNT = "gaia";
@@ -52,6 +67,7 @@ const ATTACHMENT_EXTENSIONS: Record<string, string> = {
 };
 const DISCORD_CDN_HOSTS = new Set(["cdn.discordapp.com", "media.discordapp.net"]);
 const NO_MENTIONS = { parse: [] as const };
+const APPROVAL_TIMEOUT_MS = 10 * 60_000;
 
 export type AccessConfig = {
   ownerId: string;
@@ -70,6 +86,7 @@ export type DiscordSource = {
 type AttachmentMetadata = Pick<Attachment, "contentType" | "id" | "name" | "size" | "url">;
 
 class AttachmentError extends Error {}
+class WorkspaceError extends Error {}
 
 export function validateDiscordAttachment(attachment: AttachmentMetadata): { contentType: string; isImage: boolean } {
   const contentType = attachment.contentType?.split(";", 1)[0]?.toLowerCase() ?? "";
@@ -187,6 +204,18 @@ export function parseAccessConfig(env: NodeJS.ProcessEnv = process.env): AccessC
 export function isAllowedSource(source: DiscordSource, config: AccessConfig): boolean {
   return !source.isBot && !source.webhookId && source.userId === config.ownerId &&
     source.guildId === config.guildId && config.channelIds.has(source.channelId);
+}
+
+export async function canonicalizeWorkspace(input: string): Promise<string> {
+  const trimmed = input.trim();
+  if (!trimmed) throw new WorkspaceError("Workspace path is required.");
+  const expanded = trimmed === "~" ? homedir() : trimmed.startsWith("~/") ? join(homedir(), trimmed.slice(2)) : trimmed;
+  const canonical = await realpath(resolve(expanded)).catch(() => {
+    throw new WorkspaceError("Workspace must be an existing directory.");
+  });
+  if (!(await stat(canonical)).isDirectory()) throw new WorkspaceError("Workspace must be an existing directory.");
+  if (dirname(canonical) === canonical) throw new WorkspaceError("The filesystem root cannot be enrolled as a workspace.");
+  return canonical;
 }
 
 type Fence = { opener: string; closer: string };
@@ -340,11 +369,13 @@ class DiscordChat {
   private readonly activeThreads = new Map<string, string>();
   private readonly pool: Pool;
   private readonly codex: CodexClient;
+  private readonly config: AccessConfig;
   private closing = false;
 
-  constructor(pool: Pool, codex: CodexClient) {
+  constructor(pool: Pool, codex: CodexClient, config: AccessConfig) {
     this.pool = pool;
     this.codex = codex;
+    this.config = config;
   }
 
   enqueue(message: Message): Promise<void> {
@@ -358,6 +389,24 @@ class DiscordChat {
     return this.queue.run(channelId, async () => {
       await getOrCreateChannel(this.pool, channelId, channelName);
       await setChannelThread(this.pool, channelId, null);
+    });
+  }
+
+  enrollWorkspace(channelId: string, channelName: string, input: string): Promise<string> {
+    return this.queue.run(channelId, async () => {
+      const workspacePath = await canonicalizeWorkspace(input);
+      await getOrCreateChannel(this.pool, channelId, channelName);
+      await setChannelWorkspace(this.pool, channelId, workspacePath);
+      await logAction(this.pool, { channelId, agent: "GAIA", action: "workspace_enrolled" });
+      return workspacePath;
+    });
+  }
+
+  removeWorkspace(channelId: string, channelName: string): Promise<void> {
+    return this.queue.run(channelId, async () => {
+      await getOrCreateChannel(this.pool, channelId, channelName);
+      await setChannelWorkspace(this.pool, channelId, null);
+      await logAction(this.pool, { channelId, agent: "GAIA", action: "workspace_removed" });
     });
   }
 
@@ -380,7 +429,7 @@ class DiscordChat {
     const channelId = message.channelId;
     const channelName = message.channel.name;
     const storedContent = [content, ...message.attachments.map((attachment) => `[Attachment: ${attachment.name}]`)].filter(Boolean).join("\n");
-    const threadId = await getOrCreateChannel(this.pool, channelId, channelName);
+    const channel = await getOrCreateChannel(this.pool, channelId, channelName);
     if (await messageExists(this.pool, message.id)) return;
 
     let downloaded: Awaited<ReturnType<typeof downloadDiscordAttachments>>;
@@ -407,6 +456,7 @@ class DiscordChat {
       let streamedText = "";
       let startedTurnId: string | undefined;
       let turnIdSave = Promise.resolve();
+      let activitySends = Promise.resolve();
 
       const queueEdit = (): void => {
         editTimer = null;
@@ -421,8 +471,8 @@ class DiscordChat {
       let response: string;
       let responseTurnId: string | undefined;
       try {
-        const codexThreadId = await this.codex.openThread(threadId);
-        if (!threadId) await setChannelThread(this.pool, channelId, codexThreadId);
+        const codexThreadId = await this.codex.openThread(channel.threadId, channel.workspacePath);
+        if (!channel.threadId) await setChannelThread(this.pool, channelId, codexThreadId);
         this.activeThreads.set(channelId, codexThreadId);
         const result = await this.codex.runTurn(codexThreadId, content, {
           onText: scheduleEdit,
@@ -432,8 +482,13 @@ class DiscordChat {
             void turnIdSave.catch(() => undefined);
             if (this.closing) void this.codex.interrupt(codexThreadId).catch(() => undefined);
           },
+          onApproval: (approval) => this.requestApproval(message, approval),
+          onActivity: (activity) => {
+            activitySends = activitySends.then(() => this.showActivity(message, activity)).catch(() => undefined);
+          },
         }, downloaded.files);
         await turnIdSave;
+        await activitySends;
         response = result.status === "interrupted"
           ? `${result.text}${result.text ? "\n\n" : ""}_Turn stopped._`
           : result.text;
@@ -453,6 +508,89 @@ class DiscordChat {
     } finally {
       await downloaded.cleanup();
     }
+  }
+
+  private async requestApproval(message: Message, approval: CodexApproval): Promise<"approve" | "deny"> {
+    const requestId = randomUUID();
+    const approveId = `gaia-approval:${requestId}:approve`;
+    const denyId = `gaia-approval:${requestId}:deny`;
+    const details = [
+      "**Approval required**",
+      `**Agent:** ${approval.agent}`,
+      `**Action:** ${approval.action}`,
+      `**Target:** ${this.limit(approval.target, 600)}`,
+      `**Reason:** ${this.limit(approval.reason, 350)}`,
+      `**Risk:** ${approval.risk}`,
+    ].join("\n");
+    const components = [new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder().setCustomId(approveId).setLabel("Approve once").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId(denyId).setLabel("Deny").setStyle(ButtonStyle.Danger),
+    )];
+
+    await createApproval(this.pool, {
+      requestId,
+      channelId: message.channelId,
+      kind: approval.kind,
+      agent: approval.agent,
+      risk: approval.risk,
+    });
+    let prompt: Message | null = null;
+    try {
+      const nonce = requestId.replaceAll("-", "").slice(0, 25);
+      const sent = await retryDiscord(() => message.reply({ content: details, components, allowedMentions: NO_MENTIONS, nonce, enforceNonce: true }));
+      prompt = sent;
+      const interaction = await sent.awaitMessageComponent({
+        componentType: ComponentType.Button,
+        time: APPROVAL_TIMEOUT_MS,
+        filter: (candidate) => {
+          if (candidate.customId !== approveId && candidate.customId !== denyId) return false;
+          if (isAllowedSource({
+            guildId: candidate.guildId,
+            channelId: candidate.channelId,
+            userId: candidate.user.id,
+            isBot: candidate.user.bot,
+          }, this.config)) return true;
+          void candidate.reply({ content: "Only the configured GAIA owner can decide approvals.", flags: MessageFlags.Ephemeral }).catch(() => undefined);
+          return false;
+        },
+      });
+      const approved = interaction.customId === approveId;
+      const status = approved ? "approved" : "denied";
+      if (!await decideApproval(this.pool, requestId, status)) {
+        await interaction.update({ content: `${details}\n\nThis request was already resolved.`, components: [] });
+        return "deny";
+      }
+      await interaction.update({ content: `${details}\n\n**Decision:** ${approved ? "Approved once" : "Denied"}`, components: [] }).catch(() => undefined);
+      await logAction(this.pool, { channelId: message.channelId, agent: approval.agent, action: `approval_${status}`, details: { kind: approval.kind, risk: approval.risk } }).catch(() => undefined);
+      return approved ? "approve" : "deny";
+    } catch {
+      await decideApproval(this.pool, requestId, "expired").catch(() => false);
+      await prompt?.edit({ content: `${details}\n\n**Decision:** Expired and denied`, components: [] }).catch(() => undefined);
+      await logAction(this.pool, { channelId: message.channelId, agent: approval.agent, action: "approval_expired", details: { kind: approval.kind, risk: approval.risk } }).catch(() => undefined);
+      return "deny";
+    }
+  }
+
+  private async showActivity(message: Message, activity: CodexActivity): Promise<void> {
+    const label = activity.kind === "command" ? "Command" : "File changes";
+    const nonce = randomUUID().replaceAll("-", "").slice(0, 25);
+    await retryDiscord(() => message.reply({
+      content: `**${label} ${activity.status}**\n${this.limit(activity.summary, 1_500)}`,
+      allowedMentions: NO_MENTIONS,
+      nonce,
+      enforceNonce: true,
+    }));
+    await logAction(this.pool, {
+      channelId: message.channelId,
+      agent: "GAIA",
+      action: `${activity.kind}_${activity.status}`,
+      details: activity.count === undefined ? {} : { files: activity.count },
+    });
+  }
+
+  private limit(value: string, maximum: number): string {
+    const safe = value.replaceAll("`", "'").replaceAll("@", "(at)");
+    return safe.length <= maximum ? safe : `${safe.slice(0, maximum - 3)}...`;
   }
 
   private async finishResponse(
@@ -505,6 +643,17 @@ async function handleInteraction(
     await interaction.editReply("Started a new conversation for this channel.");
   } else if (subcommand === "stop") {
     await interaction.editReply(await chat.stop(interaction.channelId) ? "Stopping the active turn." : "No turn is active in this channel.");
+  } else if (subcommand === "workspace") {
+    try {
+      const workspace = await chat.enrollWorkspace(interaction.channelId, interactionChannelName(interaction), interaction.options.getString("path", true));
+      await interaction.editReply({ content: `Enrolled workspace and started fresh context for this channel: ${workspace.replaceAll("@", "(at)")}`, allowedMentions: NO_MENTIONS });
+    } catch (error) {
+      if (!(error instanceof WorkspaceError)) throw error;
+      await interaction.editReply(error.message);
+    }
+  } else if (subcommand === "unworkspace") {
+    await chat.removeWorkspace(interaction.channelId, interactionChannelName(interaction));
+    await interaction.editReply("Removed this channel's workspace and started fresh conversation-only context.");
   }
 }
 
@@ -518,7 +667,7 @@ export async function startDiscord(pool: Pool, codex: CodexClient, config: Acces
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
   });
 
-  const chat = new DiscordChat(pool, codex);
+  const chat = new DiscordChat(pool, codex, config);
   client.on(Events.MessageCreate, (message) => {
     if (!isAllowedSource({
       guildId: message.guildId,
@@ -552,6 +701,9 @@ export async function startDiscord(pool: Pool, codex: CodexClient, config: Acces
         .addSubcommand((command) => command.setName("status").setDescription("Check local services"))
         .addSubcommand((command) => command.setName("new").setDescription("Start fresh context in this channel"))
         .addSubcommand((command) => command.setName("stop").setDescription("Stop the active turn in this channel"))
+        .addSubcommand((command) => command.setName("workspace").setDescription("Enroll an existing local workspace for this channel")
+          .addStringOption((option) => option.setName("path").setDescription("Absolute path or ~/path").setRequired(true)))
+        .addSubcommand((command) => command.setName("unworkspace").setDescription("Remove this channel's enrolled workspace"))
         .toJSON(),
     ], config.guildId);
     return {

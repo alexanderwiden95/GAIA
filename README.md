@@ -58,6 +58,26 @@ with a visible message. Accepted files are downloaded with generated names to
 an isolated temporary directory, treated as untrusted data, and deleted after
 the turn finishes.
 
+## Workspaces and Approvals
+
+Channels remain conversation-only until the owner enrolls an existing local
+directory with `/gaia workspace path:<absolute path or ~/path>`. GAIA resolves
+symlinks and stores the canonical path, rejects missing paths and the filesystem
+root, and starts fresh Codex context whenever the workspace boundary changes.
+Use `/gaia unworkspace` to return the channel to conversation-only mode.
+
+Workspace turns use Codex `workspace-write` sandboxing and its strict
+`untrusted` approval policy. Command, file-change, and additional-permission
+requests appear as Discord messages showing the agent, action, target, reason,
+and risk, with **Approve once** and **Deny** buttons. Only the configured owner
+can decide; unanswered requests expire and fail closed after ten minutes.
+Destructive requests are labeled HADES-class and always require a button click.
+GAIA posts bounded command and file-change summaries after execution.
+
+Approval and action records contain only status and redacted categorical
+metadata, not command text, file contents, or credentials. Remembered approvals
+are intentionally not offered; use approve-once for every request.
+
 ## Run
 
 Install packages once, then start PostgreSQL, apply migrations, and start GAIA:
@@ -93,6 +113,3 @@ channel keeps an independent Codex thread across daemon restarts. Use `/gaia
 new` to clear that channel's context, `/gaia stop` to interrupt its active turn,
 and `/gaia status` to check the daemon, database, Discord gateway, Codex app
 server, and ChatGPT login. Only the configured owner can receive a response.
-
-Chat turns are intentionally read-only until enrolled workspaces and Discord
-approval controls are added in Phase 4.

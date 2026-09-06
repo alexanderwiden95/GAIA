@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  canonicalizeWorkspace,
   ChannelTaskQueue,
   isAllowedSource,
   parseAccessConfig,
@@ -10,6 +11,7 @@ import {
   validateDiscordAttachment,
   type DiscordSource,
 } from "../src/discord.ts";
+import { isHadesAction } from "../src/codex.ts";
 
 const access = parseAccessConfig({
   GAIA_OWNER_ID: "123456789012345678",
@@ -43,6 +45,15 @@ test("invalid authorization configuration fails closed", () => {
     GAIA_GUILD_ID: "223456789012345678",
     GAIA_CHANNEL_IDS: "323456789012345678",
   }), /GAIA_OWNER_ID/);
+});
+
+test("workspace paths are canonical and destructive actions are HADES-class", async () => {
+  assert.equal(await canonicalizeWorkspace("."), await canonicalizeWorkspace(process.cwd()));
+  await assert.rejects(canonicalizeWorkspace("/"), /root cannot be enrolled/);
+  await assert.rejects(canonicalizeWorkspace("/definitely/not/a/gaia/workspace"), /existing directory/);
+  assert.equal(isHadesAction("rm -rf build"), true);
+  assert.equal(isHadesAction("git reset --hard HEAD~1"), true);
+  assert.equal(isHadesAction("npm test"), false);
 });
 
 test("long Discord messages preserve fenced code blocks", () => {
