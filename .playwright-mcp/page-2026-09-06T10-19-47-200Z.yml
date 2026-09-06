@@ -1,0 +1,359 @@
+- generic [ref=f6e3]:
+  - status
+  - generic [ref=f6e4]:
+    - banner [ref=f6e5]:
+      - generic [ref=f6e6]:
+        - link "Return to discord.dev" [ref=f6e8] [cursor=pointer]:
+          - /url: /developers/home
+        - generic [ref=f6e26]:
+          - button "Create menu" [ref=f6e27] [cursor=pointer]:
+            - generic [ref=f6e28]: Create
+          - button "Docs" [ref=f6e33] [cursor=pointer]
+          - button "Teams" [ref=f6e38] [cursor=pointer]
+          - button "Menu dell'utente" [ref=f6e48] [cursor=pointer]
+    - generic [ref=f6e42]:
+      - navigation [ref=f6e51]:
+        - generic [ref=f6e55]:
+          - link "Applicazioni" [ref=f6e56] [cursor=pointer]:
+            - /url: /developers/applications
+          - generic [ref=f6e65]:
+            - log [ref=f6e67]
+            - generic [ref=f6e68]:
+              - generic [ref=f6e69]:
+                - generic [ref=f6e71]:
+                  - generic [ref=f6e72]: G
+                  - generic [ref=f6e74]: GAIA
+                - combobox [ref=f6e75]
+              - generic [aria-hidden] [ref=f6e77] [cursor=pointer]
+          - generic [ref=f6e80]:
+            - button "Panoramica" [ref=f6e81] [cursor=pointer]
+            - list [ref=f6e87]:
+              - listitem [ref=f6e88]:
+                - link "Informazioni generali" [ref=f6e90] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/information
+              - listitem [ref=f6e92]:
+                - link "Installazione" [ref=f6e94] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/installation
+              - listitem [ref=f6e97]:
+                - link "OAuth2" [ref=f6e99] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/oauth2
+              - listitem [ref=f6e101]:
+                - link "Bot" [ref=f6e103] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/bot
+              - listitem [ref=f6e105]:
+                - link "Emoji Novità" [ref=f6e107] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/emojis
+                  - generic [ref=f6e109]:
+                    - text: Emoji
+                    - generic [ref=f6e110]: Novità
+              - listitem [ref=f6e113]:
+                - link "Webhook Novità" [ref=f6e115] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/webhooks
+                  - generic [ref=f6e117]:
+                    - text: Webhook
+                    - generic [ref=f6e118]: Novità
+              - listitem [ref=f6e121]:
+                - link "Rich Presence" [ref=f6e123] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/rich-presence
+              - listitem [ref=f6e127]:
+                - link "Tester delle app" [ref=f6e129] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/testers
+              - listitem [ref=f6e131]:
+                - link "Verifica dell'app" [ref=f6e133] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/verification-onboarding
+          - button "Giochi Novità" [ref=f6e139] [cursor=pointer]:
+            - generic [ref=f6e143]:
+              - text: Giochi
+              - generic [ref=f6e144]: Novità
+          - button "Attività" [ref=f6e150] [cursor=pointer]
+          - button "App premium" [ref=f6e157] [cursor=pointer]
+      - main [ref=f6e165]:
+        - generic [ref=f6e166]:
+          - heading "Bot" [level=1] [ref=f6e167]
+          - paragraph [ref=f6e169]: Rendi più umana la tua app su Discord con un utente bot. Falla partecipare alla chat nei server dei tuoi utenti per interagire direttamente con loro.
+          - paragraph [ref=f6e170]:
+            - button "Scopri di più sugli utenti bot" [ref=f6e171] [cursor=pointer]
+        - generic [ref=f6e174]:
+          - generic [ref=f6e175]:
+            - generic [ref=f6e176]:
+              - generic [ref=f6e177]:
+                - generic [ref=f6e178]: Icona
+                - list [ref=f6e180]:
+                  - listitem [ref=f6e181]: "Dimensioni: 1024x1024"
+                  - listitem [ref=f6e182]: "Proporzioni: 1:1"
+                  - listitem [ref=f6e183]: "Tipi di file: PNG, GIF, JPG, WEBP"
+                  - listitem [ref=f6e184]: "Dimensione massima: 10MB"
+              - generic [ref=f6e186]:
+                - button "Modifica" [ref=f6e187] [cursor=pointer]:
+                  - generic:
+                    - button "Modifica"
+                - button "Choose File"
+            - generic [ref=f6e188]:
+              - generic [ref=f6e189]:
+                - generic [ref=f6e190]: Banner
+                - list [ref=f6e192]:
+                  - listitem [ref=f6e193]: "Dimensioni: 680x240"
+                  - listitem [ref=f6e194]: "Proporzioni: 17:6"
+                  - listitem [ref=f6e195]: "Tipi di file: PNG, GIF, JPG, WEBP"
+                  - listitem [ref=f6e196]: "Dimensione massima: 10MB"
+              - generic [ref=f6e198]:
+                - button "Modifica Trascina o clicca per caricare" [ref=f6e199] [cursor=pointer]:
+                  - generic:
+                    - button "Modifica"
+                  - generic: Trascina o clicca per caricare
+                - button "Choose File"
+          - generic [ref=f6e200]:
+            - generic [ref=f6e201]: Nome utente
+            - generic [ref=f6e203]:
+              - textbox "Nome utente" [ref=f6e207]:
+                - /placeholder: ""
+                - text: GAIA
+              - generic [ref=f6e208]:
+                - generic [ref=f6e209]: "#"
+                - textbox "Suffisso" [disabled] [ref=f6e213]:
+                  - /placeholder: ""
+                  - text: "3409"
+          - generic [ref=f6e214]:
+            - generic [ref=f6e215]: Token
+            - generic [ref=f6e217]: Dopo essere stati creati, per ragioni di sicurezza, i token si possono visualizzare una sola volta. Se dovessi perdere l'accesso al tuo token o dimenticarlo, rigenerane uno nuovo.
+            - button "Resetta token" [ref=f6e220] [cursor=pointer]
+          - generic [ref=f6e224]:
+            - heading "Flusso di autorizzazione" [level=2] [ref=f6e226]
+            - generic [ref=f6e227]: Queste impostazioni controllano come sono limitate le autorizzazioni OAuth2 per il tuo bot (chi può aggiungerlo e in che modo può farlo).
+            - generic [ref=f6e228]:
+              - generic [ref=f6e229]:
+                - generic [ref=f6e230]: Bot pubblico
+                - generic [ref=f6e232]:
+                  - generic [ref=f6e233]: Le app pubbliche possono essere installate da chiunque. Se deselezioni l'opzione, solo tu puoi installare questa app.
+                  - switch "Le app pubbliche possono essere installate da chiunque. Se deselezioni l'opzione, solo tu puoi installare questa app." [checked] [ref=f6e241]
+              - generic [ref=f6e242]:
+                - generic [ref=f6e243]: Richiede Code Grant OAuth2
+                - generic [ref=f6e245]:
+                  - generic [ref=f6e246]: Se la tua app ha diversi scopi, potresti aver bisogno dell'intero flow OAuth2 per evitare che il bot si unisca a un server prima che l'app gli abbia fornito un token.
+                  - switch "Se la tua app ha diversi scopi, potresti aver bisogno dell'intero flow OAuth2 per evitare che il bot si unisca a un server prima che l'app gli abbia fornito un token." [ref=f6e254]
+          - generic [ref=f6e255]:
+            - heading "Offuscamento per canali privati" [level=2] [ref=f6e257]
+            - generic [ref=f6e258]:
+              - generic [ref=f6e259]: Scegli di ricevere metadati offuscati per i canali privati a cui il bot non può accedere. Questa è un'alternativa all'invio della capacità del gateway private-channel-obfuscation ed entra in vigore alla prossima connessione del bot.
+              - switch "Scegli di ricevere metadati offuscati per i canali privati a cui il bot non può accedere. Questa è un'alternativa all'invio della capacità del gateway private-channel-obfuscation ed entra in vigore alla prossima connessione del bot." [ref=f6e267]
+          - generic [ref=f6e268]:
+            - heading "Privileged Gateway Intents" [level=2] [ref=f6e270]
+            - generic [ref=f6e272]:
+              - text: Alcuni
+              - button "Gateway Intents" [ref=f6e273] [cursor=pointer]
+              - text: richiedono la revisione se il tuo bot ha raggiunto 10.000 o più utenti. Se il tuo bot non ha raggiunto 10.000 utenti, qui sotto puoi attivare o disattivare tali intent per accedervi.
+          - generic [ref=f6e274]:
+            - generic [ref=f6e275]:
+              - generic [ref=f6e276]: Presence Intent
+              - generic [ref=f6e278]:
+                - generic [ref=f6e280] [cursor=pointer]:
+                  - paragraph [ref=f6e281]:
+                    - text: Necessario affinché il tuo bot possa ricevere eventi
+                    - button "Presence Update" [ref=f6e282]
+                    - text: .
+                  - paragraph [ref=f6e283]:
+                    - strong [ref=f6e284]:
+                      - text: "NOTA BENE: una volta che il tuo bot raggiunge 10.000 o più utenti, l'utilizzo di questo intent dovrà essere revisionato."
+                      - button "Scopri di più qui" [ref=f6e285]
+                - 'switch "Necessario affinché il tuo bot possa ricevere eventi Presence Update. NOTA BENE: una volta che il tuo bot raggiunge 10.000 o più utenti, l''utilizzo di questo intent dovrà essere revisionato. Scopri di più qui" [ref=f6e292]'
+            - generic [ref=f6e293]:
+              - generic [ref=f6e294]: Server Members Intent
+              - generic [ref=f6e296]:
+                - generic [ref=f6e298] [cursor=pointer]:
+                  - paragraph [ref=f6e299]:
+                    - text: Necessario affinché il tuo bot riceva eventi di categoria
+                    - button "GUILD_MEMBERS" [ref=f6e300]
+                    - text: .
+                  - paragraph [ref=f6e301]:
+                    - strong [ref=f6e302]:
+                      - text: "NOTA BENE: una volta che il tuo bot raggiunge 10.000 o più utenti, l'utilizzo di questo intent dovrà essere revisionato."
+                      - button "Scopri di più qui" [ref=f6e303]
+                - 'switch "Necessario affinché il tuo bot riceva eventi di categoria GUILD_MEMBERS. NOTA BENE: una volta che il tuo bot raggiunge 10.000 o più utenti, l''utilizzo di questo intent dovrà essere revisionato. Scopri di più qui" [ref=f6e310]'
+            - generic [ref=f6e311]:
+              - generic [ref=f6e312]: Message Content Intent
+              - generic [ref=f6e314]:
+                - generic [ref=f6e316] [cursor=pointer]:
+                  - paragraph [ref=f6e317]:
+                    - text: Necessario affinché il tuo bot possa ricevere il
+                    - button "contenuto dei messaggi" [ref=f6e318]
+                    - text: della maggior parte dei messaggi.
+                  - paragraph [ref=f6e319]:
+                    - strong [ref=f6e320]:
+                      - text: "NOTA BENE: una volta che il tuo bot raggiunge 10.000 o più utenti, l'utilizzo di questo intent dovrà essere revisionato."
+                      - button "Scopri di più qui" [ref=f6e321]
+                - 'switch "Necessario affinché il tuo bot possa ricevere il contenuto dei messaggi della maggior parte dei messaggi. NOTA BENE: una volta che il tuo bot raggiunge 10.000 o più utenti, l''utilizzo di questo intent dovrà essere revisionato. Scopri di più qui" [checked] [ref=f6e328]'
+        - generic [ref=f6e330]:
+          - heading "Permessi dei bot" [level=2] [ref=f6e332]
+          - generic [ref=f6e333]: Serve aiuto con la matematica dei bit? Usa lo strumento qui sotto per calcolare il codice numerico dei permessi per il tuo bot in base alle funzionalità di cui ha bisogno.
+          - generic [ref=f6e334]:
+            - generic [ref=f6e335]:
+              - generic [ref=f6e336]:
+                - generic [ref=f6e337]: Permessi generali
+                - generic [ref=f6e340]:
+                  - checkbox "Amministratore" [ref=f6e342]
+                  - generic [ref=f6e348]: Amministratore
+                - generic [ref=f6e352]:
+                  - checkbox "Visualizzare il registro attività" [ref=f6e354]
+                  - generic [ref=f6e360]: Visualizzare il registro attività
+                - generic [ref=f6e364]:
+                  - checkbox "Gestire server" [ref=f6e366]
+                  - generic [ref=f6e372]: Gestire server
+                - generic [ref=f6e376]:
+                  - checkbox "Gestire i ruoli" [ref=f6e378]
+                  - generic [ref=f6e384]: Gestire i ruoli
+                - generic [ref=f6e388]:
+                  - checkbox "Gestire i canali" [ref=f6e390]
+                  - generic [ref=f6e396]: Gestire i canali
+                - generic [ref=f6e400]:
+                  - checkbox "Espellere i membri" [ref=f6e402]
+                  - generic [ref=f6e408]: Espellere i membri
+                - generic [ref=f6e412]:
+                  - checkbox "Bannare i membri" [ref=f6e414]
+                  - generic [ref=f6e420]: Bannare i membri
+                - generic [ref=f6e424]:
+                  - checkbox "Crea invito istantaneo" [ref=f6e426]
+                  - generic [ref=f6e432]: Crea invito istantaneo
+                - generic [ref=f6e436]:
+                  - checkbox "Cambia nickname" [ref=f6e438]
+                  - generic [ref=f6e444]: Cambia nickname
+                - generic [ref=f6e448]:
+                  - checkbox "Gestire i soprannomi" [ref=f6e450]
+                  - generic [ref=f6e456]: Gestire i soprannomi
+                - generic [ref=f6e460]:
+                  - checkbox "Gestisci espressioni" [ref=f6e462]
+                  - generic [ref=f6e468]: Gestisci espressioni
+                - generic [ref=f6e472]:
+                  - checkbox "Crea espressioni" [ref=f6e474]
+                  - generic [ref=f6e480]: Crea espressioni
+                - generic [ref=f6e484]:
+                  - checkbox "Gestire i webhook" [ref=f6e486]
+                  - generic [ref=f6e492]: Gestire i webhook
+                - generic [ref=f6e496]:
+                  - checkbox "Visualizzare i canali" [ref=f6e498]
+                  - generic [ref=f6e504]: Visualizzare i canali
+                - generic [ref=f6e508]:
+                  - checkbox "Gestisci eventi" [ref=f6e510]
+                  - generic [ref=f6e516]: Gestisci eventi
+                - generic [ref=f6e520]:
+                  - checkbox "Crea eventi" [ref=f6e522]
+                  - generic [ref=f6e528]: Crea eventi
+                - generic [ref=f6e532]:
+                  - checkbox "Modera membri" [ref=f6e534]
+                  - generic [ref=f6e540]: Modera membri
+                - generic [ref=f6e544]:
+                  - checkbox "Visualizza Approfondimenti sul server" [ref=f6e546]
+                  - generic [ref=f6e552]: Visualizza Approfondimenti sul server
+                - generic [ref=f6e556]:
+                  - checkbox "Visualizza Approfondimenti sugli abbonamenti al server" [ref=f6e558]
+                  - generic [ref=f6e564]: Visualizza Approfondimenti sugli abbonamenti al server
+              - generic [ref=f6e567]:
+                - generic [ref=f6e568]: Permessi della chat testuale
+                - generic [ref=f6e571]:
+                  - checkbox "Invia messaggi" [ref=f6e573]
+                  - generic [ref=f6e579]: Invia messaggi
+                - generic [ref=f6e583]:
+                  - checkbox "Crea thread pubblici" [ref=f6e585]
+                  - generic [ref=f6e591]: Crea thread pubblici
+                - generic [ref=f6e595]:
+                  - checkbox "Crea thread privati" [ref=f6e597]
+                  - generic [ref=f6e603]: Crea thread privati
+                - generic [ref=f6e607]:
+                  - checkbox "Invia messaggi nei thread" [ref=f6e609]
+                  - generic [ref=f6e615]: Invia messaggi nei thread
+                - generic [ref=f6e619]:
+                  - checkbox "Usare la sintesi vocale" [ref=f6e621]
+                  - generic [ref=f6e627]: Usare la sintesi vocale
+                - generic [ref=f6e631]:
+                  - checkbox "Gestisci messaggi" [ref=f6e633]
+                  - generic [ref=f6e639]: Gestisci messaggi
+                - generic [ref=f6e643]:
+                  - checkbox "Attacca messaggi" [ref=f6e645]
+                  - generic [ref=f6e651]: Attacca messaggi
+                - generic [ref=f6e655]:
+                  - checkbox "Gestire i thread" [ref=f6e657]
+                  - generic [ref=f6e663]: Gestire i thread
+                - generic [ref=f6e667]:
+                  - checkbox "Incorporare i link" [ref=f6e669]
+                  - generic [ref=f6e675]: Incorporare i link
+                - generic [ref=f6e679]:
+                  - checkbox "Allegare i file" [ref=f6e681]
+                  - generic [ref=f6e687]: Allegare i file
+                - generic [ref=f6e691]:
+                  - checkbox "Leggere la cronologia dei messaggi" [ref=f6e693]
+                  - generic [ref=f6e699]: Leggere la cronologia dei messaggi
+                - generic [ref=f6e703]:
+                  - checkbox "Menzionare tutti" [ref=f6e705]
+                  - generic [ref=f6e711]: Menzionare tutti
+                - generic [ref=f6e715]:
+                  - checkbox "Usare emoji esterne" [ref=f6e717]
+                  - generic [ref=f6e723]: Usare emoji esterne
+                - generic [ref=f6e727]:
+                  - checkbox "Usare adesivi esterni" [ref=f6e729]
+                  - generic [ref=f6e735]: Usare adesivi esterni
+                - generic [ref=f6e739]:
+                  - checkbox "Aggiungere reazioni" [ref=f6e741]
+                  - generic [ref=f6e747]: Aggiungere reazioni
+                - generic [ref=f6e751]:
+                  - checkbox "Usare comandi slash" [ref=f6e753]
+                  - generic [ref=f6e759]: Usare comandi slash
+                - generic [ref=f6e763]:
+                  - checkbox "Usare attività incorporate" [ref=f6e765]
+                  - generic [ref=f6e771]: Usare attività incorporate
+                - generic [ref=f6e775]:
+                  - checkbox "Usare app esterne" [ref=f6e777]
+                  - generic [ref=f6e783]: Usare app esterne
+                - generic [ref=f6e787]:
+                  - checkbox "Crea sondaggi" [ref=f6e789]
+                  - generic [ref=f6e795]: Crea sondaggi
+                - generic [ref=f6e799]:
+                  - checkbox "Ignora Slowmode" [ref=f6e801]
+                  - generic [ref=f6e807]: Ignora Slowmode
+                - generic [ref=f6e811]:
+                  - checkbox "Inviare messaggi vocali" [ref=f6e813]
+                  - generic [ref=f6e819]: Inviare messaggi vocali
+              - generic [ref=f6e822]:
+                - generic [ref=f6e823]: Permessi della chat vocale
+                - generic [ref=f6e826]:
+                  - checkbox "Collegarsi" [ref=f6e828]
+                  - generic [ref=f6e834]: Collegarsi
+                - generic [ref=f6e838]:
+                  - checkbox "Parlare" [ref=f6e840]
+                  - generic [ref=f6e846]: Parlare
+                - generic [ref=f6e850]:
+                  - checkbox "Video" [ref=f6e852]
+                  - generic [ref=f6e858]: Video
+                - generic [ref=f6e862]:
+                  - checkbox "Silenzia membri" [ref=f6e864]
+                  - generic [ref=f6e870]: Silenzia membri
+                - generic [ref=f6e874]:
+                  - checkbox "Silenziare l'audio degli altri" [ref=f6e876]
+                  - generic [ref=f6e882]: Silenziare l'audio degli altri
+                - generic [ref=f6e886]:
+                  - checkbox "Sposta utenti" [ref=f6e888]
+                  - generic [ref=f6e894]: Sposta utenti
+                - generic [ref=f6e898]:
+                  - checkbox "Usare l'attivazione vocale" [ref=f6e900]
+                  - generic [ref=f6e906]: Usare l'attivazione vocale
+                - generic [ref=f6e910]:
+                  - checkbox "Priorità di parola" [ref=f6e912]
+                  - generic [ref=f6e918]: Priorità di parola
+                - generic [ref=f6e922]:
+                  - checkbox "Chiedi di parlare" [ref=f6e924]
+                  - generic [ref=f6e930]: Chiedi di parlare
+                - generic [ref=f6e934]:
+                  - checkbox "Usare attività incorporate" [ref=f6e936]
+                  - generic [ref=f6e942]: Usare attività incorporate
+                - generic [ref=f6e946]:
+                  - checkbox "Usare la Soundboard" [ref=f6e948]
+                  - generic [ref=f6e954]: Usare la Soundboard
+                - generic [ref=f6e958]:
+                  - checkbox "Usare suoni esterni" [ref=f6e960]
+                  - generic [ref=f6e966]: Usare suoni esterni
+                - generic [ref=f6e970]:
+                  - checkbox "Impostare stato del canale vocale" [ref=f6e972]
+                  - generic [ref=f6e978]: Impostare stato del canale vocale
+            - generic [ref=f6e981]:
+              - generic [ref=f6e982]: Codice numerico dei permessi
+              - generic [ref=f6e986]:
+                - textbox [disabled] [ref=f6e987]: "0"
+                - button "Copia" [ref=f6e989] [cursor=pointer]

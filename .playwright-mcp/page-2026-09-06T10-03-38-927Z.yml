@@ -1,0 +1,47 @@
+- dialog "GAIA awiden0370 GAIA App wants to access your Discord account Signed in as awiden0370Not you?" [ref=f7e9]:
+  - generic [ref=f7e11]:
+    - log
+    - log
+  - generic [ref=f7e12]:
+    - banner
+    - main [ref=f7e15]:
+      - generic [ref=f7e16]:
+        - generic [ref=f7e17]:
+          - generic [ref=f7e18]:
+            - img "GAIA" [ref=f7e19]
+            - img "awiden0370" [ref=f7e24]
+          - generic [ref=f7e25]:
+            - text: GAIA
+            - img "App" [ref=f7e26]:
+              - generic [ref=f7e27]: APP
+          - generic [ref=f7e28]: wants to access your Discord account
+          - generic [ref=f7e30]:
+            - text: Signed in as awiden0370
+            - button "Not you?" [ref=f7e31] [cursor=pointer]
+        - generic [ref=f7e33]:
+          - generic [ref=f7e34]:
+            - heading "This will allow the developer of GAIA to:" [level=1] [ref=f7e35]
+            - 'group "Allowed: Add a bot to a server" [ref=f7e36]':
+              - generic [ref=f7e41]: Add a bot to a server
+            - 'group "Allowed: Create commands" [ref=f7e42]':
+              - generic [ref=f7e47]: Create commands
+            - 'group "Not allowed: Paint a happy little tree" [ref=f7e48]':
+              - generic [ref=f7e53]: Paint a happy little tree
+          - generic [ref=f7e54]:
+            - generic [ref=f7e55]:
+              - generic [ref=f7e56]: "Add to server:"
+              - generic [ref=f7e58]:
+                - generic [ref=f7e60]:
+                  - combobox "Add to server:" [expanded] [active] [ref=f7e64]
+                  - button [aria-hidden] [ref=f7e65] [cursor=pointer]
+                - generic [ref=f7e70]:
+                  - text: This requires you to have
+                  - strong [ref=f7e71]: Manage Server
+                  - text: permission in the server.
+            - listbox [ref=f7e81]:
+              - status [ref=f7e82]:
+                - generic [ref=f7e83]: No items to show
+    - contentinfo [ref=f7e73]:
+      - generic [ref=f7e75]:
+        - button "Cancel" [ref=f7e76] [cursor=pointer]
+        - button "You missed some fields" [disabled]

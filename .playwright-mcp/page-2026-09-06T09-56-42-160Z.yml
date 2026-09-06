@@ -1,0 +1,93 @@
+- generic [ref=f4e1]:
+  - generic [ref=f4e4]:
+    - banner [ref=f4e5]:
+      - generic [ref=f4e6]:
+        - link [ref=f4e217] [cursor=pointer]:
+          - /url: /developers/home
+        - generic [ref=f4e26]:
+          - button [ref=f4e218] [cursor=pointer]:
+            - generic [ref=f4e28]: Create
+          - button [ref=f4e219] [cursor=pointer]:
+            - generic [ref=f4e34]: Docs
+          - button [ref=f4e220] [cursor=pointer]:
+            - generic [ref=f4e41]: Teams
+          - button [ref=f4e221] [cursor=pointer]
+    - generic [ref=f4e45]:
+      - navigation [ref=f4e46]:
+        - generic [ref=f4e51]:
+          - link [ref=f4e222] [cursor=pointer]:
+            - /url: /developers/home
+            - text: Pagina principale
+          - link [ref=f4e223] [cursor=pointer]:
+            - /url: /developers/applications
+            - text: Applicazioni
+          - link [ref=f4e224] [cursor=pointer]:
+            - /url: /developers/embeds
+            - text: Debugger di embed
+      - main [ref=f4e55]:
+        - generic [ref=f4e56]:
+          - heading [level=1] [ref=f4e225]:
+            - generic [ref=f4e58]: Applicazioni
+            - button [ref=f4e226] [cursor=pointer]:
+              - generic [ref=f4e61]: Visualizza applicazione
+          - paragraph [ref=f4e64]:
+            - text: Sviluppa
+            - button [ref=f4e227] [cursor=pointer]: app
+            - text: per personalizzare Discord e ampliarne le funzionalità per milioni di utenti.
+        - generic [ref=f4e66]:
+          - generic [ref=f4e67]:
+            - generic [ref=f4e68]:
+              - generic [ref=f4e69]: "Ordina per:"
+              - generic [ref=f4e73]:
+                - log [ref=f4e75]
+                - generic [ref=f4e76]:
+                  - generic [ref=f4e77]:
+                    - generic [ref=f4e78]: Data di creazione
+                    - combobox [ref=f4e228]
+                  - generic [aria-hidden] [ref=f4e81] [cursor=pointer]
+            - generic [ref=f4e84]:
+              - button [ref=f4e229] [cursor=pointer]:
+                - generic [ref=f4e88]: Piccolo
+              - button [ref=f4e230] [cursor=pointer]:
+                - generic [ref=f4e92]: Grande
+          - heading [level=2] [ref=f4e231]: Le mie applicazioni
+          - generic [ref=f4e97]:
+            - generic [ref=f4e98]: Non hai ancora delle applicazioni, faccina triste.
+            - generic [ref=f4e99]: Clicca su Nuova applicazione in alto per cominciare.
+  - generic [ref=f4e188]:
+    - generic [ref=f4e189]:
+      - generic [ref=f4e190]: Sondaggio
+      - button "Ignora" [ref=f4e191] [cursor=pointer]
+    - generic [ref=f4e196]: Riesci a trovare quello che ti serve nel Portale sviluppatori?
+    - generic [ref=f4e197]:
+      - button "No" [ref=f4e198] [cursor=pointer]
+      - button "Sì" [ref=f4e200] [cursor=pointer]
+  - generic:
+    - dialog "Crea una nuova app":
+      - generic:
+        - generic:
+          - log
+          - log
+      - generic [ref=f4e232]:
+        - banner [ref=f4e233]:
+          - generic [ref=f4e235]:
+            - heading "Crea una nuova app" [level=1] [ref=f4e237]
+            - button "Chiudi" [ref=f4e239] [cursor=pointer]
+        - main [ref=f4e249]:
+          - generic [ref=f4e250]:
+            - generic [ref=f4e251]:
+              - generic [ref=f4e252]: Nome *
+              - textbox "Nome *" [active] [ref=f4e257]:
+                - /placeholder: ""
+            - generic [ref=f4e258]:
+              - checkbox "Cliccando su Crea, accetti i Termini di Servizio per sviluppatori e l'Informativa per sviluppatori di Discord." [ref=f4e260]
+              - generic [ref=f4e268]:
+                - text: Cliccando su Crea, accetti i
+                - button "Termini di Servizio per sviluppatori" [ref=f4e269] [cursor=pointer]
+                - text: e l'
+                - button "Informativa per sviluppatori" [ref=f4e270] [cursor=pointer]
+                - text: di Discord.
+        - contentinfo [ref=f4e272]:
+          - generic [ref=f4e274]:
+            - button "Annulla" [ref=f4e275] [cursor=pointer]
+            - button "Crea" [disabled]

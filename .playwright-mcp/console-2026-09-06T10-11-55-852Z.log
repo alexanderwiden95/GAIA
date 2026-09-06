@@ -1,0 +1,2 @@
+[     913ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://discord.com/api/v9/applications/1546097269613531246/store-layout:0
+[  294182ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://discord.com/api/v9/applications/1546097269613531246:0

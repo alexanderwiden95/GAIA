@@ -1,0 +1,229 @@
+- generic [ref=f21e11]:
+  - generic [ref=f21e12]:
+    - generic [ref=f21e14]:
+      - generic [ref=f21e15]: G
+      - generic [ref=f21e17]: GAIA
+    - generic [ref=f21e18]:
+      - button "Inbox" [ref=f21e21] [cursor=pointer]
+      - link [ref=f21e25] [cursor=pointer]:
+        - /url: https://support.discord.com
+        - button "Help" [ref=f21e26]
+  - generic [ref=f21e30]:
+    - generic [ref=f21e31]:
+      - navigation "Servers sidebar" [ref=f21e32]:
+        - tree [ref=f21e33]:
+          - generic [ref=f21e34]:
+            - treeitem "Direct Messages" [level=1] [ref=f21e43] [cursor=pointer]
+            - group "Servers" [ref=f21e50]:
+              - generic [ref=f21e51]:
+                - treeitem "GAIA" [level=1] [selected] [ref=f21e61] [cursor=pointer]:
+                  - generic [aria-hidden] [ref=f21e63]: G
+                - generic [ref=f21e64]: GAIA
+            - treeitem "Add a Server" [level=1] [ref=f21e71] [cursor=pointer]
+            - treeitem "Discover" [level=1] [ref=f21e82] [cursor=pointer]
+            - treeitem "Download Apps" [level=1] [ref=f21e93] [cursor=pointer]
+      - navigation "GAIA (server)" [ref=f21e359]:
+        - generic [ref=f21e362]:
+          - button "GAIA, server actions" [ref=f21e363] [cursor=pointer]:
+            - heading "GAIA" [level=2] [ref=f21e365]
+          - button "Invite to Server" [ref=f21e370] [cursor=pointer]
+        - heading "Channels" [level=2] [ref=f21e375]
+        - list "Channels" [ref=f21e377]:
+          - listitem [ref=f21e379]:
+            - generic [ref=f21e380]:
+              - button "Events"
+              - generic [aria-hidden] [ref=f21e385] [cursor=pointer]: Events
+          - listitem [ref=f21e386]:
+            - generic [ref=f21e387]:
+              - button "Server Boosts"
+              - generic [aria-hidden] [ref=f21e392] [cursor=pointer]: Server Boosts
+          - listitem [ref=f21e394]:
+            - generic [ref=f21e395] [cursor=pointer]:
+              - button "Canali testuali (category)" [expanded] [ref=f21e396]:
+                - heading "Canali testuali" [level=3] [ref=f21e397]
+              - generic [ref=f21e401]:
+                - button "Create Channel" [ref=f21e402]
+                - generic [ref=f21e405]: Create Channel
+          - listitem [ref=f21e406]:
+            - link "generale (text channel)" [ref=f21e409] [cursor=pointer]:
+              - /url: /channels/1546099225727864832/1546099227200061472
+              - generic [ref=f21e410]:
+                - img "Text icon" [ref=f21e411]
+                - generic [ref=f21e414]: Text
+                - generic [aria-hidden] [ref=f21e415]: generale
+                - generic [ref=f21e416]:
+                  - button "Invite to Channel" [ref=f21e418]
+                  - generic [ref=f21e422]: Invite to Channel
+                  - button "Edit Channel" [ref=f21e424]
+                  - generic [ref=f21e427]: Edit Channel
+          - listitem [ref=f21e428]:
+            - link "work (text channel)" [ref=f21e431] [cursor=pointer]:
+              - /url: /channels/1546099225727864832/1546108894965927936
+              - generic [ref=f21e432]:
+                - img "Text icon" [ref=f21e433]
+                - generic [ref=f21e436]: Text
+                - generic [aria-hidden] [ref=f21e437]: work
+                - generic:
+                  - generic [ref=f21e438]: Invite to Channel
+                  - generic [ref=f21e439]: Edit Channel
+          - listitem [ref=f21e440]:
+            - generic [ref=f21e441] [cursor=pointer]:
+              - button "Canali vocali (category)" [expanded] [ref=f21e442]:
+                - heading "Canali vocali" [level=3] [ref=f21e443]
+              - generic [ref=f21e447]:
+                - button "Create Channel" [ref=f21e448]
+                - generic [ref=f21e451]: Create Channel
+          - listitem [ref=f21e452]:
+            - button "Generale (voice channel)" [ref=f21e456] [cursor=pointer]:
+              - generic [ref=f21e457]:
+                - img "Voice icon" [ref=f21e458]
+                - generic [ref=f21e462]: Voice
+                - generic [aria-hidden] [ref=f21e463]: Generale
+                - generic:
+                  - generic [ref=f21e464]: Open Chat
+                  - generic [ref=f21e465]: Invite to Voice
+                  - generic [ref=f21e466]: Edit Channel
+      - separator "Resize Sidebar" [ref=f21e140]
+      - region "User status and settings" [ref=f21e141]:
+        - generic [ref=f21e142]:
+          - generic [ref=f21e467] [cursor=pointer]:
+            - button "Manage profile and status"
+            - generic [ref=f21e470]:
+              - generic [ref=f21e471]: Awiden
+              - generic [ref=f21e475]:
+                - generic: awiden0370
+                - generic: Online
+          - generic [ref=f21e152]:
+            - generic [ref=f21e153]:
+              - switch "Mute" [checked] [ref=f21e154] [cursor=pointer]
+              - generic [ref=f21e157]: Unmute
+              - button "Input Options" [ref=f21e158] [cursor=pointer]
+            - generic [ref=f21e162]:
+              - switch "Deafen" [ref=f21e163] [cursor=pointer]
+              - button "Output Options" [ref=f21e166] [cursor=pointer]
+            - button "User Settings" [ref=f21e170] [cursor=pointer]
+    - generic [ref=f21e175]:
+      - region "Channel header" [ref=f21e177]:
+        - generic [ref=f21e178]:
+          - generic [ref=f21e179]:
+            - generic [ref=f21e183]: Text Channel
+            - 'heading "GAIA: generale" [level=1] [ref=f21e185]':
+              - generic [ref=f21e186]: "GAIA:"
+              - text: generale
+          - generic [ref=f21e187]:
+            - button "Threads" [ref=f21e188] [cursor=pointer]
+            - button "Notification Settings" [ref=f21e191] [cursor=pointer]
+            - button "Pinned Messages" [ref=f21e194] [cursor=pointer]
+            - button "Hide Member List" [ref=f21e197] [cursor=pointer]
+            - generic [ref=f21e511]:
+              - combobox "Search GAIA" [ref=f21e512]
+              - button [aria-hidden] [ref=f21e514]
+      - generic [ref=f21e201]:
+        - main "generale (channel)" [ref=f21e202]:
+          - heading "generale chat" [level=2] [ref=f21e204]
+          - group [ref=f21e206]:
+            - list "Messages in generale" [ref=f21e208]:
+              - generic [ref=f21e522]:
+                - generic [ref=f21e523]:
+                  - heading [level=3] [ref=f21e524]:
+                    - paragraph [ref=f21e525]: Welcome to
+                    - paragraph [ref=f21e526]: GAIA
+                  - generic [ref=f21e527]:
+                    - text: This is your brand new, shiny server. Here are some steps to help you get started. For more, check out our
+                    - link "Getting Started guide" [ref=f21e528] [cursor=pointer]:
+                      - /url: https://support.discord.com/hc/en-us/articles/360045138571?utm_source=discord&utm_medium=blog&utm_campaign=2020-06_help-new-user&utm_content=--t%3Apm
+                    - text: .
+                - button "Invite your friends" [ref=f21e530] [cursor=pointer]
+                - button "Personalize your server with an icon" [ref=f21e535] [cursor=pointer]
+                - button "Send your first message" [ref=f21e540] [cursor=pointer]
+                - button "Download the Discord App" [ref=f21e545] [cursor=pointer]
+                - button "Add your first app" [ref=f21e550] [cursor=pointer]
+                - button "Unlock perks for everyone with Boosts" [ref=f21e555] [cursor=pointer]
+              - separator "September 6, 2026"
+              - listitem [ref=f21e559]:
+                - article [ref=f21e560]:
+                  - generic [ref=f21e567]:
+                    - text: Glad you're here,
+                    - link "GAIA" [ref=f21e568] [cursor=pointer]
+                    - text: .
+                    - generic:
+                      - generic:
+                        - time:
+                          - generic [aria-hidden]: —
+                          - text: 12:07 PM
+                      - generic: Sunday, September 6, 2026 at 12:07 PM
+              - listitem [ref=f21e572]:
+                - article "Awiden , Remember the exact channel word ORCHID. Reply only GENERAL_OK. , 12:46 PM" [ref=f21e573]:
+                  - generic [ref=f21e574]:
+                    - img [aria-hidden] [ref=f21e575] [cursor=pointer]
+                    - heading [level=3] [ref=f21e576]:
+                      - button "Awiden" [ref=f21e578]
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 12:46 PM
+                        - generic: Sunday, September 6, 2026 at 12:46 PM
+                    - generic [ref=f21e579]: Remember the exact channel word ORCHID. Reply only GENERAL_OK.
+              - listitem [ref=f21e580]:
+                - article [ref=f21e581]:
+                  - generic "GAIA replying to Awiden" [ref=f21e582]:
+                    - button "Jump To Reply" [ref=f21e583] [cursor=pointer]
+                    - button "@Awiden" [ref=f21e584]
+                    - button "Remember the exact channel word ORCHID. Reply only GENERAL_OK." [ref=f21e585] [cursor=pointer]
+                  - generic [ref=f21e586]:
+                    - img [aria-hidden] [ref=f21e587] [cursor=pointer]
+                    - heading [level=3] [ref=f21e588]:
+                      - generic [ref=f21e589]:
+                        - button "GAIA" [ref=f21e590]
+                        - img "App" [ref=f21e591]:
+                          - generic [ref=f21e592]: APP
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 12:46 PM
+                        - generic: Sunday, September 6, 2026 at 12:46 PM
+                    - generic [ref=f21e593]:
+                      - text: GENERAL_OK
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic: (edited)
+                        - generic: Sunday, September 6, 2026 at 12:46 PM
+          - generic [ref=f21e307]:
+            - button "More message options" [ref=f21e309] [cursor=pointer]
+            - generic [ref=f21e314]:
+              - generic [aria-hidden]: "Message #generale"
+              - 'textbox "Message #generale" [ref=f21e315]'
+            - generic [ref=f21e317]:
+              - generic [ref=f21e318]:
+                - button "Send a gift" [ref=f21e319] [cursor=pointer]
+                - generic [ref=f21e322]: Upgrade your friends! Gift them awesome chat perks with Nitro.
+              - button "Open GIF picker" [ref=f21e324] [cursor=pointer]
+              - generic [ref=f21e327]: Send GIF
+              - button "Open sticker picker" [ref=f21e329] [cursor=pointer]
+              - button "Add Emoji" [ref=f21e333] [cursor=pointer]
+              - button "Apps" [ref=f21e338] [cursor=pointer]
+        - complementary [ref=f21e341]:
+          - heading "Members list for generale (channel)" [level=2] [ref=f21e343]
+          - list "Members" [ref=f21e344]:
+            - generic [ref=f21e636]:
+              - heading "Online, 2 members" [level=3] [ref=f21e637]:
+                - generic [aria-hidden] [ref=f21e639]:
+                  - generic [ref=f21e640]: Online
+                  - generic [ref=f21e641]: — 2
+              - listitem [ref=f21e642]:
+                - generic [ref=f21e644]:
+                  - img "awiden0370, Online" [ref=f21e646]
+                  - generic [ref=f21e649]:
+                    - generic [ref=f21e650]: Awiden
+                    - img "Server Owner" [ref=f21e655]
+                    - generic [ref=f21e657]: Server Owner
+              - listitem [ref=f21e658]:
+                - generic [ref=f21e660]:
+                  - img "GAIA, Online" [ref=f21e662]
+                  - generic [ref=f21e665]:
+                    - generic [ref=f21e666]: GAIA
+                    - img "App" [ref=f21e671]:
+                      - generic [ref=f21e672]: APP

@@ -1,0 +1,73 @@
+- dialog "GAIA awiden0370 GAIA App vuole accedere al tuo account di Discord Registrato come awiden0370Non sei tu?" [ref=f13e9]:
+  - generic [ref=f13e11]:
+    - log
+    - log
+  - generic [ref=f13e12]:
+    - banner
+    - main [ref=f13e15]:
+      - generic [ref=f13e16]:
+        - generic [ref=f13e17]:
+          - generic [ref=f13e18]:
+            - img "GAIA" [ref=f13e19]
+            - img "awiden0370" [ref=f13e24]
+          - generic [ref=f13e25]:
+            - text: GAIA
+            - img "App" [ref=f13e26]:
+              - generic [ref=f13e27]: APP
+          - generic [ref=f13e28]: vuole accedere al tuo account di Discord
+          - generic [ref=f13e30]:
+            - text: Registrato come awiden0370
+            - button "Non sei tu?" [ref=f13e31] [cursor=pointer]
+        - generic [ref=f13e33]:
+          - generic [ref=f13e88]:
+            - generic [ref=f13e89]:
+              - text: Conferma di voler dare a
+              - strong [ref=f13e90]: GAIA
+              - text: le seguenti autorizzazioni su
+              - strong [ref=f13e91]: GAIA
+              - text: ":"
+            - list [ref=f13e92]:
+              - listitem [ref=f13e93]:
+                - generic [ref=f13e94]:
+                  - checkbox "Visualizzare i canali" [checked] [ref=f13e96]
+                  - generic [ref=f13e102]: Visualizzare i canali
+              - listitem [ref=f13e105]:
+                - generic [ref=f13e106]:
+                  - checkbox "Inviare i messaggi" [checked] [ref=f13e108]
+                  - generic [ref=f13e114]: Inviare i messaggi
+              - listitem [ref=f13e117]:
+                - generic [ref=f13e118]:
+                  - checkbox "Invia messaggi nei thread" [checked] [ref=f13e120]
+                  - generic [ref=f13e126]: Invia messaggi nei thread
+              - listitem [ref=f13e129]:
+                - generic [ref=f13e130]:
+                  - checkbox "Crea thread pubblici" [checked] [ref=f13e132]
+                  - generic [ref=f13e138]: Crea thread pubblici
+              - listitem [ref=f13e141]:
+                - generic [ref=f13e142]:
+                  - checkbox "Incorporare i link" [checked] [ref=f13e144]
+                  - generic [ref=f13e150]: Incorporare i link
+              - listitem [ref=f13e153]:
+                - generic [ref=f13e154]:
+                  - checkbox "Allegare i file" [checked] [ref=f13e156]
+                  - generic [ref=f13e162]: Allegare i file
+              - listitem [ref=f13e165]:
+                - generic [ref=f13e166]:
+                  - checkbox "Leggere la cronologia dei messaggi" [checked] [ref=f13e168]
+                  - generic [ref=f13e174]: Leggere la cronologia dei messaggi
+              - listitem [ref=f13e177]:
+                - generic [ref=f13e178]:
+                  - checkbox "Usa comandi applicazioni" [checked] [ref=f13e180]
+                  - generic [ref=f13e186]: Usa comandi applicazioni
+          - generic [ref=f13e189]:
+            - generic [ref=f13e190]: L'informativa sulla privacy e i termini di servizio dello sviluppatore di GAIA sono validi per questa applicazione.
+            - generic [ref=f13e194]: Attivo fin dal 6 set 2026
+            - generic [ref=f13e198]: Usato in 0 server
+            - generic [ref=f13e207]:
+              - text: Questa applicazione
+              - strong [ref=f13e208]: non può
+              - text: leggere o inviare messaggi a nome tuo.
+    - contentinfo [ref=f13e76]:
+      - generic [ref=f13e78]:
+        - button "Indietro" [ref=f13e209] [cursor=pointer]
+        - button "Autorizza" [active] [ref=f13e210] [cursor=pointer]

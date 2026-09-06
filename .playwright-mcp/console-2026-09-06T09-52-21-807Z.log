@@ -1,0 +1,94 @@
+[    2594ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://discord.com/api/v9/experiments?with_guild_experiments=true&platform=DEVELOPER_PORTAL:0
+[    2600ms] [ERROR] {ok: false, headers: Object, body: Object, text: {"message": "400: Bad Request", "code": 0}, status: 400} @ https://discord.com/assets/index.64083bd3e09552cc.js:26
+[    3689ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://discord.com/api/v9/teams:0
+[    3691ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://discord.com/api/v9/users/@me/guilds?with_counts=true:0
+[    3691ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://discord.com/api/v9/applications?with_team_applications=true:0
+[    3692ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://discord.com/api/v9/teams:0
+[    3739ms] f
+[   28600ms] [INFO] %c[libdiscore] 
+font-weight: bold;
+color: purple;
+ [experiment_manager] Loaded experiments from cache @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[   28802ms] [LOG] %c[ProcessUtilsElectron] 
+font-weight: bold;
+color: purple;
+ setMemoryInformation not available. @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[   29214ms] [LOG] %c[default] 
+font-weight: bold;
+color: purple;
+ [BUILD INFO] Release Channel: stable, Build Number: 607562, Version Hash: f9b13d9eaa95f75e952091b9150d0d2881c02b5d @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[   29220ms] [LOG] AppCrashedFatalReport: getLastCrash not supported. @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[   29493ms] [INFO] %c[libdiscore] 
+font-weight: bold;
+color: purple;
+ The answer for life the universe and everything is: 42 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[   30281ms] [INFO] %c[useAuthWebsocket] 
+font-weight: bold;
+color: purple;
+ [0ms] connecting to wss://remote-auth-gateway.discord.gg/?v=2 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[   30588ms] [INFO] %c[useAuthWebsocket] 
+font-weight: bold;
+color: purple;
+ [309ms] got hello, auth timeout=321870ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[   30904ms] [INFO] %c[useAuthWebsocket] 
+font-weight: bold;
+color: purple;
+ [625ms] connected, handshaking with fingerprint: KTNdF4xocYNFb2Kwt01_UXG5anAH4hiKDi7ITG3eoh4 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[   31047ms] [INFO] %c[useAuthWebsocket] 
+font-weight: bold;
+color: purple;
+ [768ms] computed nonce proof @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[   31182ms] [INFO] %c[useAuthWebsocket] 
+font-weight: bold;
+color: purple;
+ [903ms] handshake complete awaiting remote auth. @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[  199953ms] [INFO] %c[useAuthWebsocket] 
+font-weight: bold;
+color: purple;
+ [169674ms] remote auth handshake started, awaiting ticket/cancel. @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[  212147ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching LOGIN @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[  212151ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching LOGIN_SUCCESS @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[  212157ms] [ERROR] %c[KeybindsStore] 
+font-weight: bold;
+color: purple;
+ [kb store] KeybindStore: Looking for callback action TOGGLE_OVERLAY_INPUT_LOCK but it doesn't exist in this version. Skipping @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[  212157ms] [ERROR] %c[KeybindsStore] 
+font-weight: bold;
+color: purple;
+ [kb store] KeybindStore: Looking for callback action SOUNDBOARD_HOLD but it doesn't exist in this version. Skipping @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[  212158ms] [ERROR] %c[KeybindsStore] 
+font-weight: bold;
+color: purple;
+ [kb store] KeybindStore: Looking for callback action SAVE_CLIP but it doesn't exist in this version. Skipping @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[  212158ms] [ERROR] %c[KeybindsStore] 
+font-weight: bold;
+color: purple;
+ [kb store] KeybindStore: Looking for callback action SAVE_SCREENSHOT but it doesn't exist in this version. Skipping @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[  212167ms] [LOG] %c[Routing/Utils] 
+font-weight: bold;
+color: purple;
+ assign - route to external path /developers/applications @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[  212172ms] [INFO] %c[useAuthWebsocket] 
+font-weight: bold;
+color: purple;
+ [181893ms] cleaning up @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[  212216ms] Transitioning to authenticated state
+[  212653ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://discord.com/api/v9/teams:0
+[  212656ms] f
+[  212667ms] [ERROR] Failed to load resource: the server responded with a status of 429 () @ https://discord.com/error-reporting-proxy/developers:0
+[  212690ms] [ERROR] Failed to load resource: the server responded with a status of 429 () @ https://discord.com/error-reporting-proxy/developers:0
+[  212715ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://discord.com/api/v9/users/@me/identity/verification:0
+[  212837ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://discord.com/api/v9/teams:0
+[  330876ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://discord.com/api/v9/applications:0
+[  367873ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://discord.com/api/v9/applications:0
+[  368093ms] [LOG] recaptchacompat disabled @ https://discord.com/assets/index.64083bd3e09552cc.js:26
+[  374139ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://discord.com/api/v9/applications/1546097269613531246/store-layout:0
+[  456189ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://discord.com/api/v9/applications/1546097269613531246:0
+[  543492ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://discord.com/api/v9/applications/1546097269613531246:0
+[  559218ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://discord.com/api/v9/applications/1546097269613531246/bot/reset:0

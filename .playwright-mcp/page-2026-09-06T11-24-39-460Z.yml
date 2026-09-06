@@ -1,0 +1,47 @@
+- generic [ref=f26e5]:
+  - generic [ref=f26e11]:
+    - generic [ref=f26e14]:
+      - button "Inbox" [ref=f26e17] [cursor=pointer]
+      - link [ref=f26e21] [cursor=pointer]:
+        - /url: https://support.discord.com
+        - button "Help" [ref=f26e22]
+    - generic [ref=f26e26]:
+      - generic [ref=f26e27]:
+        - navigation "Servers sidebar" [ref=f26e28]:
+          - tree [ref=f26e29]:
+            - generic [ref=f26e30]:
+              - group "Servers"
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - treeitem "Add a Server" [level=1]
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - treeitem "Discover" [level=1]
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - treeitem "Download Apps" [level=1]
+        - status [ref=f26e32]
+        - separator "Resize Sidebar" [ref=f26e75]
+        - region "User status and settings" [ref=f26e76]
+      - status [ref=f26e78]
+  - generic [ref=f26e84]:
+    - generic [ref=f26e86]:
+      - generic [ref=f26e87]: Did you know
+      - generic [ref=f26e88]: No keyboard? Enable the Send Message button in Appearance Settings to chat.
+    - generic [ref=f26e89]:
+      - generic [ref=f26e90]: Connection problems? Let us know!
+      - generic [ref=f26e91]:
+        - link "Tweet Us" [ref=f26e92] [cursor=pointer]:
+          - /url: https://twitter.com/discord_support
+        - link "Server Status" [ref=f26e95] [cursor=pointer]:
+          - /url: https://discordstatus.com

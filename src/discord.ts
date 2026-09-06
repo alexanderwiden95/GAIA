@@ -1,0 +1,566 @@
+import { execFile as execFileCallback } from "node:child_process";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { promisify } from "node:util";
+
+import {
+  Client,
+  Events,
+  GatewayIntentBits,
+  MessageFlags,
+  RESTEvents,
+  SlashCommandBuilder,
+  type Attachment,
+  type ChatInputCommandInteraction,
+  type Message,
+} from "discord.js";
+import type { Pool } from "pg";
+
+import { CodexClient, type CodexAttachment } from "./codex.ts";
+import { getOrCreateChannel, messageExists, saveMessage, setChannelThread, setMessageTurn } from "./db.ts";
+
+const execFile = promisify(execFileCallback);
+const KEYCHAIN_ACCOUNT = "gaia";
+const KEYCHAIN_SERVICE = "gaia.discord.bot-token";
+const SNOWFLAKE = /^\d{17,20}$/;
+const DISCORD_MESSAGE_LIMIT = 2_000;
+const STREAM_EDIT_INTERVAL_MS = 1_500;
+const GLOBAL_TURN_LIMIT = 2;
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+const MAX_TEXT_ATTACHMENT_BYTES = 256 * 1024;
+const ALLOWED_ATTACHMENT_TYPES = new Set([
+  "application/json",
+  "image/gif",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "text/csv",
+  "text/markdown",
+  "text/plain",
+]);
+const IMAGE_ATTACHMENT_TYPES = new Set(["image/gif", "image/jpeg", "image/png", "image/webp"]);
+const ATTACHMENT_EXTENSIONS: Record<string, string> = {
+  "application/json": ".json",
+  "image/gif": ".gif",
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "text/csv": ".csv",
+  "text/markdown": ".md",
+  "text/plain": ".txt",
+};
+const DISCORD_CDN_HOSTS = new Set(["cdn.discordapp.com", "media.discordapp.net"]);
+const NO_MENTIONS = { parse: [] as const };
+
+export type AccessConfig = {
+  ownerId: string;
+  guildId: string;
+  channelIds: ReadonlySet<string>;
+};
+
+export type DiscordSource = {
+  guildId: string | null;
+  channelId: string;
+  userId: string;
+  isBot: boolean;
+  webhookId?: string | null;
+};
+
+type AttachmentMetadata = Pick<Attachment, "contentType" | "id" | "name" | "size" | "url">;
+
+class AttachmentError extends Error {}
+
+export function validateDiscordAttachment(attachment: AttachmentMetadata): { contentType: string; isImage: boolean } {
+  const contentType = attachment.contentType?.split(";", 1)[0]?.toLowerCase() ?? "";
+  if (attachment.size > MAX_ATTACHMENT_BYTES) throw new AttachmentError(`Attachment ${JSON.stringify(attachment.name)} exceeds Discord's free 10 MiB limit.`);
+  if (!ALLOWED_ATTACHMENT_TYPES.has(contentType)) {
+    throw new AttachmentError(`Attachment ${JSON.stringify(attachment.name)} has unsupported type ${JSON.stringify(contentType || "unknown")}.`);
+  }
+  let url: URL;
+  try {
+    url = new URL(attachment.url);
+  } catch {
+    throw new AttachmentError(`Attachment ${JSON.stringify(attachment.name)} has an invalid Discord URL.`);
+  }
+  if (url.protocol !== "https:" || !DISCORD_CDN_HOSTS.has(url.hostname) || url.username || url.password) {
+    throw new AttachmentError(`Attachment ${JSON.stringify(attachment.name)} is not hosted on Discord's CDN.`);
+  }
+  return { contentType, isImage: IMAGE_ATTACHMENT_TYPES.has(contentType) };
+}
+
+export function validateAttachmentBytes(contentType: string, bytes: Uint8Array): string | undefined {
+  const buffer = Buffer.from(bytes);
+  const matches =
+    contentType === "image/png" ? buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+      : contentType === "image/jpeg" ? buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff
+        : contentType === "image/gif" ? ["GIF87a", "GIF89a"].includes(buffer.subarray(0, 6).toString("ascii"))
+          : contentType === "image/webp" ? buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP"
+            : true;
+  if (!matches) throw new AttachmentError(`Attachment contents do not match declared type ${JSON.stringify(contentType)}.`);
+  if (!IMAGE_ATTACHMENT_TYPES.has(contentType)) {
+    if (bytes.byteLength > MAX_TEXT_ATTACHMENT_BYTES) throw new AttachmentError("Text attachments cannot exceed 256 KiB.");
+    let text: string;
+    try {
+      text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    } catch {
+      throw new AttachmentError(`Attachment contents are not valid UTF-8 ${JSON.stringify(contentType)} data.`);
+    }
+    if (text.includes("\0")) throw new AttachmentError("Text attachments cannot contain null bytes.");
+    if (contentType === "application/json") {
+      try {
+        JSON.parse(text);
+      } catch {
+        throw new AttachmentError("JSON attachment is not valid JSON.");
+      }
+    }
+    return text;
+  }
+}
+
+async function downloadDiscordAttachments(attachments: Iterable<Attachment>): Promise<{
+  files: CodexAttachment[];
+  cleanup: () => Promise<void>;
+}> {
+  const validated = [...attachments].map((attachment) => ({ attachment, ...validateDiscordAttachment(attachment) }));
+  if (!validated.length) return { files: [], cleanup: async () => undefined };
+  const directory = await mkdtemp(join(tmpdir(), "gaia-discord-"));
+  try {
+    const files: CodexAttachment[] = [];
+    for (const { attachment, contentType, isImage } of validated) {
+      const response = await fetch(attachment.url, { redirect: "error", signal: AbortSignal.timeout(30_000) });
+      if (!response.ok || !response.body) throw new AttachmentError(`Could not download attachment ${JSON.stringify(attachment.name)} from Discord.`);
+      const responseType = response.headers.get("content-type")?.split(";", 1)[0]?.toLowerCase();
+      if (responseType && responseType !== contentType) throw new AttachmentError(`Attachment ${JSON.stringify(attachment.name)} changed type while downloading.`);
+      const declaredLength = Number(response.headers.get("content-length"));
+      if (Number.isFinite(declaredLength) && declaredLength > MAX_ATTACHMENT_BYTES) {
+        throw new AttachmentError(`Attachment ${JSON.stringify(attachment.name)} exceeds Discord's free 10 MiB limit.`);
+      }
+      const reader = response.body.getReader();
+      const chunks: Uint8Array[] = [];
+      let length = 0;
+      while (true) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+        length += chunk.value.byteLength;
+        if (length > MAX_ATTACHMENT_BYTES) {
+          await reader.cancel();
+          throw new AttachmentError(`Attachment ${JSON.stringify(attachment.name)} exceeds Discord's free 10 MiB limit.`);
+        }
+        chunks.push(chunk.value);
+      }
+      const bytes = Buffer.concat(chunks, length);
+      const content = validateAttachmentBytes(contentType, bytes);
+      const path = join(directory, `${attachment.id}${ATTACHMENT_EXTENSIONS[contentType]}`);
+      await writeFile(path, bytes, { mode: 0o600 });
+      files.push({ name: attachment.name, path, isImage, content });
+    }
+    return { files, cleanup: () => rm(directory, { recursive: true, force: true }) };
+  } catch (error) {
+    await rm(directory, { recursive: true, force: true });
+    if (error instanceof AttachmentError) throw error;
+    throw new AttachmentError("Discord attachment download failed. Try uploading it again.");
+  }
+}
+
+function requiredSnowflake(env: NodeJS.ProcessEnv, name: string): string {
+  const value = env[name]?.trim();
+  if (!value) throw new Error(`${name} is required`);
+  if (!SNOWFLAKE.test(value)) throw new Error(`${name} must be a Discord snowflake`);
+  return value;
+}
+
+export function parseAccessConfig(env: NodeJS.ProcessEnv = process.env): AccessConfig {
+  const channelIds = new Set((env.GAIA_CHANNEL_IDS ?? "").split(",").map((id) => id.trim()).filter(Boolean));
+  if (!channelIds.size) throw new Error("GAIA_CHANNEL_IDS must contain at least one Discord channel ID");
+  for (const id of channelIds) {
+    if (!SNOWFLAKE.test(id)) throw new Error("GAIA_CHANNEL_IDS must contain only Discord snowflakes");
+  }
+  return {
+    ownerId: requiredSnowflake(env, "GAIA_OWNER_ID"),
+    guildId: requiredSnowflake(env, "GAIA_GUILD_ID"),
+    channelIds,
+  };
+}
+
+export function isAllowedSource(source: DiscordSource, config: AccessConfig): boolean {
+  return !source.isBot && !source.webhookId && source.userId === config.ownerId &&
+    source.guildId === config.guildId && config.channelIds.has(source.channelId);
+}
+
+type Fence = { opener: string; closer: string };
+
+function fenceState(text: string, initial: Fence | null): Fence | null {
+  let open = initial;
+  for (const match of text.matchAll(/^(`{3,}|~{3,})([^\n]*)$/gm)) {
+    const delimiter = match[1]!;
+    if (delimiter.length > 512) continue;
+    if (open) {
+      if (delimiter[0] === open.closer[0] && delimiter.length >= open.closer.length && !match[2]!.trim()) open = null;
+    } else {
+      open = { opener: match[0].slice(0, 512), closer: delimiter };
+    }
+  }
+  return open;
+}
+
+export function splitDiscordMessage(input: string, limit = DISCORD_MESSAGE_LIMIT): string[] {
+  const text = input.trimEnd() || "(No response.)";
+  if (limit < 1_024) throw new Error("Discord message limit is too small");
+  const chunks: string[] = [];
+  let remaining = text;
+  let openFence: Fence | null = null;
+
+  while (remaining) {
+    const prefix = openFence ? `${openFence.opener}\n` : "";
+    const capacity = limit - prefix.length - (openFence?.closer.length ?? 512) - 1;
+    let length = Math.min(capacity, remaining.length);
+    if (length < remaining.length) {
+      const candidate = remaining.slice(0, length);
+      const newline = candidate.lastIndexOf("\n");
+      const space = candidate.lastIndexOf(" ");
+      const boundary = Math.max(newline, space);
+      if (boundary >= Math.floor(capacity / 2)) length = boundary + 1;
+    }
+    if (length < remaining.length && /[\uD800-\uDBFF]/.test(remaining[length - 1]!) && /[\uDC00-\uDFFF]/.test(remaining[length]!)) length--;
+    const part = remaining.slice(0, length);
+    remaining = remaining.slice(length);
+    const nextFence = fenceState(part, openFence);
+    chunks.push(`${prefix}${part}${nextFence ? `\n${nextFence.closer}` : ""}`.trimEnd());
+    openFence = nextFence;
+  }
+  return chunks;
+}
+
+export class ChannelTaskQueue {
+  private readonly tails = new Map<string, Promise<void>>();
+  private readonly waiters: Array<() => void> = [];
+  private readonly limit: number;
+  private active = 0;
+
+  constructor(limit = GLOBAL_TURN_LIMIT) {
+    if (limit < 1) throw new Error("Global turn limit must be positive");
+    this.limit = limit;
+  }
+
+  run<T>(channelId: string, task: () => Promise<T>): Promise<T> {
+    const previous = this.tails.get(channelId) ?? Promise.resolve();
+    const execution = previous.then(() => this.withSlot(task));
+    const tail = execution.then(() => undefined, () => undefined);
+    this.tails.set(channelId, tail);
+    void tail.then(() => {
+      if (this.tails.get(channelId) === tail) this.tails.delete(channelId);
+    });
+    return execution;
+  }
+
+  async onIdle(): Promise<void> {
+    await Promise.all(this.tails.values());
+  }
+
+  private async withSlot<T>(task: () => Promise<T>): Promise<T> {
+    await this.acquire();
+    try {
+      return await task();
+    } finally {
+      const next = this.waiters.shift();
+      if (next) next();
+      else this.active--;
+    }
+  }
+
+  private acquire(): Promise<void> {
+    if (this.active < this.limit) {
+      this.active++;
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => this.waiters.push(resolve));
+  }
+}
+
+export async function loadDiscordToken(env: NodeJS.ProcessEnv = process.env): Promise<string> {
+  const localToken = env.GAIA_DISCORD_TOKEN?.trim();
+  if (localToken) return localToken;
+  if (process.platform !== "darwin") throw new Error("GAIA_DISCORD_TOKEN is required outside macOS");
+  try {
+    const { stdout } = await execFile("/usr/bin/security", [
+      "find-generic-password",
+      "-a", KEYCHAIN_ACCOUNT,
+      "-s", KEYCHAIN_SERVICE,
+      "-w",
+    ], { encoding: "utf8", timeout: 5_000 });
+    const token = stdout.trim();
+    if (token) return token;
+  } catch {
+    // The actionable error below deliberately omits Keychain and process output.
+  }
+  throw new Error(`Discord bot token not found in ${KEYCHAIN_SERVICE}; see README.md`);
+}
+
+async function codexHealth(codex: CodexClient): Promise<string> {
+  try {
+    const version = await execFile("codex", ["--version"], { encoding: "utf8", timeout: 5_000 });
+    const auth = await execFile("codex", ["login", "status"], { encoding: "utf8", timeout: 5_000 });
+    if (!`${auth.stdout}${auth.stderr}`.includes("Logged in using ChatGPT")) {
+      return "ERROR - run `codex login` with ChatGPT";
+    }
+    return codex.isReady() ? `OK - ${version.stdout.trim()}; app-server ready` : "ERROR - app-server stopped; next turn will restart it";
+  } catch {
+    return "ERROR - install Codex or run `codex login`";
+  }
+}
+
+async function statusText(client: Client, pool: Pool, codex: CodexClient): Promise<string> {
+  const database = await pool.query("SELECT 1").then(() => "OK").catch(() => "ERROR - run `docker compose up -d --wait` and `npm run migrate`");
+  const discord = client.isReady() ? "OK - gateway ready" : "ERROR - gateway disconnected";
+  const codexStatus = await codexHealth(codex);
+  return ["GAIA: OK", `Database: ${database}`, `Discord: ${discord}`, `Codex: ${codexStatus}`].join("\n");
+}
+
+async function retryDiscord<T>(operation: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+  for (const delay of [0, 500, 1_500]) {
+    if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
+
+function replyWithRetry(message: Message, content: string, nonce: string): Promise<Message> {
+  return retryDiscord(() => message.reply({ content, allowedMentions: NO_MENTIONS, nonce, enforceNonce: true }));
+}
+
+class DiscordChat {
+  private readonly queue = new ChannelTaskQueue();
+  private readonly activeThreads = new Map<string, string>();
+  private readonly pool: Pool;
+  private readonly codex: CodexClient;
+  private closing = false;
+
+  constructor(pool: Pool, codex: CodexClient) {
+    this.pool = pool;
+    this.codex = codex;
+  }
+
+  enqueue(message: Message): Promise<void> {
+    if (this.closing) return Promise.resolve();
+    const content = message.content.trim();
+    if (!content && !message.attachments.size) return Promise.resolve();
+    return this.queue.run(message.channelId, () => this.respond(message, content));
+  }
+
+  newConversation(channelId: string, channelName: string): Promise<void> {
+    return this.queue.run(channelId, async () => {
+      await getOrCreateChannel(this.pool, channelId, channelName);
+      await setChannelThread(this.pool, channelId, null);
+    });
+  }
+
+  async stop(channelId: string): Promise<boolean> {
+    const threadId = this.activeThreads.get(channelId);
+    return threadId ? this.codex.interrupt(threadId) : false;
+  }
+
+  async close(): Promise<void> {
+    this.closing = true;
+    const idle = this.queue.onIdle().then(() => true);
+    while (!await Promise.race([idle, new Promise<false>((resolve) => setTimeout(() => resolve(false), 100))])) {
+      await Promise.all([...this.activeThreads.values()].map((threadId) => this.codex.interrupt(threadId).catch(() => false)));
+    }
+  }
+
+  private async respond(message: Message, content: string): Promise<void> {
+    if (this.closing) return;
+    if (!message.inGuild()) throw new Error("Authorized Discord messages must belong to a guild");
+    const channelId = message.channelId;
+    const channelName = message.channel.name;
+    const storedContent = [content, ...message.attachments.map((attachment) => `[Attachment: ${attachment.name}]`)].filter(Boolean).join("\n");
+    const threadId = await getOrCreateChannel(this.pool, channelId, channelName);
+    if (await messageExists(this.pool, message.id)) return;
+
+    let downloaded: Awaited<ReturnType<typeof downloadDiscordAttachments>>;
+    try {
+      downloaded = await downloadDiscordAttachments(message.attachments.values());
+    } catch (error) {
+      const response = error instanceof AttachmentError ? error.message : "Discord attachment download failed. Try uploading it again.";
+      const sent = await replyWithRetry(message, response, message.id);
+      await saveMessage(this.pool, { discordId: message.id, channelId, role: "user", content: storedContent });
+      await saveMessage(this.pool, { discordId: sent.id, channelId, role: "gaia", content: response });
+      return;
+    }
+
+    try {
+      await retryDiscord(() => message.channel.sendTyping());
+      const placeholder = await replyWithRetry(message, "Thinking...", message.id);
+      if (!await saveMessage(this.pool, { discordId: message.id, channelId, role: "user", content: storedContent })) return;
+      const typing = setInterval(() => {
+        void retryDiscord(() => message.channel.sendTyping()).catch(() => undefined);
+      }, 8_000);
+      let editTimer: NodeJS.Timeout | null = null;
+      let edits = Promise.resolve();
+      let streamedText = "";
+      let startedTurnId: string | undefined;
+      let turnIdSave = Promise.resolve();
+
+      const queueEdit = (): void => {
+        editTimer = null;
+        const preview = splitDiscordMessage(streamedText)[0] ?? "Thinking...";
+        edits = edits.then(() => retryDiscord(() => placeholder.edit({ content: preview, allowedMentions: NO_MENTIONS })).then(() => undefined)).catch(() => undefined);
+      };
+      const scheduleEdit = (text: string): void => {
+        streamedText = text;
+        if (!editTimer) editTimer = setTimeout(queueEdit, STREAM_EDIT_INTERVAL_MS);
+      };
+
+      let response: string;
+      let responseTurnId: string | undefined;
+      try {
+        const codexThreadId = await this.codex.openThread(threadId);
+        if (!threadId) await setChannelThread(this.pool, channelId, codexThreadId);
+        this.activeThreads.set(channelId, codexThreadId);
+        const result = await this.codex.runTurn(codexThreadId, content, {
+          onText: scheduleEdit,
+          onStarted: (turnId) => {
+            startedTurnId = turnId;
+            turnIdSave = setMessageTurn(this.pool, message.id, turnId);
+            void turnIdSave.catch(() => undefined);
+            if (this.closing) void this.codex.interrupt(codexThreadId).catch(() => undefined);
+          },
+        }, downloaded.files);
+        await turnIdSave;
+        response = result.status === "interrupted"
+          ? `${result.text}${result.text ? "\n\n" : ""}_Turn stopped._`
+          : result.text;
+        responseTurnId = result.turnId;
+      } catch {
+        response = "GAIA could not complete that turn. Try again; if it persists, run `/gaia status`.";
+        responseTurnId = startedTurnId;
+        console.error("Failed to complete a Discord turn");
+      }
+      try {
+        await this.finishResponse(placeholder, channelId, response, responseTurnId, edits, editTimer);
+      } finally {
+        clearInterval(typing);
+        if (editTimer) clearTimeout(editTimer);
+        this.activeThreads.delete(channelId);
+      }
+    } finally {
+      await downloaded.cleanup();
+    }
+  }
+
+  private async finishResponse(
+    placeholder: Message,
+    channelId: string,
+    text: string,
+    turnId: string | undefined,
+    pendingEdits: Promise<void>,
+    editTimer: NodeJS.Timeout | null,
+  ): Promise<void> {
+    if (editTimer) clearTimeout(editTimer);
+    await pendingEdits;
+    const chunks = splitDiscordMessage(text);
+    const first = await retryDiscord(() => placeholder.edit({ content: chunks[0]!, allowedMentions: NO_MENTIONS }));
+    await saveMessage(this.pool, { discordId: first.id, channelId, role: "gaia", content: chunks[0]!, turnId });
+    for (const [index, chunk] of chunks.slice(1).entries()) {
+      const sent = await replyWithRetry(placeholder, chunk, `${placeholder.id}-${index}`);
+      await saveMessage(this.pool, { discordId: sent.id, channelId, role: "gaia", content: chunk, turnId });
+    }
+  }
+}
+
+function interactionChannelName(interaction: ChatInputCommandInteraction): string {
+  const channel = interaction.channel;
+  return !channel || channel.isDMBased() ? interaction.channelId : channel.name;
+}
+
+async function handleInteraction(
+  interaction: ChatInputCommandInteraction,
+  client: Client,
+  pool: Pool,
+  codex: CodexClient,
+  chat: DiscordChat,
+  config: AccessConfig,
+): Promise<void> {
+  if (!isAllowedSource({
+    guildId: interaction.guildId,
+    channelId: interaction.channelId,
+    userId: interaction.user.id,
+    isBot: interaction.user.bot,
+  }, config)) return;
+  if (interaction.commandName !== "gaia") return;
+  const subcommand = interaction.options.getSubcommand(false);
+  if (!subcommand) return;
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  if (subcommand === "status") {
+    await interaction.editReply(await statusText(client, pool, codex));
+  } else if (subcommand === "new") {
+    await chat.newConversation(interaction.channelId, interactionChannelName(interaction));
+    await interaction.editReply("Started a new conversation for this channel.");
+  } else if (subcommand === "stop") {
+    await interaction.editReply(await chat.stop(interaction.channelId) ? "Stopping the active turn." : "No turn is active in this channel.");
+  }
+}
+
+export type DiscordService = {
+  client: Client;
+  close: () => Promise<void>;
+};
+
+export async function startDiscord(pool: Pool, codex: CodexClient, config: AccessConfig, token: string): Promise<DiscordService> {
+  const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+  });
+
+  const chat = new DiscordChat(pool, codex);
+  client.on(Events.MessageCreate, (message) => {
+    if (!isAllowedSource({
+      guildId: message.guildId,
+      channelId: message.channelId,
+      userId: message.author.id,
+      isBot: message.author.bot,
+      webhookId: message.webhookId,
+    }, config)) return;
+    void chat.enqueue(message).catch(() => console.error("Failed to queue Discord message"));
+  });
+  client.on(Events.InteractionCreate, (interaction) => {
+    if (interaction.isChatInputCommand()) {
+      void handleInteraction(interaction, client, pool, codex, chat, config).catch(() => {
+        console.error("Failed to handle Discord interaction");
+      });
+    }
+  });
+  client.on(Events.Error, () => console.error("Discord client error"));
+  client.on(Events.ShardDisconnect, (event, shardId) => console.warn(`Discord shard ${shardId} disconnected with code ${event.code}`));
+  client.on(Events.ShardReconnecting, (shardId) => console.warn(`Discord shard ${shardId} reconnecting`));
+  client.on(Events.ShardResume, (shardId, replayedEvents) => console.log(`Discord shard ${shardId} resumed; replayed ${replayedEvents} events`));
+  client.rest.on(RESTEvents.RateLimited, (rateLimit) => console.warn(`Discord REST rate limited; retrying in ${Math.ceil(rateLimit.timeToReset)} ms`));
+
+  try {
+    await client.login(token);
+    if (!client.application) throw new Error("Discord application is unavailable after login");
+    await client.application.commands.set([
+      new SlashCommandBuilder()
+        .setName("gaia")
+        .setDescription("GAIA controls")
+        .addSubcommand((command) => command.setName("status").setDescription("Check local services"))
+        .addSubcommand((command) => command.setName("new").setDescription("Start fresh context in this channel"))
+        .addSubcommand((command) => command.setName("stop").setDescription("Stop the active turn in this channel"))
+        .toJSON(),
+    ], config.guildId);
+    return {
+      client,
+      close: async () => {
+        client.destroy();
+        await chat.close();
+      },
+    };
+  } catch (error) {
+    client.destroy();
+    throw error;
+  }
+}

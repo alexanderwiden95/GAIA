@@ -1,0 +1,13 @@
+- generic [ref=f6e3]:
+  - status
+  - generic [ref=f6e4]:
+    - banner [ref=f6e5]:
+      - generic [ref=f6e6]:
+        - link "Return to discord.dev" [ref=f6e8] [cursor=pointer]:
+          - /url: /developers/home
+        - generic [ref=f6e26]:
+          - button "Create menu" [ref=f6e27] [cursor=pointer]:
+            - generic [ref=f6e28]: Create
+          - button "Docs" [ref=f6e33] [cursor=pointer]
+          - button "Teams" [ref=f6e38] [cursor=pointer]
+    - img "Loading..." [ref=f6e44]

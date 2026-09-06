@@ -1,0 +1,101 @@
+- generic [ref=f21e5]:
+  - generic [ref=f21e11]:
+    - generic [ref=f21e12]:
+      - generic [ref=f21e14]:
+        - generic [ref=f21e15]: G
+        - generic [ref=f21e17]: GAIA
+      - generic [ref=f21e18]:
+        - button "Inbox" [ref=f21e21] [cursor=pointer]
+        - link [ref=f21e25] [cursor=pointer]:
+          - /url: https://support.discord.com
+          - button "Help" [ref=f21e26]
+    - generic [ref=f21e30]:
+      - generic [ref=f21e31]:
+        - navigation "Servers sidebar" [ref=f21e32]:
+          - tree [ref=f21e33]:
+            - generic [ref=f21e34]:
+              - treeitem "Direct Messages" [level=1] [ref=f21e43] [cursor=pointer]
+              - group "Servers" [ref=f21e50]:
+                - generic [ref=f21e51]:
+                  - treeitem "GAIA" [level=1] [selected] [ref=f21e61] [cursor=pointer]:
+                    - generic [aria-hidden] [ref=f21e63]: G
+                  - generic [ref=f21e64]: GAIA
+              - treeitem "Add a Server" [level=1] [ref=f21e71] [cursor=pointer]
+              - treeitem "Discover" [level=1] [ref=f21e82] [cursor=pointer]
+              - treeitem "Download Apps" [level=1] [ref=f21e93] [cursor=pointer]
+        - status [ref=f21e97]
+        - separator "Resize Sidebar" [ref=f21e140]
+        - region "User status and settings" [ref=f21e141]:
+          - generic [ref=f21e142]:
+            - generic [ref=f21e143] [cursor=pointer]:
+              - button "Manage profile and status"
+              - generic [ref=f21e146]:
+                - generic [ref=f21e147]: Awiden
+                - generic [ref=f21e151]:
+                  - generic: awiden0370
+                  - generic: Online
+            - generic [ref=f21e152]:
+              - generic [ref=f21e153]:
+                - switch "Mute" [checked] [ref=f21e154] [cursor=pointer]
+                - generic [ref=f21e157]: Unmute
+                - button "Input Options" [ref=f21e158] [cursor=pointer]
+              - generic [ref=f21e162]:
+                - switch "Deafen" [ref=f21e163] [cursor=pointer]
+                - button "Output Options" [ref=f21e166] [cursor=pointer]
+              - button "User Settings" [ref=f21e170] [cursor=pointer]
+      - generic [ref=f21e175]:
+        - region "Channel header" [ref=f21e177]:
+          - generic [ref=f21e178]:
+            - generic [ref=f21e179]:
+              - generic [ref=f21e183]: Text Channel
+              - 'heading "GAIA: generale" [level=1] [ref=f21e185]':
+                - generic [ref=f21e186]: "GAIA:"
+                - text: generale
+            - generic [ref=f21e187]:
+              - button "Threads" [ref=f21e188] [cursor=pointer]
+              - button "Notification Settings" [ref=f21e191] [cursor=pointer]
+              - button "Pinned Messages" [ref=f21e194] [cursor=pointer]
+              - button "Hide Member List" [ref=f21e197] [cursor=pointer]
+        - generic [ref=f21e201]:
+          - main "generale (channel)" [ref=f21e202]:
+            - heading "generale chat" [level=2] [ref=f21e204]
+            - group [ref=f21e206]:
+              - list "Messages in generale" [ref=f21e208]:
+                - generic [ref=f21e209]:
+                  - heading [level=3] [ref=f21e212]
+                  - heading [level=3] [ref=f21e224]
+                  - heading [level=3] [ref=f21e239]
+                  - heading [level=3] [ref=f21e245]
+                  - heading [level=3] [ref=f21e253]
+                  - heading [level=3] [ref=f21e259]
+                  - heading [level=3] [ref=f21e271]
+                  - heading [level=3] [ref=f21e277]
+                  - heading [level=3] [ref=f21e294]
+            - generic [ref=f21e307]:
+              - button "More message options" [ref=f21e309] [cursor=pointer]
+              - generic [ref=f21e314]:
+                - generic [aria-hidden]: "Message #generale"
+                - 'textbox "Message #generale" [ref=f21e315]'
+              - generic [ref=f21e317]:
+                - generic [ref=f21e318]:
+                  - button "Send a gift" [ref=f21e319] [cursor=pointer]
+                  - generic [ref=f21e322]: Upgrade your friends! Gift them awesome chat perks with Nitro.
+                - button "Open GIF picker" [ref=f21e324] [cursor=pointer]
+                - generic [ref=f21e327]: Send GIF
+                - button "Open sticker picker" [ref=f21e329] [cursor=pointer]
+                - button "Add Emoji" [ref=f21e333] [cursor=pointer]
+                - button "Apps" [ref=f21e338] [cursor=pointer]
+          - complementary [ref=f21e341]:
+            - heading "Members list for generale (channel)" [level=2] [ref=f21e343]
+            - list "Members" [ref=f21e344]
+  - generic [ref=f21e345]:
+    - generic [ref=f21e347]:
+      - generic [ref=f21e348]: Did you know
+      - generic [ref=f21e349]: Change Text-to-Speech speed in Accessibility Settings.
+    - generic [ref=f21e350]:
+      - generic [ref=f21e351]: Connection problems? Let us know!
+      - generic [ref=f21e352]:
+        - link "Tweet Us" [ref=f21e353] [cursor=pointer]:
+          - /url: https://twitter.com/discord_support
+        - link "Server Status" [ref=f21e356] [cursor=pointer]:
+          - /url: https://discordstatus.com

@@ -1,0 +1,68 @@
+- generic [ref=f10e5]:
+  - generic [ref=f10e11]:
+    - generic [ref=f10e12]:
+      - generic [ref=f10e13]: Friends
+      - generic [ref=f10e19]:
+        - button "Inbox" [ref=f10e22] [cursor=pointer]
+        - link [ref=f10e26] [cursor=pointer]:
+          - /url: https://support.discord.com
+          - button "Help" [ref=f10e27]
+    - generic [ref=f10e31]:
+      - generic [ref=f10e32]:
+        - navigation "Servers sidebar" [ref=f10e33]:
+          - tree [ref=f10e34]:
+            - generic [ref=f10e35]:
+              - group "Servers"
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - treeitem "Add a Server" [level=1]
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - treeitem "Discover" [level=1]
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - treeitem "Download Apps" [level=1]
+        - navigation "Private channels" [ref=f10e37]:
+          - button "Find or start a conversation" [ref=f10e39] [cursor=pointer]
+          - list "Direct Messages" [ref=f10e45]:
+            - listitem [ref=f10e48]:
+              - link "Friends" [ref=f10e50] [cursor=pointer]:
+                - /url: /channels/@me
+            - listitem [ref=f10e59]:
+              - link "Shop" [ref=f10e61] [cursor=pointer]:
+                - /url: /shop
+            - listitem [ref=f10e71]:
+              - link "Quests" [ref=f10e73] [cursor=pointer]:
+                - /url: /quest-home
+            - heading "Direct Messages More Create Message" [level=2] [ref=f10e82]:
+              - generic [ref=f10e83]: Direct Messages
+              - generic [ref=f10e84]:
+                - button "More" [ref=f10e85] [cursor=pointer]
+                - button "Create Message" [ref=f10e88] [cursor=pointer]
+        - separator "Resize Sidebar" [ref=f10e112]
+        - region "User status and settings" [ref=f10e113]
+      - img "Loading" [ref=f10e116]
+  - generic [ref=f10e120]:
+    - generic [ref=f10e122]:
+      - generic [ref=f10e123]: Did you know
+      - generic [ref=f10e124]:
+        - text: You can press
+        - img "Up arrow" [ref=f10e127]: ▲
+        - text: to quickly edit your most recent message.
+    - generic [ref=f10e128]:
+      - generic [ref=f10e129]: Connection problems? Let us know!
+      - generic [ref=f10e130]:
+        - link "Tweet Us" [ref=f10e131] [cursor=pointer]:
+          - /url: https://twitter.com/discord_support
+        - link "Server Status" [ref=f10e134] [cursor=pointer]:
+          - /url: https://discordstatus.com

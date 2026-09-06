@@ -1,0 +1,47 @@
+- generic [ref=f16e5]:
+  - generic [ref=f16e11]:
+    - generic [ref=f16e14]:
+      - button "Messaggi ricevuti" [ref=f16e17] [cursor=pointer]
+      - link [ref=f16e21] [cursor=pointer]:
+        - /url: https://support.discord.com
+        - button "Aiuto" [ref=f16e22]
+    - generic [ref=f16e26]:
+      - generic [ref=f16e27]:
+        - navigation "Barra laterale del server" [ref=f16e28]:
+          - tree [ref=f16e29]:
+            - generic [ref=f16e30]:
+              - group "Server"
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - treeitem "Aggiungi un server" [level=1]
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - treeitem "Scopri" [level=1]
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - treeitem "Scarica le app" [level=1]
+        - status [ref=f16e32]
+        - separator "Resize Sidebar" [ref=f16e75]
+        - region "Impostazioni e stato utente" [ref=f16e76]
+      - status [ref=f16e78]
+  - generic [ref=f16e84]:
+    - generic [ref=f16e86]:
+      - generic [ref=f16e87]: Lo sapevi che
+      - generic [ref=f16e88]: Prima che scegliessimo questo nome, Discord stava per chiamarsi Bonfire. Doveva dare la sensazione di essere un luogo comodo e sicuro.
+    - generic [ref=f16e89]:
+      - generic [ref=f16e90]: Problemi di connessione? Facci sapere!
+      - generic [ref=f16e91]:
+        - link "Mandaci un tweet" [ref=f16e92] [cursor=pointer]:
+          - /url: https://twitter.com/discord_support
+        - link "Stato dei server" [ref=f16e95] [cursor=pointer]:
+          - /url: https://discordstatus.com

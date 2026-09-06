@@ -1,0 +1,39 @@
+[     426ms] [LOG] [FAST CONNECT] wss://gateway.discord.gg/?encoding=json&v=9&compress=zlib-stream, encoding: json, version: 9 @ https://discord.com/oauth2/authorize?client_id=1546097269613531246&scope=bot%20applications.commands&permissions=311385246720:28
+[    2046ms] [LOG] [FAST CONNECT] session is not required, skipping fast connect early identify @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[    2058ms] [INFO] %c[libdiscore] 
+font-weight: bold;
+color: purple;
+ [experiment_manager] Loaded experiments from cache @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[    2183ms] [LOG] %c[ProcessUtilsElectron] 
+font-weight: bold;
+color: purple;
+ setMemoryInformation not available. @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[    2405ms] [LOG] %c[default] 
+font-weight: bold;
+color: purple;
+ [BUILD INFO] Release Channel: stable, Build Number: 607562, Version Hash: f9b13d9eaa95f75e952091b9150d0d2881c02b5d @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[    2411ms] [LOG] AppCrashedFatalReport: getLastCrash not supported. @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[    2530ms] [INFO] %c[libdiscore] 
+font-weight: bold;
+color: purple;
+ The answer for life the universe and everything is: 42 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[    2994ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:6463/?v=1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ https://discord.com/assets/web.f803cc09a978437c.js:58
+[    3031ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:6464/?v=1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ https://discord.com/assets/web.f803cc09a978437c.js:58
+[    3086ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:6465/?v=1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ https://discord.com/assets/web.f803cc09a978437c.js:58
+[    3088ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:6466/?v=1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ https://discord.com/assets/web.f803cc09a978437c.js:58
+[    3089ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:6467/?v=1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ https://discord.com/assets/web.f803cc09a978437c.js:58
+[    3090ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:6468/?v=1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ https://discord.com/assets/web.f803cc09a978437c.js:58
+[    3093ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:6469/?v=1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ https://discord.com/assets/web.f803cc09a978437c.js:58
+[    3096ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:6470/?v=1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ https://discord.com/assets/web.f803cc09a978437c.js:58
+[    3100ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:6471/?v=1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ https://discord.com/assets/web.f803cc09a978437c.js:58
+[    3102ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:6472/?v=1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ https://discord.com/assets/web.f803cc09a978437c.js:58
+[    3300ms] [INFO] %c[SignalHelpers.web] 
+font-weight: bold;
+color: purple;
+ signalCurrentUserDetails {rpId: discord.com, userId: MPMD-4wmT1MVdNYlzYQgKQ, name: alexander.widen95@gmail.com, displayName: awiden0370} @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[    3636ms] [INFO] %c[SignalHelpers.web] 
+font-weight: bold;
+color: purple;
+ signalCurrentUserDetails {rpId: discord.com, userId: MPMD-4wmT1MVdNYlzYQgKQ, name: alexander.widen95@gmail.com, displayName: awiden0370} @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[   91719ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://discord.com/api/v9/oauth2/authorize?client_id=1546097269613531246&scope=bot%20applications.commands:0
+[   92028ms] [LOG] recaptchacompat disabled @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464

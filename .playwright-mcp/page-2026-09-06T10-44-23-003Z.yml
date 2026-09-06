@@ -1,0 +1,255 @@
+- generic [ref=f16e1306]:
+  - generic [ref=f16e1313]:
+    - generic [ref=f16e1314]:
+      - generic [ref=f16e1316]:
+        - generic [ref=f16e1317]: G
+        - generic [ref=f16e1319]: GAIA
+      - generic [ref=f16e1320]:
+        - button "Inbox" [ref=f16e1323] [cursor=pointer]
+        - link [ref=f16e1327] [cursor=pointer]:
+          - /url: https://support.discord.com
+          - button "Help" [ref=f16e1328]
+    - generic [ref=f16e1332]:
+      - generic [ref=f16e1333]:
+        - navigation "Servers sidebar" [ref=f16e1334]:
+          - tree [ref=f16e1335]:
+            - generic [ref=f16e1336]:
+              - treeitem "Direct Messages" [level=1] [ref=f16e1345] [cursor=pointer]
+              - group "Servers" [ref=f16e1352]:
+                - generic [ref=f16e1353]:
+                  - treeitem "GAIA" [level=1] [selected] [ref=f16e1363] [cursor=pointer]:
+                    - generic [aria-hidden] [ref=f16e1365]: G
+                  - generic [ref=f16e1366]: GAIA
+              - treeitem "Add a Server" [level=1] [ref=f16e1373] [cursor=pointer]
+              - treeitem "Discover" [level=1] [ref=f16e1384] [cursor=pointer]
+              - treeitem "Download Apps" [level=1] [ref=f16e1395] [cursor=pointer]
+        - navigation "GAIA (server)" [ref=f16e1399]:
+          - generic [ref=f16e1402]:
+            - button "GAIA, server actions" [ref=f16e1403] [cursor=pointer]:
+              - heading "GAIA" [level=2] [ref=f16e1405]
+            - button "Invite to Server" [ref=f16e1410] [cursor=pointer]
+          - heading "Channels" [level=2] [ref=f16e1415]
+          - list "Channels" [ref=f16e1417]:
+            - listitem [ref=f16e1419]:
+              - generic [ref=f16e1420]:
+                - button "Events"
+                - generic [aria-hidden] [ref=f16e1425] [cursor=pointer]: Events
+            - listitem [ref=f16e1426]:
+              - generic [ref=f16e1427]:
+                - button "Server Boosts"
+                - generic [aria-hidden] [ref=f16e1432] [cursor=pointer]: Server Boosts
+            - listitem [ref=f16e1434]:
+              - generic [ref=f16e1435] [cursor=pointer]:
+                - button "Canali testuali (category)" [expanded] [ref=f16e1436]:
+                  - heading "Canali testuali" [level=3] [ref=f16e1437]
+                - generic [ref=f16e1441]:
+                  - button "Create Channel" [ref=f16e1442]
+                  - generic [ref=f16e1445]: Create Channel
+            - listitem [ref=f16e1446]:
+              - link "generale (text channel)" [ref=f16e1449] [cursor=pointer]:
+                - /url: /channels/1546099225727864832/1546099227200061472
+                - generic [ref=f16e1450]:
+                  - img "Text icon" [ref=f16e1451]
+                  - generic [ref=f16e1454]: Text
+                  - generic [aria-hidden] [ref=f16e1455]: generale
+                  - generic [ref=f16e1456]:
+                    - button "Invite to Channel" [ref=f16e1458]
+                    - generic [ref=f16e1462]: Invite to Channel
+                    - button "Edit Channel" [ref=f16e1464]
+                    - generic [ref=f16e1467]: Edit Channel
+            - listitem [ref=f16e1468]:
+              - generic [ref=f16e1469] [cursor=pointer]:
+                - button "Canali vocali (category)" [expanded] [ref=f16e1470]:
+                  - heading "Canali vocali" [level=3] [ref=f16e1471]
+                - generic [ref=f16e1475]:
+                  - button "Create Channel" [ref=f16e1476]
+                  - generic [ref=f16e1479]: Create Channel
+            - listitem [ref=f16e1480]:
+              - button "Generale (voice channel)" [ref=f16e1484] [cursor=pointer]:
+                - generic [ref=f16e1485]:
+                  - img "Voice icon" [ref=f16e1486]
+                  - generic [ref=f16e1490]: Voice
+                  - generic [aria-hidden] [ref=f16e1491]: Generale
+                  - generic:
+                    - generic [ref=f16e1492]: Open Chat
+                    - generic [ref=f16e1493]: Invite to Voice
+                    - generic [ref=f16e1494]: Edit Channel
+        - separator "Resize Sidebar" [ref=f16e1495]
+        - region "User status and settings" [ref=f16e1496]:
+          - generic [ref=f16e1497]:
+            - generic [ref=f16e1498] [cursor=pointer]:
+              - button "Manage profile and status"
+              - generic [ref=f16e1501]:
+                - generic [ref=f16e1502]: Awiden
+                - generic [ref=f16e1506]:
+                  - generic: awiden0370
+                  - generic: Online
+            - generic [ref=f16e1507]:
+              - generic [ref=f16e1508]:
+                - switch "Mute" [checked] [ref=f16e1509] [cursor=pointer]
+                - generic [ref=f16e1530]: Unmute
+                - button "Input Options" [ref=f16e1531] [cursor=pointer]
+              - generic [ref=f16e1535]:
+                - switch "Deafen" [ref=f16e1536] [cursor=pointer]
+                - button "Output Options" [ref=f16e1548] [cursor=pointer]
+              - button "User Settings" [ref=f16e1552] [cursor=pointer]
+      - generic [ref=f16e1563]:
+        - region "Channel header" [ref=f16e1565]:
+          - generic [ref=f16e1566]:
+            - generic [ref=f16e1567]:
+              - generic [ref=f16e1571]: Text Channel
+              - 'heading "GAIA: generale" [level=1] [ref=f16e1573]':
+                - generic [ref=f16e1574]: "GAIA:"
+                - text: generale
+            - generic [ref=f16e1575]:
+              - button "Threads" [ref=f16e1576] [cursor=pointer]
+              - button "Notification Settings" [ref=f16e1579] [cursor=pointer]
+              - button "Pinned Messages" [ref=f16e1582] [cursor=pointer]
+              - button "Hide Member List" [ref=f16e1585] [cursor=pointer]
+              - generic [ref=f16e1590]:
+                - combobox "Search GAIA" [ref=f16e1591]
+                - button [aria-hidden] [ref=f16e1593]
+        - generic [ref=f16e1599]:
+          - main "generale (channel)" [ref=f16e1600]:
+            - heading "generale chat" [level=2] [ref=f16e1602]
+            - group [ref=f16e1604]:
+              - list "Messages in generale" [ref=f16e1606]:
+                - generic [ref=f16e1609]:
+                  - generic [ref=f16e1610]:
+                    - heading [level=3] [ref=f16e1611]:
+                      - paragraph [ref=f16e1612]: Welcome to
+                      - paragraph [ref=f16e1613]: GAIA
+                    - generic [ref=f16e1614]:
+                      - text: This is your brand new, shiny server. Here are some steps to help you get started. For more, check out our
+                      - link "Getting Started guide" [ref=f16e1615] [cursor=pointer]:
+                        - /url: https://support.discord.com/hc/en-us/articles/360045138571?utm_source=discord&utm_medium=blog&utm_campaign=2020-06_help-new-user&utm_content=--t%3Apm
+                      - text: .
+                  - button "Invite your friends" [ref=f16e1617] [cursor=pointer]
+                  - button "Personalize your server with an icon" [ref=f16e1622] [cursor=pointer]
+                  - button "Send your first message" [ref=f16e1627] [cursor=pointer]
+                  - button "Download the Discord App" [ref=f16e1632] [cursor=pointer]
+                  - button "Add your first app" [ref=f16e1637] [cursor=pointer]
+                  - button "Unlock perks for everyone with Boosts" [ref=f16e1642] [cursor=pointer]
+                - separator "new, September 6, 2026":
+                  - generic: September 6, 2026
+                  - generic: new
+                - listitem [ref=f16e1646]:
+                  - article "Glad you're here, GAIA . 12:07 PM Sunday, September 6, 2026 at 12:07 PM" [ref=f16e1647]:
+                    - generic [ref=f16e1654]:
+                      - text: Glad you're here,
+                      - link "GAIA" [ref=f16e1655] [cursor=pointer]
+                      - text: .
+                      - generic [ref=f16e1659]:
+                        - time [ref=f16e1661]:
+                          - generic [aria-hidden] [ref=f16e1662]: —
+                          - text: 12:07 PM
+                        - generic [ref=f16e1663]: Sunday, September 6, 2026 at 12:07 PM
+                - listitem [ref=f16e1664]:
+                  - 'article "GAIA App , GAIA: OK Database: OK Discord: OK - gateway ready Codex: OK - codex-cli 0.153.4 , 12:13 PM" [ref=f16e1665]':
+                    - generic [aria-hidden] [ref=f16e1666]:
+                      - button [ref=f16e1667]: Awiden
+                      - text: used
+                      - button [ref=f16e1668]:
+                        - generic [ref=f16e1669]: gaia status
+                    - generic [ref=f16e1672]:
+                      - img [aria-hidden] [ref=f16e1673] [cursor=pointer]
+                      - heading [level=3] [ref=f16e1674]:
+                        - generic [ref=f16e1675]:
+                          - button "GAIA" [ref=f16e1676]
+                          - img "App" [ref=f16e1677]:
+                            - generic [ref=f16e1678]: APP
+                        - generic [ref=f16e1679]:
+                          - time [ref=f16e1681]:
+                            - generic [aria-hidden] [ref=f16e1682]: —
+                            - text: 12:13 PM
+                          - generic [ref=f16e1683]: Sunday, September 6, 2026 at 12:13 PM
+                      - generic [ref=f16e1684]: "GAIA: OK Database: OK Discord: OK - gateway ready Codex: OK - codex-cli 0.153.4"
+                    - generic [ref=f16e1686]:
+                      - text: Only you can see this •
+                      - link "Dismiss message" [ref=f16e1690] [cursor=pointer]
+            - generic [ref=f16e1696]:
+              - button "More message options" [ref=f16e1698] [cursor=pointer]
+              - generic [ref=f16e1703]:
+                - generic [aria-hidden]: "Message #generale"
+                - 'textbox "Message #generale" [ref=f16e1704]'
+              - generic [ref=f16e1706]:
+                - generic [ref=f16e1707]:
+                  - button "Send a gift" [ref=f16e1708] [cursor=pointer]
+                  - generic [ref=f16e1724]: Upgrade your friends! Gift them awesome chat perks with Nitro.
+                - button "Open GIF picker" [ref=f16e1726] [cursor=pointer]
+                - generic [ref=f16e1736]: Send GIF
+                - button "Open sticker picker" [ref=f16e1738] [cursor=pointer]
+                - button "Add Emoji" [ref=f16e1748] [cursor=pointer]
+                - button "Apps" [ref=f16e1753] [cursor=pointer]
+          - complementary [ref=f16e1771]:
+            - heading "Members list for generale (channel)" [level=2] [ref=f16e1773]
+            - list "Members" [ref=f16e1774]:
+              - generic [ref=f16e1775]:
+                - heading "Online, 2 members" [level=3] [ref=f16e1776]:
+                  - generic [aria-hidden] [ref=f16e1778]:
+                    - generic [ref=f16e1779]: Online
+                    - generic [ref=f16e1780]: — 2
+                - listitem [ref=f16e1781]:
+                  - generic [ref=f16e1783]:
+                    - img "awiden0370, Online" [ref=f16e1814]
+                    - generic [ref=f16e1788]:
+                      - generic [ref=f16e1789]: Awiden
+                      - img "Server Owner" [ref=f16e1794]
+                      - generic [ref=f16e1796]: Server Owner
+                - listitem [ref=f16e1797]:
+                  - generic [ref=f16e1799]:
+                    - img "GAIA, Online" [ref=f16e1801]
+                    - generic [ref=f16e1804]:
+                      - generic [ref=f16e1805]: GAIA
+                      - img "App" [ref=f16e1810]:
+                        - generic [ref=f16e1811]: APP
+  - generic:
+    - generic:
+      - generic:
+        - dialog "Create Channel":
+          - generic:
+            - generic:
+              - log
+              - log
+          - generic [ref=f16e1815]:
+            - banner [ref=f16e1816]:
+              - generic [ref=f16e1817]:
+                - generic [ref=f16e1818]:
+                  - heading "Create Channel" [level=1] [ref=f16e1820]
+                  - button "Close" [ref=f16e1822] [cursor=pointer]
+                - generic [ref=f16e1827]: in Canali testuali
+            - main [ref=f16e1834]:
+              - generic [ref=f16e1835]:
+                - generic [ref=f16e1836]:
+                  - generic [ref=f16e1837]: Channel Type
+                  - radiogroup "Text Channel Type" [ref=f16e1840]:
+                    - generic [ref=f16e1841]:
+                      - radio "Text Send messages, images, GIFs, emoji, opinions, and puns" [checked] [ref=f16e1843]
+                      - generic [ref=f16e1848]:
+                        - generic [ref=f16e1849]: Text
+                        - generic [ref=f16e1853]: Send messages, images, GIFs, emoji, opinions, and puns
+                    - generic [ref=f16e1854]:
+                      - radio "Voice Hang out together with voice, video, and screen share" [ref=f16e1856]
+                      - generic [ref=f16e1861]:
+                        - generic [ref=f16e1862]: Voice
+                        - generic [ref=f16e1867]: Hang out together with voice, video, and screen share
+                    - generic [ref=f16e1868]:
+                      - radio "Forum Create a space for organized discussions" [ref=f16e1870]
+                      - generic [ref=f16e1875]:
+                        - generic [ref=f16e1876]: Forum
+                        - generic [ref=f16e1881]: Create a space for organized discussions
+                - generic [ref=f16e1882]:
+                  - generic [ref=f16e1883]: Channel Name
+                  - generic [ref=f16e1887]:
+                    - textbox "Channel Name" [active] [ref=f16e1891]:
+                      - /placeholder: new-channel
+                    - button "Add Emoji" [ref=f16e1893] [cursor=pointer]
+                - generic [ref=f16e1897]:
+                  - generic [ref=f16e1898]:
+                    - generic [ref=f16e1899] [cursor=pointer]: Private Channel
+                    - generic [ref=f16e1902]: Only selected members and roles will be able to view this channel.
+                  - switch "Private Channel" [ref=f16e1909]
+            - contentinfo [ref=f16e1911]:
+              - generic [ref=f16e1913]:
+                - button "Cancel" [ref=f16e1914] [cursor=pointer]
+                - button "Create Channel" [disabled]

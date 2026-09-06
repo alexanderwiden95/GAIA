@@ -1,0 +1,139 @@
+- generic [ref=f4e1]:
+  - generic [ref=f4e4]:
+    - banner [ref=f4e5]:
+      - generic [ref=f4e6]:
+        - link [ref=f4e8] [cursor=pointer]:
+          - /url: /developers/home
+        - generic [ref=f4e26]:
+          - button [ref=f4e27] [cursor=pointer]:
+            - generic [ref=f4e28]: Create
+          - button [ref=f4e33] [cursor=pointer]:
+            - generic [ref=f4e34]: Docs
+          - button [ref=f4e38] [cursor=pointer]:
+            - generic [ref=f4e41]: Teams
+          - button [ref=f4e42] [cursor=pointer]
+    - generic [ref=f4e45]:
+      - navigation [ref=f4e46]:
+        - generic [ref=f4e51]:
+          - link [ref=f4e52] [cursor=pointer]:
+            - /url: /developers/home
+            - text: Pagina principale
+          - link [ref=f4e53] [cursor=pointer]:
+            - /url: /developers/applications
+            - text: Applicazioni
+          - link [ref=f4e54] [cursor=pointer]:
+            - /url: /developers/embeds
+            - text: Debugger di embed
+      - main [ref=f4e55]:
+        - generic [ref=f4e56]:
+          - heading [level=1] [ref=f4e57]:
+            - generic [ref=f4e58]: Applicazioni
+            - button [ref=f4e60] [cursor=pointer]:
+              - generic [ref=f4e61]: Visualizza applicazione
+          - paragraph [ref=f4e64]:
+            - text: Sviluppa
+            - button [ref=f4e65] [cursor=pointer]: app
+            - text: per personalizzare Discord e ampliarne le funzionalità per milioni di utenti.
+        - generic [ref=f4e66]:
+          - generic [ref=f4e67]:
+            - generic [ref=f4e68]:
+              - generic [ref=f4e69]: "Ordina per:"
+              - generic [ref=f4e73]:
+                - log [ref=f4e75]
+                - generic [ref=f4e76]:
+                  - generic [ref=f4e77]:
+                    - generic [ref=f4e78]: Data di creazione
+                    - combobox [ref=f4e79]
+                  - generic [aria-hidden] [ref=f4e81] [cursor=pointer]
+            - generic [ref=f4e84]:
+              - button [ref=f4e85] [cursor=pointer]:
+                - generic [ref=f4e88]: Piccolo
+              - button [ref=f4e89] [cursor=pointer]:
+                - generic [ref=f4e92]: Grande
+          - heading [level=2] [ref=f4e95]: Le mie applicazioni
+          - generic [ref=f4e97]:
+            - generic [ref=f4e98]: Non hai ancora delle applicazioni, faccina triste.
+            - generic [ref=f4e99]: Clicca su Nuova applicazione in alto per cominciare.
+  - generic [ref=f4e101]:
+    - banner [ref=f4e102]:
+      - link "Torna su discord.dev" [ref=f4e104] [cursor=pointer]:
+        - /url: /developers/home
+    - generic [ref=f4e125]:
+      - generic [ref=f4e127]:
+        - heading "Cosa ti porta al Portale sviluppatori?" [level=2] [ref=f4e128]
+        - generic [ref=f4e129]: Seleziona tutte le opzioni valide.
+      - generic [ref=f4e130]:
+        - button "Integrare il Social SDK di Discord" [ref=f4e131] [cursor=pointer]:
+          - generic [aria-hidden]:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: REDSEC
+                          - generic: 17:02
+                      - generic: Invite to Join
+        - button "Personalizzare l'identità del mio gioco su Discord" [ref=f4e136] [cursor=pointer]:
+          - generic [aria-hidden]:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Role-Playing
+                    - generic: Dark Fantasy
+        - button "Promuovere la visibilità del mio gioco con gli annunci" [ref=f4e141] [cursor=pointer]:
+          - generic [aria-hidden]:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: 0% complete
+                        - generic: Claim Reward
+        - button "Avviare un negozio per vendere oggetti di gioco su Discord" [ref=f4e146] [cursor=pointer]:
+          - generic [aria-hidden]:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic: In-Game Item
+                      - generic: $16.99
+        - button "Creare un bot" [active] [pressed] [ref=f4e151] [cursor=pointer]:
+          - generic [ref=f4e181]:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: Nelly
+                        - generic: Today at 9:18 AM
+                      - generic: What is your favorite ice cream flavor?
+                      - generic:
+                        - generic: Chocolate
+                        - generic: Vanilla
+                        - generic: Strawberry
+                        - generic: Rainbow sherbert
+                        - generic: Mint chocolate chip
+                - generic: "Message #mess-hall"
+        - button "Avvia un'attività" [ref=f4e156] [cursor=pointer]:
+          - generic [aria-hidden]:
+            - generic: Suggested Activities
+        - button "Sto solo curiosando" [ref=f4e161] [cursor=pointer]
+      - generic [ref=f4e166]:
+        - generic [ref=f4e167]:
+          - button "Continua al Portale sviluppatori" [ref=f4e183] [cursor=pointer]
+          - button "Salta" [ref=f4e168]
+        - generic [ref=f4e170]: 1 di 1
+  - generic [ref=f4e188]:
+    - generic [ref=f4e189]:
+      - generic [ref=f4e190]: Sondaggio
+      - button "Ignora" [ref=f4e191] [cursor=pointer]
+    - generic [ref=f4e196]: Riesci a trovare quello che ti serve nel Portale sviluppatori?
+    - generic [ref=f4e197]:
+      - button "No" [ref=f4e198] [cursor=pointer]
+      - button "Sì" [ref=f4e200] [cursor=pointer]

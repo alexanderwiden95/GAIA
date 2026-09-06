@@ -1,0 +1,58 @@
+- generic [active] [ref=f4e1]:
+  - generic [ref=f4e3]:
+    - status
+    - generic [ref=f4e4]:
+      - banner [ref=f4e5]:
+        - generic [ref=f4e6]:
+          - link "Return to discord.dev" [ref=f4e202] [cursor=pointer]:
+            - /url: /developers/home
+          - generic [ref=f4e26]:
+            - button "Create menu" [ref=f4e203] [cursor=pointer]:
+              - generic [ref=f4e28]: Create
+            - button "Docs" [ref=f4e204] [cursor=pointer]
+            - button "Teams" [ref=f4e205] [cursor=pointer]
+            - button "Menu dell'utente" [ref=f4e206] [cursor=pointer]
+      - generic [ref=f4e45]:
+        - navigation [ref=f4e46]:
+          - generic [ref=f4e51]:
+            - link "Pagina principale" [ref=f4e207] [cursor=pointer]:
+              - /url: /developers/home
+            - link "Applicazioni" [ref=f4e208] [cursor=pointer]:
+              - /url: /developers/applications
+            - link "Debugger di embed" [ref=f4e209] [cursor=pointer]:
+              - /url: /developers/embeds
+        - main [ref=f4e55]:
+          - generic [ref=f4e56]:
+            - heading "Applicazioni Visualizza applicazione" [level=1] [ref=f4e210]:
+              - generic [ref=f4e58]: Applicazioni
+              - button "Visualizza applicazione" [ref=f4e211] [cursor=pointer]
+            - paragraph [ref=f4e64]:
+              - text: Sviluppa
+              - button "app" [ref=f4e212] [cursor=pointer]
+              - text: per personalizzare Discord e ampliarne le funzionalità per milioni di utenti.
+          - generic [ref=f4e66]:
+            - generic [ref=f4e67]:
+              - generic [ref=f4e68]:
+                - generic [ref=f4e69]: "Ordina per:"
+                - generic [ref=f4e73]:
+                  - log [ref=f4e75]
+                  - generic [ref=f4e76]:
+                    - generic [ref=f4e77]:
+                      - generic [ref=f4e78]: Data di creazione
+                      - combobox "Ordina per:" [ref=f4e213]
+                    - generic [aria-hidden] [ref=f4e81] [cursor=pointer]
+              - generic [ref=f4e84]:
+                - button "Piccolo" [ref=f4e214] [cursor=pointer]
+                - button "Grande" [ref=f4e215] [cursor=pointer]
+            - heading "Le mie applicazioni" [level=2] [ref=f4e216]
+            - generic [ref=f4e97]:
+              - generic [ref=f4e98]: Non hai ancora delle applicazioni, faccina triste.
+              - generic [ref=f4e99]: Clicca su Nuova applicazione in alto per cominciare.
+  - generic [ref=f4e188]:
+    - generic [ref=f4e189]:
+      - generic [ref=f4e190]: Sondaggio
+      - button "Ignora" [ref=f4e191] [cursor=pointer]
+    - generic [ref=f4e196]: Riesci a trovare quello che ti serve nel Portale sviluppatori?
+    - generic [ref=f4e197]:
+      - button "No" [ref=f4e198] [cursor=pointer]
+      - button "Sì" [ref=f4e200] [cursor=pointer]

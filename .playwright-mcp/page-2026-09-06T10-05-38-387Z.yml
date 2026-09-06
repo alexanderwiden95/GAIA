@@ -1,0 +1,88 @@
+- generic [active] [ref=f10e1]:
+  - generic [ref=f10e427]:
+    - log
+    - log
+  - generic [ref=f10e145]:
+    - generic [ref=f10e146]:
+      - generic [ref=f10e147]: Amici
+      - generic [ref=f10e153]:
+        - button "Messaggi ricevuti" [ref=f10e156] [cursor=pointer]
+        - link [ref=f10e160] [cursor=pointer]:
+          - /url: https://support.discord.com
+          - button "Aiuto" [ref=f10e161]
+    - generic [ref=f10e165]:
+      - generic [ref=f10e166]:
+        - navigation "Barra laterale del server" [ref=f10e167]:
+          - tree [ref=f10e168]:
+            - generic [ref=f10e169]:
+              - treeitem "Messaggi diretti" [level=1] [selected] [ref=f10e178] [cursor=pointer]
+              - group "Server"
+              - treeitem "Aggiungi un server" [level=1] [ref=f10e191] [cursor=pointer]
+              - treeitem "Scopri" [level=1] [ref=f10e208] [cursor=pointer]
+              - treeitem "Scarica le app" [level=1] [ref=f10e219] [cursor=pointer]
+        - navigation "Canali privati" [ref=f10e223]:
+          - button "Trova o avvia una conversazione" [ref=f10e225] [cursor=pointer]
+          - list "Messaggi diretti" [ref=f10e231]:
+            - listitem [ref=f10e234]:
+              - link "Amici" [ref=f10e236] [cursor=pointer]:
+                - /url: /channels/@me
+            - listitem [ref=f10e245]:
+              - link "Negozio" [ref=f10e247] [cursor=pointer]:
+                - /url: /shop
+            - listitem [ref=f10e257]:
+              - link "Missioni" [ref=f10e259] [cursor=pointer]:
+                - /url: /quest-home
+            - heading "Messaggi diretti Di più Crea un messaggio" [level=2] [ref=f10e268]:
+              - generic [ref=f10e269]: Messaggi diretti
+              - generic [ref=f10e270]:
+                - button "Di più" [ref=f10e271] [cursor=pointer]
+                - button "Crea un messaggio" [ref=f10e274] [cursor=pointer]
+        - separator "Resize Sidebar" [ref=f10e298]
+        - region "Impostazioni e stato utente" [ref=f10e299]:
+          - generic [ref=f10e300]:
+            - generic [ref=f10e301] [cursor=pointer]:
+              - button "Gestisci profilo e stato"
+              - generic [ref=f10e304]:
+                - generic [ref=f10e305]: Awiden
+                - generic [ref=f10e309]:
+                  - generic: awiden0370
+                  - generic: Online
+            - generic [ref=f10e310]:
+              - generic [ref=f10e311]:
+                - switch "Silenzia" [checked] [ref=f10e312] [cursor=pointer]
+                - generic [ref=f10e333]: Togli il silenziamento al microfono
+                - button "Opzioni di ingresso" [ref=f10e334] [cursor=pointer]
+              - generic [ref=f10e338]:
+                - switch "Silenzia l'audio" [ref=f10e339] [cursor=pointer]
+                - button "Opzioni di uscita" [ref=f10e351] [cursor=pointer]
+              - button "Impostazioni utente" [ref=f10e355] [cursor=pointer]
+      - main "Amici" [ref=f10e365]:
+        - navigation [ref=f10e366]:
+          - generic [ref=f10e367]:
+            - generic [ref=f10e368]:
+              - heading "Amici" [level=1] [ref=f10e374]
+              - tablist "Amici" [ref=f10e377]:
+                - tab "Aggiungi amico" [selected] [ref=f10e378] [cursor=pointer]
+            - button "Nuova chat di gruppo" [ref=f10e383] [cursor=pointer]
+        - generic [ref=f10e387]:
+          - tabpanel [ref=f10e388]:
+            - generic [ref=f10e389]:
+              - heading "Aggiungi amico" [level=2] [ref=f10e390]
+              - generic [ref=f10e391]:
+                - generic [ref=f10e392]:
+                  - generic [ref=f10e393]: Puoi aggiungere gli amici con il loro nome utente Discord.
+                  - img "Wumpus Waving" [ref=f10e394]
+                - generic [ref=f10e396]:
+                  - textbox "Inserisci un nome utente" [ref=f10e398]
+                  - button "Invia richiesta di amicizia" [disabled]
+                - status
+            - generic [ref=f10e399]:
+              - heading "Altri posti dove fare amicizia" [level=2] [ref=f10e400]
+              - generic [ref=f10e401]: Non hai un nome utente a portata di mano? Dai un'occhiata alla nostra lista di server pubblici che include di tutto, dai giochi alla cucina, alla musica, agli anime e altro ancora.
+            - button "Esplora i server che possono essere trovati" [ref=f10e403] [cursor=pointer]
+          - complementary [ref=f10e412]:
+            - generic [ref=f10e414]:
+              - heading "Attivi ora" [level=2] [ref=f10e415]
+              - generic [ref=f10e416]:
+                - heading "Tutto tranquillo al momento..." [level=2] [ref=f10e417]
+                - generic [ref=f10e418]: Quando un amico inizia un'attività, come giocare o usare la chat vocale, lo mostreremo qui!

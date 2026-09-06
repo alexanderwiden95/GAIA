@@ -1,0 +1,113 @@
+- generic [ref=f3e1]:
+  - generic [ref=f3e310]:
+    - log [ref=f3e311]:
+      - generic [ref=f3e312]: Caricamento in corso...
+      - generic [ref=f3e313]: Caricamento in corso...
+    - log
+  - generic [ref=f3e3]:
+    - status
+    - generic [ref=f3e4]:
+      - banner [ref=f3e5]:
+        - generic [ref=f3e6]:
+          - link "Torna su discord.dev" [ref=f3e287] [cursor=pointer]:
+            - /url: /developers/home
+          - generic [ref=f3e26]:
+            - button "Menu di creazione" [ref=f3e288] [cursor=pointer]:
+              - generic [ref=f3e28]: Crea
+            - button "Documenti" [ref=f3e289] [cursor=pointer]
+            - button "Team" [ref=f3e290] [cursor=pointer]
+            - button "Menu dell'utente" [ref=f3e48] [cursor=pointer]
+      - generic [ref=f3e42]:
+        - navigation [ref=f3e51]:
+          - generic [ref=f3e55]:
+            - link "Applicazioni" [ref=f3e56] [cursor=pointer]:
+              - /url: /developers/applications
+            - generic [ref=f3e65]:
+              - log [ref=f3e67]
+              - generic [ref=f3e68]:
+                - generic [ref=f3e69]:
+                  - generic [ref=f3e315]:
+                    - generic [ref=f3e316]: G
+                    - generic [ref=f3e318]: GAIA
+                  - combobox [ref=f3e75]
+                - generic [aria-hidden] [ref=f3e77] [cursor=pointer]
+            - generic [ref=f3e80]:
+              - button "Panoramica" [ref=f3e81] [cursor=pointer]
+              - list [ref=f3e87]:
+                - listitem [ref=f3e88]:
+                  - link "Informazioni generali" [ref=f3e90] [cursor=pointer]:
+                    - /url: /developers/applications/1546097269613531246/information
+                - listitem [ref=f3e92]:
+                  - link "Installazione" [ref=f3e319] [cursor=pointer]:
+                    - /url: /developers/applications/1546097269613531246/installation
+                - listitem [ref=f3e100]:
+                  - link "OAuth2" [ref=f3e102] [cursor=pointer]:
+                    - /url: /developers/applications/1546097269613531246/oauth2
+                - listitem [ref=f3e104]:
+                  - link "Bot" [ref=f3e106] [cursor=pointer]:
+                    - /url: /developers/applications/1546097269613531246/bot
+                - listitem [ref=f3e108]:
+                  - link "Emoji Novità" [ref=f3e110] [cursor=pointer]:
+                    - /url: /developers/applications/1546097269613531246/emojis
+                    - generic [ref=f3e112]:
+                      - text: Emoji
+                      - generic [ref=f3e113]: Novità
+                - listitem [ref=f3e116]:
+                  - link "Webhook Novità" [ref=f3e118] [cursor=pointer]:
+                    - /url: /developers/applications/1546097269613531246/webhooks
+                    - generic [ref=f3e120]:
+                      - text: Webhook
+                      - generic [ref=f3e121]: Novità
+                - listitem [ref=f3e124]:
+                  - link "Rich Presence" [ref=f3e126] [cursor=pointer]:
+                    - /url: /developers/applications/1546097269613531246/rich-presence
+                - listitem [ref=f3e130]:
+                  - link "Tester delle app" [ref=f3e132] [cursor=pointer]:
+                    - /url: /developers/applications/1546097269613531246/testers
+                - listitem [ref=f3e134]:
+                  - link "Verifica dell'app" [ref=f3e136] [cursor=pointer]:
+                    - /url: /developers/applications/1546097269613531246/verification-onboarding
+            - button "Giochi Novità" [ref=f3e142] [cursor=pointer]:
+              - generic [ref=f3e146]:
+                - text: Giochi
+                - generic [ref=f3e147]: Novità
+            - button "Attività" [ref=f3e153] [cursor=pointer]
+            - button "App premium" [ref=f3e160] [cursor=pointer]
+        - main [ref=f3e168]:
+          - generic [ref=f3e169]:
+            - generic [ref=f3e170]:
+              - heading "Installazione" [level=1] [ref=f3e171]
+              - paragraph [ref=f3e173]: Stabilisci come gli utenti potranno installare la tua app. Crea un link d'installazione, scegli quale contesto d'installazione supportare e stabilisci gli ambiti e i permessi che vuoi richiedere.
+              - generic [ref=f3e320]: Tutte le tue modifiche sono state salvate.
+            - generic [ref=f3e175]:
+              - heading "Contesti di installazione" [level=2] [ref=f3e177]
+              - generic [ref=f3e178]: Seleziona i contesti di installazione supportati dalla tua app. L'installazione può essere sia livello degli utenti che delle guild.
+              - group "Seleziona metodi" [ref=f3e179]:
+                - generic [ref=f3e181]:
+                  - generic [aria-hidden] [ref=f3e182]: Seleziona metodi
+                  - generic [ref=f3e183]: Seleziona i contesti di installazione supportati dalla tua app. L'installazione può essere sia livello degli utenti che delle guild.
+                - group "Installazione per utenti" [ref=f3e185]:
+                  - generic [ref=f3e186]:
+                    - checkbox "Installazione per utenti" [checked] [ref=f3e188]
+                    - generic [ref=f3e194]: Installazione per utenti
+                  - generic [ref=f3e197]:
+                    - checkbox "Installazione per guild" [checked] [ref=f3e199]
+                    - generic [ref=f3e205]: Installazione per guild
+            - generic [ref=f3e209]:
+              - heading "Link d'installazione" [level=2] [ref=f3e210]
+              - generic [ref=f3e211]: Usa il link d'installazione fornito da noi o registrane uno personalizzato. Se scegli un link personalizzato, gli utenti che aggiungono la tua app verranno reindirizzati al tuo URL invece che al flusso Aggiungi app di Discord.
+              - generic [ref=f3e216]:
+                - log [ref=f3e218]
+                - generic [ref=f3e219]:
+                  - generic [ref=f3e220]:
+                    - generic [ref=f3e221]: Nessuno
+                    - combobox "Link d'installazione" [ref=f3e222]
+                  - generic [aria-hidden] [ref=f3e224] [cursor=pointer]
+          - generic [ref=f3e297]:
+            - generic [ref=f3e298]: Attenzione! Ci sono delle modifiche non salvate!
+            - generic [ref=f3e303]:
+              - button "Resetta" [ref=f3e304]
+              - button "Salva modifiche Caricamento in corso..." [active] [ref=f3e322] [cursor=pointer]:
+                - generic [ref=f3e307]:
+                  - generic [ref=f3e308]: Salva modifiche
+                  - img "Caricamento in corso..." [ref=f3e324]

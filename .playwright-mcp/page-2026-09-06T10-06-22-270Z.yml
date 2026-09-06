@@ -1,0 +1,150 @@
+- generic [active] [ref=f10e1]:
+  - generic [ref=f10e427]:
+    - log [ref=f10e537]:
+      - generic [ref=f10e538]: Loading
+      - generic [ref=f10e539]: Loading finished
+    - log
+  - generic [ref=f10e145]:
+    - generic [ref=f10e146]:
+      - generic [ref=f10e148]:
+        - generic [ref=f10e540]: G
+        - generic [ref=f10e152]: GAIA
+      - generic [ref=f10e153]:
+        - button "Messaggi ricevuti" [ref=f10e156] [cursor=pointer]
+        - link [ref=f10e160] [cursor=pointer]:
+          - /url: https://support.discord.com
+          - button "Aiuto" [ref=f10e161]
+    - generic [ref=f10e165]:
+      - generic [ref=f10e166]:
+        - navigation "Barra laterale del server" [ref=f10e167]:
+          - tree [ref=f10e168]:
+            - generic [ref=f10e169]:
+              - treeitem "Messaggi diretti" [level=1] [ref=f10e178] [cursor=pointer]
+              - group "Server" [ref=f10e542]:
+                - generic [ref=f10e543]:
+                  - treeitem "GAIA" [level=1] [selected] [ref=f10e553] [cursor=pointer]:
+                    - generic [aria-hidden] [ref=f10e555]: G
+                  - generic [ref=f10e556]: GAIA
+              - treeitem "Aggiungi un server" [level=1] [ref=f10e191] [cursor=pointer]
+              - treeitem "Scopri" [level=1] [ref=f10e208] [cursor=pointer]
+              - treeitem "Scarica le app" [level=1] [ref=f10e219] [cursor=pointer]
+        - navigation "GAIA (server)" [ref=f10e557]:
+          - generic [ref=f10e560]:
+            - button "GAIA, azioni server" [ref=f10e561] [cursor=pointer]:
+              - heading "GAIA" [level=2] [ref=f10e563]
+            - button "Invita al server" [ref=f10e568] [cursor=pointer]
+          - heading "Canali" [level=2] [ref=f10e573]
+          - list "Canali" [ref=f10e575]:
+            - listitem [ref=f10e577]:
+              - generic [ref=f10e578]:
+                - button "Eventi"
+                - generic [aria-hidden] [ref=f10e583] [cursor=pointer]: Eventi
+            - listitem [ref=f10e584]:
+              - generic [ref=f10e585]:
+                - button "Potenziamenti server"
+                - generic [aria-hidden] [ref=f10e590] [cursor=pointer]: Potenziamenti server
+            - listitem [ref=f10e592]:
+              - generic [ref=f10e593] [cursor=pointer]:
+                - button "Canali testuali (categoria)" [expanded] [ref=f10e594]:
+                  - heading "Canali testuali" [level=3] [ref=f10e595]
+                - generic [ref=f10e599]:
+                  - button "Creare canale" [ref=f10e600]
+                  - generic [ref=f10e603]: Creare canale
+            - listitem [ref=f10e604]:
+              - link "generale (canale testuale)" [ref=f10e607] [cursor=pointer]:
+                - /url: /channels/1546099225727864832/1546099227200061472
+                - generic [ref=f10e608]:
+                  - img "Testo icon" [ref=f10e609]
+                  - generic [ref=f10e612]: Testo
+                  - generic [aria-hidden] [ref=f10e613]: generale
+                  - generic [ref=f10e614]:
+                    - button "Invita nel canale" [ref=f10e616]
+                    - generic [ref=f10e620]: Invita nel canale
+                    - button "Modifica il canale" [ref=f10e622]
+                    - generic [ref=f10e625]: Modifica il canale
+            - listitem [ref=f10e626]:
+              - generic [ref=f10e627] [cursor=pointer]:
+                - button "Canali vocali (categoria)" [expanded] [ref=f10e628]:
+                  - heading "Canali vocali" [level=3] [ref=f10e629]
+                - generic [ref=f10e633]:
+                  - button "Creare canale" [ref=f10e634]
+                  - generic [ref=f10e637]: Creare canale
+            - listitem [ref=f10e638]:
+              - button "Generale (canale vocale)" [ref=f10e642] [cursor=pointer]:
+                - generic [ref=f10e643]:
+                  - img "Voce icon" [ref=f10e644]
+                  - generic [ref=f10e648]: Voce
+                  - generic [aria-hidden] [ref=f10e649]: Generale
+                  - generic:
+                    - generic [ref=f10e650]: Apri chat
+                    - generic [ref=f10e651]: Invita nella chat vocale
+                    - generic [ref=f10e652]: Modifica il canale
+        - separator "Resize Sidebar" [ref=f10e298]
+        - region "Impostazioni e stato utente" [ref=f10e299]:
+          - generic [ref=f10e300]:
+            - generic [ref=f10e439] [cursor=pointer]:
+              - button "Gestisci profilo e stato"
+              - generic [ref=f10e442]:
+                - generic [ref=f10e443]: Awiden
+                - generic [ref=f10e447]:
+                  - generic: awiden0370
+                  - generic: Online
+            - generic [ref=f10e310]:
+              - generic [ref=f10e311]:
+                - switch "Silenzia" [checked] [ref=f10e312] [cursor=pointer]
+                - generic [ref=f10e333]: Togli il silenziamento al microfono
+                - button "Opzioni di ingresso" [ref=f10e334] [cursor=pointer]
+              - generic [ref=f10e338]:
+                - switch "Silenzia l'audio" [ref=f10e339] [cursor=pointer]
+                - button "Opzioni di uscita" [ref=f10e351] [cursor=pointer]
+              - button "Impostazioni utente" [ref=f10e355] [cursor=pointer]
+      - generic [ref=f10e654]:
+        - region "Intestazione canale" [ref=f10e656]:
+          - generic [ref=f10e657]:
+            - generic [ref=f10e658]:
+              - generic [ref=f10e662]: Canale testuale
+              - 'heading "GAIA: generale" [level=1] [ref=f10e664]':
+                - generic [ref=f10e665]: "GAIA:"
+                - text: generale
+            - generic [ref=f10e666]:
+              - button "Thread" [ref=f10e667] [cursor=pointer]
+              - button "Impostazioni delle notifiche" [ref=f10e670] [cursor=pointer]
+              - button "Messaggi attaccati" [ref=f10e673] [cursor=pointer]
+              - button "Mostra lista dei membri" [ref=f10e676] [cursor=pointer]
+              - generic [ref=f10e681]:
+                - combobox "Cerca GAIA" [ref=f10e682]
+                - button [aria-hidden] [ref=f10e684]
+        - main "generale (canale)" [ref=f10e691]:
+          - heading "Chat di generale" [level=2] [ref=f10e693]
+          - group [ref=f10e695]:
+            - list "Messaggi in generale" [ref=f10e697]:
+              - generic [ref=f10e700]:
+                - generic [ref=f10e701]:
+                  - heading [level=3] [ref=f10e702]:
+                    - paragraph [ref=f10e703]: Benvenuto su
+                    - paragraph [ref=f10e704]: GAIA
+                  - generic [ref=f10e705]:
+                    - text: Questo qui è il tuo server nuovo di zecca. Ecco alcuni passi per cominciare. Per saperne di più, dai un'occhiata alla nostra
+                    - link "Guida introduttiva" [ref=f10e706] [cursor=pointer]:
+                      - /url: https://support.discord.com/hc/it/articles/360045138571?utm_source=discord&utm_medium=blog&utm_campaign=2020-06_help-new-user&utm_content=--t%3Apm
+                    - text: .
+                - button "Invita i tuoi amici" [ref=f10e708] [cursor=pointer]
+                - button "Personalizza il server con un'icona" [ref=f10e713] [cursor=pointer]
+                - button "Invia il tuo primo messaggio" [ref=f10e718] [cursor=pointer]
+                - button "Scarica l'app Discord" [ref=f10e723] [cursor=pointer]
+                - button "Aggiungi la tua prima app" [ref=f10e728] [cursor=pointer]
+                - button "Sblocca benefici per tutti con i potenziamenti" [ref=f10e733] [cursor=pointer]
+          - generic [ref=f10e742]:
+            - button "Più opzioni di messaggio" [ref=f10e744] [cursor=pointer]
+            - generic [ref=f10e749]:
+              - generic [aria-hidden]: "Invia un messaggio in #generale"
+              - 'textbox "Invia un messaggio in #generale" [ref=f10e750]'
+            - generic [ref=f10e752]:
+              - generic [ref=f10e753]:
+                - button "Invia un regalo" [ref=f10e754] [cursor=pointer]
+                - generic [ref=f10e770]: Fai fare il salto di qualità ai tuoi amici! Regalagli benefici della chat incredibili grazie a Nitro.
+              - button "Apri selettore di GIF" [ref=f10e772] [cursor=pointer]
+              - generic [ref=f10e782]: Invia GIF
+              - button "Apri selettore di adesivi" [ref=f10e784] [cursor=pointer]
+              - button "Aggiungi emoji" [ref=f10e794] [cursor=pointer]
+              - button "App" [ref=f10e799] [cursor=pointer]

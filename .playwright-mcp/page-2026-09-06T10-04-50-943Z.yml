@@ -1,0 +1,77 @@
+- generic [ref=f7e4]:
+  - dialog "GAIA awiden0370 GAIA App wants to access your Discord account Signed in as awiden0370Not you?" [ref=f7e9]:
+    - generic [ref=f7e12]:
+      - banner
+      - main [ref=f7e15]:
+        - generic [ref=f7e16]:
+          - generic [ref=f7e17]:
+            - generic [ref=f7e18]:
+              - img "GAIA" [ref=f7e19]
+              - img "awiden0370" [ref=f7e24]
+            - generic [ref=f7e25]:
+              - text: GAIA
+              - img "App" [ref=f7e26]:
+                - generic [ref=f7e27]: APP
+            - generic [ref=f7e28]: wants to access your Discord account
+            - generic [ref=f7e30]:
+              - text: Signed in as awiden0370
+              - button "Not you?" [ref=f7e31] [cursor=pointer]
+          - generic [ref=f7e33]:
+            - generic [ref=f7e34]:
+              - heading "This will allow the developer of GAIA to:" [level=1] [ref=f7e35]
+              - 'group "Allowed: Add a bot to a server" [ref=f7e36]':
+                - generic [ref=f7e41]: Add a bot to a server
+              - 'group "Allowed: Create commands" [ref=f7e42]':
+                - generic [ref=f7e47]: Create commands
+              - 'group "Not allowed: Paint a happy little tree" [ref=f7e48]':
+                - generic [ref=f7e53]: Paint a happy little tree
+            - generic [ref=f7e55]:
+              - generic [ref=f7e56]: "Add to server:"
+              - generic [ref=f7e58]:
+                - generic [ref=f7e60]:
+                  - combobox "Add to server:" [ref=f7e64]
+                  - button [aria-hidden] [ref=f7e65] [cursor=pointer]
+                - generic [ref=f7e70]:
+                  - text: This requires you to have
+                  - strong [ref=f7e71]: Manage Server
+                  - text: permission in the server.
+      - contentinfo [ref=f7e73]:
+        - generic [ref=f7e75]:
+          - button "Cancel" [ref=f7e76] [cursor=pointer]
+          - button "You missed some fields Loading" [disabled]:
+            - generic:
+              - generic: You missed some fields
+              - generic:
+                - img "Loading"
+  - generic:
+    - generic:
+      - dialog "Wait! Are you human?":
+        - generic:
+          - generic:
+            - log:
+              - generic: Loading
+            - log
+        - generic [ref=f7e84]:
+          - banner [ref=f7e86]:
+            - generic [ref=f7e87]:
+              - button "Close" [active] [ref=f7e95] [cursor=pointer]
+              - heading "Wait! Are you human?" [level=1] [ref=f7e100]
+              - generic [ref=f7e101]: Please confirm you’re not a robot.
+          - main [ref=f7e105]:
+            - iframe [ref=f7e108]:
+              - generic [ref=f9e2] [cursor=pointer]:
+                - checkbox "'I am human', Select in order to trigger the challenge, or to bypass it if you have an accessibility cookie" [ref=f9e7]
+                - generic [ref=f9e8]: I am human
+                - generic [ref=f9e12]:
+                  - generic "hCaptcha" [ref=f9e13]:
+                    - button "hCaptcha logo, opens new window with more information" [ref=f9e14]
+                  - generic [ref=f9e78]:
+                    - link "hCaptcha Privacy Policy, opens in a new tab" [ref=f9e79]:
+                      - /url: https://hcaptcha.com/privacy?ref=discord.com&utm_campaign=a9b5fb07-92ff-493f-86fe-352a2803b3df&utm_medium=checkbox&hl=en
+                      - text: Privacy
+                    - text: "-"
+                    - link "hCaptcha Terms of Service, opens in a new tab" [ref=f9e80]:
+                      - /url: https://hcaptcha.com/terms?ref=discord.com&utm_campaign=a9b5fb07-92ff-493f-86fe-352a2803b3df&utm_medium=checkbox&hl=en
+                      - text: Terms
+                  - generic:
+                    - img "Brand"

@@ -1,0 +1,576 @@
+- generic [ref=f26e11]:
+  - generic [ref=f26e12]:
+    - generic [ref=f26e98]:
+      - generic [ref=f26e99]: G
+      - generic [ref=f26e101]: GAIA
+    - generic [ref=f26e14]:
+      - button "Inbox" [ref=f26e17] [cursor=pointer]
+      - link [ref=f26e21] [cursor=pointer]:
+        - /url: https://support.discord.com
+        - button "Help" [ref=f26e22]
+  - generic [ref=f26e26]:
+    - generic [ref=f26e27]:
+      - navigation "Servers sidebar" [ref=f26e28]:
+        - tree [ref=f26e29]:
+          - generic [ref=f26e30]:
+            - treeitem "Direct Messages" [level=1] [ref=f26e110] [cursor=pointer]
+            - group "Servers" [ref=f26e117]:
+              - generic [ref=f26e118]:
+                - treeitem "GAIA" [level=1] [selected] [ref=f26e128] [cursor=pointer]:
+                  - generic [aria-hidden] [ref=f26e130]: G
+                - generic [ref=f26e131]: GAIA
+            - treeitem "Add a Server" [level=1] [ref=f26e138] [cursor=pointer]
+            - treeitem "Discover" [level=1] [ref=f26e149] [cursor=pointer]
+            - treeitem "Download Apps" [level=1] [ref=f26e160] [cursor=pointer]
+      - navigation "GAIA (server)" [ref=f26e163]:
+        - generic [ref=f26e166]:
+          - button "GAIA, server actions" [ref=f26e167] [cursor=pointer]:
+            - heading "GAIA" [level=2] [ref=f26e169]
+          - button "Invite to Server" [ref=f26e174] [cursor=pointer]
+        - heading "Channels" [level=2] [ref=f26e179]
+        - list "Channels" [ref=f26e181]:
+          - listitem [ref=f26e183]:
+            - generic [ref=f26e184]:
+              - button "Events"
+              - generic [aria-hidden] [ref=f26e189] [cursor=pointer]: Events
+          - listitem [ref=f26e190]:
+            - generic [ref=f26e191]:
+              - button "Server Boosts"
+              - generic [aria-hidden] [ref=f26e196] [cursor=pointer]: Server Boosts
+          - listitem [ref=f26e198]:
+            - generic [ref=f26e199] [cursor=pointer]:
+              - button "Canali testuali (category)" [expanded] [ref=f26e200]:
+                - heading "Canali testuali" [level=3] [ref=f26e201]
+              - generic [ref=f26e205]:
+                - button "Create Channel" [ref=f26e206]
+                - generic [ref=f26e209]: Create Channel
+          - listitem [ref=f26e210]:
+            - link "generale (text channel)" [ref=f26e213] [cursor=pointer]:
+              - /url: /channels/1546099225727864832/1546099227200061472
+              - generic [ref=f26e214]:
+                - img "Text icon" [ref=f26e215]
+                - generic [ref=f26e218]: Text
+                - generic [aria-hidden] [ref=f26e219]: generale
+                - generic:
+                  - generic [ref=f26e220]: Invite to Channel
+                  - generic [ref=f26e221]: Edit Channel
+          - listitem [ref=f26e222]:
+            - link "work (text channel)" [ref=f26e225] [cursor=pointer]:
+              - /url: /channels/1546099225727864832/1546108894965927936
+              - generic [ref=f26e226]:
+                - img "Text icon" [ref=f26e227]
+                - generic [ref=f26e230]: Text
+                - generic [aria-hidden] [ref=f26e231]: work
+                - generic [ref=f26e232]:
+                  - button "Invite to Channel" [ref=f26e234]
+                  - generic [ref=f26e238]: Invite to Channel
+                  - button "Edit Channel" [ref=f26e240]
+                  - generic [ref=f26e243]: Edit Channel
+          - listitem [ref=f26e244]:
+            - generic [ref=f26e245] [cursor=pointer]:
+              - button "Canali vocali (category)" [expanded] [ref=f26e246]:
+                - heading "Canali vocali" [level=3] [ref=f26e247]
+              - generic [ref=f26e251]:
+                - button "Create Channel" [ref=f26e252]
+                - generic [ref=f26e255]: Create Channel
+          - listitem [ref=f26e256]:
+            - button "Generale (voice channel)" [ref=f26e260] [cursor=pointer]:
+              - generic [ref=f26e261]:
+                - img "Voice icon" [ref=f26e262]
+                - generic [ref=f26e266]: Voice
+                - generic [aria-hidden] [ref=f26e267]: Generale
+                - generic:
+                  - generic [ref=f26e268]: Open Chat
+                  - generic [ref=f26e269]: Invite to Voice
+                  - generic [ref=f26e270]: Edit Channel
+      - separator "Resize Sidebar" [ref=f26e75]
+      - region "User status and settings" [ref=f26e76]:
+        - generic [ref=f26e271]:
+          - generic [ref=f26e272] [cursor=pointer]:
+            - button "Manage profile and status"
+            - generic [ref=f26e275]:
+              - generic [ref=f26e276]: Awiden
+              - generic [ref=f26e280]:
+                - generic: awiden0370
+                - generic: Online
+          - generic [ref=f26e281]:
+            - generic [ref=f26e282]:
+              - switch "Mute" [checked] [ref=f26e283] [cursor=pointer]
+              - generic [ref=f26e304]: Unmute
+              - button "Input Options" [ref=f26e305] [cursor=pointer]
+            - generic [ref=f26e309]:
+              - switch "Deafen" [ref=f26e310] [cursor=pointer]
+              - button "Output Options" [ref=f26e322] [cursor=pointer]
+            - button "User Settings" [ref=f26e326] [cursor=pointer]
+    - generic [ref=f26e336]:
+      - region "Channel header" [ref=f26e338]:
+        - generic [ref=f26e339]:
+          - generic [ref=f26e340]:
+            - generic [ref=f26e344]: Text Channel
+            - 'heading "GAIA: work" [level=1] [ref=f26e346]':
+              - generic [ref=f26e347]: "GAIA:"
+              - text: work
+          - generic [ref=f26e348]:
+            - button "Threads" [ref=f26e349] [cursor=pointer]
+            - button "Notification Settings" [ref=f26e352] [cursor=pointer]
+            - button "Pinned Messages" [ref=f26e355] [cursor=pointer]
+            - button "Hide Member List" [ref=f26e358] [cursor=pointer]
+            - generic [ref=f26e363]:
+              - combobox "Search GAIA" [ref=f26e364]
+              - button [aria-hidden] [ref=f26e366]
+      - generic [ref=f26e372]:
+        - main "work (channel)" [ref=f26e373]:
+          - heading "work chat" [level=2] [ref=f26e375]
+          - group [ref=f26e377]:
+            - list "Messages in work" [ref=f26e379]:
+              - generic [ref=f26e380]:
+                - heading [level=3] [aria-hidden] [ref=f26e384]: "Welcome to #work!"
+                - generic [ref=f26e385]: "This is the start of the #work channel."
+                - button "Edit Channel" [ref=f26e387] [cursor=pointer]
+              - separator "September 6, 2026"
+              - listitem [ref=f26e393]:
+                - article "Awiden , Remember the exact channel word COBALT. Reply only WORK_OK. , 12:47 PM" [ref=f26e394]:
+                  - generic [ref=f26e395]:
+                    - img [aria-hidden] [ref=f26e396] [cursor=pointer]
+                    - heading [level=3] [ref=f26e397]:
+                      - button "Awiden" [ref=f26e399]
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 12:47 PM
+                        - generic: Sunday, September 6, 2026 at 12:47 PM
+                    - generic [ref=f26e400]: Remember the exact channel word COBALT. Reply only WORK_OK.
+              - listitem [ref=f26e401]:
+                - article [ref=f26e402]:
+                  - generic "GAIA replying to Awiden" [ref=f26e403]:
+                    - button "Jump To Reply" [ref=f26e404] [cursor=pointer]
+                    - button "@Awiden" [ref=f26e405]
+                    - button "Remember the exact channel word COBALT. Reply only WORK_OK." [ref=f26e406] [cursor=pointer]
+                  - generic [ref=f26e407]:
+                    - img [aria-hidden] [ref=f26e408] [cursor=pointer]
+                    - heading [level=3] [ref=f26e409]:
+                      - generic [ref=f26e410]:
+                        - button "GAIA" [ref=f26e411]
+                        - img "App" [ref=f26e412]:
+                          - generic [ref=f26e413]: APP
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 12:47 PM
+                        - generic: Sunday, September 6, 2026 at 12:47 PM
+                    - generic [ref=f26e414]:
+                      - text: WORK_OK
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic: (edited)
+                        - generic: Sunday, September 6, 2026 at 12:47 PM
+              - listitem [ref=f26e415]:
+                - article "Awiden , Reply only with this channel's remembered word. , 12:51 PM" [ref=f26e416]:
+                  - generic [ref=f26e417]:
+                    - img [aria-hidden] [ref=f26e418] [cursor=pointer]
+                    - heading [level=3] [ref=f26e419]:
+                      - button "Awiden" [ref=f26e421]
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 12:51 PM
+                        - generic: Sunday, September 6, 2026 at 12:51 PM
+                    - generic [ref=f26e422]: Reply only with this channel's remembered word.
+              - listitem [ref=f26e423]:
+                - article [ref=f26e424]:
+                  - generic "GAIA replying to Awiden" [ref=f26e425]:
+                    - button "Jump To Reply" [ref=f26e426] [cursor=pointer]
+                    - button "@Awiden" [ref=f26e427]
+                    - button "Reply only with this channel's remembered word." [ref=f26e428] [cursor=pointer]
+                  - generic [ref=f26e429]:
+                    - img [aria-hidden] [ref=f26e430] [cursor=pointer]
+                    - heading [level=3] [ref=f26e431]:
+                      - generic [ref=f26e432]:
+                        - button "GAIA" [ref=f26e433]
+                        - img "App" [ref=f26e434]:
+                          - generic [ref=f26e435]: APP
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 12:51 PM
+                        - generic: Sunday, September 6, 2026 at 12:51 PM
+                    - generic [ref=f26e436]:
+                      - text: COBALT
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic: (edited)
+                        - generic: Sunday, September 6, 2026 at 12:51 PM
+              - listitem [ref=f26e437]:
+                - article [ref=f26e438]:
+                  - generic [ref=f26e439]:
+                    - img [aria-hidden] [ref=f26e440] [cursor=pointer]
+                    - heading [level=3] [ref=f26e441]:
+                      - button "Awiden" [ref=f26e443]
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 12:52 PM
+                        - generic: Sunday, September 6, 2026 at 12:52 PM
+                    - generic [ref=f26e444]:
+                      - text: Run
+                      - code [ref=f26e445]: /bin/sleep 60
+                      - text: now, then reply SLEEP_FINISHED.
+              - listitem [ref=f26e446]:
+                - article [ref=f26e447]:
+                  - generic "GAIA replying to Awiden" [ref=f26e448]:
+                    - button "Jump To Reply" [ref=f26e449] [cursor=pointer]
+                    - button "@Awiden" [ref=f26e450]
+                    - button "Run /bin/sleep 60 now, then reply SLEEP_FINISHED." [ref=f26e451] [cursor=pointer]:
+                      - generic:
+                        - text: Run
+                        - code: /bin/sleep 60
+                        - text: now, then reply SLEEP_FINISHED.
+                  - generic [ref=f26e452]:
+                    - img [aria-hidden] [ref=f26e453] [cursor=pointer]
+                    - heading [level=3] [ref=f26e454]:
+                      - generic [ref=f26e455]:
+                        - button "GAIA" [ref=f26e456]
+                        - img "App" [ref=f26e457]:
+                          - generic [ref=f26e458]: APP
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 12:52 PM
+                        - generic: Sunday, September 6, 2026 at 12:52 PM
+                    - generic [ref=f26e459]:
+                      - text: SLEEP_FINISHED
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic: (edited)
+                        - generic: Sunday, September 6, 2026 at 12:53 PM
+              - listitem [ref=f26e460]:
+                - article [ref=f26e461]:
+                  - generic [ref=f26e462]:
+                    - img [aria-hidden] [ref=f26e463] [cursor=pointer]
+                    - heading [level=3] [ref=f26e464]:
+                      - button "Awiden" [ref=f26e466]
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 12:59 PM
+                        - generic: Sunday, September 6, 2026 at 12:59 PM
+                    - generic [ref=f26e467]:
+                      - text: Run
+                      - code [ref=f26e468]: /bin/sleep 300
+                      - text: now, then reply SHOULD_NOT_FINISH.
+              - listitem [ref=f26e469]:
+                - article [ref=f26e470]:
+                  - generic "GAIA replying to Awiden" [ref=f26e471]:
+                    - button "Jump To Reply" [ref=f26e472] [cursor=pointer]
+                    - button "@Awiden" [ref=f26e473]
+                    - button "Run /bin/sleep 300 now, then reply SHOULD_NOT_FINISH." [ref=f26e474] [cursor=pointer]:
+                      - generic:
+                        - text: Run
+                        - code: /bin/sleep 300
+                        - text: now, then reply SHOULD_NOT_FINISH.
+                  - generic [ref=f26e475]:
+                    - img [aria-hidden] [ref=f26e476] [cursor=pointer]
+                    - heading [level=3] [ref=f26e477]:
+                      - generic [ref=f26e478]:
+                        - button "GAIA" [ref=f26e479]
+                        - img "App" [ref=f26e480]:
+                          - generic [ref=f26e481]: APP
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 12:59 PM
+                        - generic: Sunday, September 6, 2026 at 12:59 PM
+                    - generic [ref=f26e482]:
+                      - emphasis [ref=f26e483]: Turn stopped.
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic: (edited)
+                        - generic: Sunday, September 6, 2026 at 12:59 PM
+              - listitem [ref=f26e484]:
+                - article "Awiden , Reply only AFTER_STOP_OK. , 1:00 PM" [ref=f26e485]:
+                  - generic [ref=f26e486]:
+                    - img [aria-hidden] [ref=f26e487] [cursor=pointer]
+                    - heading [level=3] [ref=f26e488]:
+                      - button "Awiden" [ref=f26e490]
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 1:00 PM
+                        - generic: Sunday, September 6, 2026 at 1:00 PM
+                    - generic [ref=f26e491]: Reply only AFTER_STOP_OK.
+              - listitem [ref=f26e492]:
+                - article [ref=f26e493]:
+                  - generic "GAIA replying to Awiden" [ref=f26e494]:
+                    - button "Jump To Reply" [ref=f26e495] [cursor=pointer]
+                    - button "@Awiden" [ref=f26e496]
+                    - button "Reply only AFTER_STOP_OK." [ref=f26e497] [cursor=pointer]
+                  - generic [ref=f26e498]:
+                    - img [aria-hidden] [ref=f26e499] [cursor=pointer]
+                    - heading [level=3] [ref=f26e500]:
+                      - generic [ref=f26e501]:
+                        - button "GAIA" [ref=f26e502]
+                        - img "App" [ref=f26e503]:
+                          - generic [ref=f26e504]: APP
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 1:00 PM
+                        - generic: Sunday, September 6, 2026 at 1:00 PM
+                    - generic [ref=f26e505]:
+                      - text: AFTER_STOP_OK
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic: (edited)
+                        - generic: Sunday, September 6, 2026 at 1:00 PM
+                  - generic:
+                    - group "Message Actions":
+                      - generic:
+                        - generic:
+                          - button "Click to react with 100"
+                        - generic:
+                          - generic: ":100:"
+                          - generic: Click to react
+                        - generic:
+                          - button "Click to react with thumbsup"
+                        - generic:
+                          - generic: ":thumbsup:"
+                          - generic: Click to react
+                        - generic:
+                          - button "Click to react with thumbsdown"
+                        - generic:
+                          - generic: ":thumbsdown:"
+                          - generic: Click to react
+                        - generic:
+                          - button "Add Reaction"
+                        - generic: Add Reaction
+                        - generic:
+                          - button "Reply"
+                        - generic: Reply
+                        - generic:
+                          - button "Forward"
+                        - generic: Forward
+                        - generic:
+                          - button "More"
+                        - generic: More
+              - listitem [ref=f26e756]:
+                - article "Awiden , Read the attached file and reply only with its exact contents. PHASE3_ATTACHMENT_OK Plaintext file preview controls Modify Attachment Modify Attachment Remove Message Attachment Delete , 1:25 PM" [ref=f26e757]:
+                  - generic [ref=f26e758]:
+                    - img [aria-hidden] [ref=f26e759] [cursor=pointer]
+                    - heading [level=3] [ref=f26e760]:
+                      - button "Awiden" [ref=f26e762]
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 1:25 PM
+                        - generic: Sunday, September 6, 2026 at 1:25 PM
+                    - generic [ref=f26e763]: Read the attached file and reply only with its exact contents.
+                  - generic [ref=f26e767]:
+                    - generic [ref=f26e768]:
+                      - code [ref=f26e771]: PHASE3_ATTACHMENT_OK
+                      - group "Plaintext file preview controls" [ref=f26e772]:
+                        - generic [ref=f26e773]:
+                          - generic [ref=f26e774]:
+                            - generic [ref=f26e775]: phase3-attachment.txt
+                            - generic [ref=f26e776]: phase3-attachment.txt (1 KB)
+                          - generic [ref=f26e777]: 1 KB
+                        - button "Change language" [ref=f26e778] [cursor=pointer]
+                        - button "View whole file" [ref=f26e782] [cursor=pointer]
+                        - button "More" [ref=f26e785] [cursor=pointer]
+                    - generic [ref=f26e788]:
+                      - button "Modify Attachment" [ref=f26e789] [cursor=pointer]
+                      - generic [ref=f26e792]: Modify Attachment
+                      - button "Remove Message Attachment" [ref=f26e793] [cursor=pointer]
+                      - generic [ref=f26e797]: Delete
+                  - generic:
+                    - group "Message Actions":
+                      - generic:
+                        - generic:
+                          - button "Click to react with 100"
+                        - generic:
+                          - generic: ":100:"
+                          - generic: Click to react
+                        - generic:
+                          - button "Click to react with thumbsup"
+                        - generic:
+                          - generic: ":thumbsup:"
+                          - generic: Click to react
+                        - generic:
+                          - button "Click to react with thumbsdown"
+                        - generic:
+                          - generic: ":thumbsdown:"
+                          - generic: Click to react
+                        - generic:
+                          - button "Add Reaction"
+                        - generic: Add Reaction
+                        - generic:
+                          - button "Edit"
+                        - generic: Edit
+                        - generic:
+                          - button "Forward"
+                        - generic: Forward
+                        - generic:
+                          - button "More"
+                        - generic: More
+              - listitem [ref=f26e806]:
+                - article [ref=f26e807]:
+                  - generic "GAIA replying to Awiden" [ref=f26e808]:
+                    - button "Jump To Reply" [ref=f26e809] [cursor=pointer]
+                    - button "Awiden" [ref=f26e810]
+                    - button "Read the attached file and reply only with its exact contents." [ref=f26e811] [cursor=pointer]
+                  - generic [ref=f26e814]:
+                    - img [aria-hidden] [ref=f26e815] [cursor=pointer]
+                    - heading [level=3] [ref=f26e816]:
+                      - generic [ref=f26e817]:
+                        - button "GAIA" [ref=f26e818]
+                        - img "App" [ref=f26e819]:
+                          - generic [ref=f26e820]: APP
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 1:25 PM
+                        - generic: Sunday, September 6, 2026 at 1:25 PM
+                    - generic [ref=f26e826]:
+                      - text: PHASE3_ATTACHMENT_OK
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic: (edited)
+                        - generic: Sunday, September 6, 2026 at 1:25 PM
+              - listitem [ref=f26e888]:
+                - 'article "Awiden , Attachment file type: archive phase3-attachment.zip 53 bytes Modify Attachment Modify Attachment Download Download , 1:27 PM" [ref=f26e889]':
+                  - generic [ref=f26e890]:
+                    - img [aria-hidden] [ref=f26e891] [cursor=pointer]
+                    - heading [level=3] [ref=f26e892]:
+                      - button "Awiden" [ref=f26e894]
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 1:27 PM
+                        - generic: Sunday, September 6, 2026 at 1:27 PM
+                  - generic [ref=f26e899]:
+                    - generic [ref=f26e900]:
+                      - 'img "Attachment file type: archive" [ref=f26e901]'
+                      - generic [ref=f26e902]:
+                        - link "phase3-attachment.zip" [ref=f26e904] [cursor=pointer]:
+                          - /url: https://cdn.discordapp.com/attachments/1546108894965927936/1546119739745509436/phase3-attachment.zip?ex=6a9e9fb7&is=6a9d4e37&hm=ddf1c1cdde00b753465ed2c699fe174f722dcffb47fc1b9ea126087bf83679f6&
+                        - generic [ref=f26e905]: 53 bytes
+                    - generic [ref=f26e906]:
+                      - button "Modify Attachment" [ref=f26e907] [cursor=pointer]
+                      - generic [ref=f26e910]: Modify Attachment
+                      - link "Download" [ref=f26e911] [cursor=pointer]:
+                        - /url: https://cdn.discordapp.com/attachments/1546108894965927936/1546119739745509436/phase3-attachment.zip?ex=6a9e9fb7&is=6a9d4e37&hm=ddf1c1cdde00b753465ed2c699fe174f722dcffb47fc1b9ea126087bf83679f6&
+                      - generic [ref=f26e914]: Download
+              - listitem [ref=f26e915]:
+                - article "GAIA replying to Awiden , Attachment \"phase3-attachment.zip\" has unsupported type \"application/zip\". , 1:27 PM" [ref=f26e916]:
+                  - generic "GAIA replying to Awiden" [ref=f26e917]:
+                    - button "Jump To Reply" [ref=f26e918] [cursor=pointer]
+                    - button "Awiden" [ref=f26e919]
+                    - button "Click to see attachment" [ref=f26e920] [cursor=pointer]
+                  - generic [ref=f26e924]:
+                    - img [aria-hidden] [ref=f26e925] [cursor=pointer]
+                    - heading [level=3] [ref=f26e926]:
+                      - generic [ref=f26e927]:
+                        - button "GAIA" [ref=f26e928]
+                        - img "App" [ref=f26e929]:
+                          - generic [ref=f26e930]: APP
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 1:27 PM
+                        - generic: Sunday, September 6, 2026 at 1:27 PM
+                    - generic [ref=f26e931]: Attachment "phase3-attachment.zip" has unsupported type "application/zip".
+              - listitem [ref=f26e1035]:
+                - article "Awiden , Read the attachment, run /bin/sleep 300, then reply with the file contents. PHASE3_SHUTDOWN_CLEANUP Plaintext file preview controls Modify Attachment Modify Attachment Remove Message Attachment Delete , 1:42 PM" [ref=f26e1036]:
+                  - generic [ref=f26e1037]:
+                    - img [aria-hidden] [ref=f26e1038] [cursor=pointer]
+                    - heading [level=3] [ref=f26e1039]:
+                      - button "Awiden" [ref=f26e1041]
+                      - generic:
+                        - generic:
+                          - time:
+                            - generic [aria-hidden]: —
+                            - text: 1:42 PM
+                        - generic: Sunday, September 6, 2026 at 1:42 PM
+                    - generic [ref=f26e1042]:
+                      - text: Read the attachment, run
+                      - code [ref=f26e1043]: /bin/sleep 300
+                      - text: ", then reply with the file contents."
+                  - generic [ref=f26e1047]:
+                    - generic [ref=f26e1048]:
+                      - code [ref=f26e1051]: PHASE3_SHUTDOWN_CLEANUP
+                      - group "Plaintext file preview controls" [ref=f26e1052]:
+                        - generic [ref=f26e1053]:
+                          - generic [ref=f26e1054]:
+                            - generic [ref=f26e1055]: phase3-shutdown.txt
+                            - generic [ref=f26e1056]: phase3-shutdown.txt (1 KB)
+                          - generic [ref=f26e1057]: 1 KB
+                        - button "Change language" [ref=f26e1058] [cursor=pointer]
+                        - button "View whole file" [ref=f26e1062] [cursor=pointer]
+                        - button "More" [ref=f26e1065] [cursor=pointer]
+                    - generic [ref=f26e1068]:
+                      - button "Modify Attachment" [ref=f26e1069] [cursor=pointer]
+                      - generic [ref=f26e1072]: Modify Attachment
+                      - button "Remove Message Attachment" [ref=f26e1073] [cursor=pointer]
+                      - generic [ref=f26e1077]: Delete
+          - generic [ref=f26e506]:
+            - generic [ref=f26e511]:
+              - button "More message options" [ref=f26e513] [cursor=pointer]
+              - generic [ref=f26e518]:
+                - generic [aria-hidden]: "Message #work"
+                - 'textbox "Message #work" [active] [ref=f26e519]'
+              - generic [ref=f26e521]:
+                - generic [ref=f26e522]:
+                  - button "Send a gift" [ref=f26e523] [cursor=pointer]
+                  - generic [ref=f26e539]: Upgrade your friends! Gift them awesome chat perks with Nitro.
+                - button "Open GIF picker" [ref=f26e541] [cursor=pointer]
+                - generic [ref=f26e551]: Send GIF
+                - button "Open sticker picker" [ref=f26e553] [cursor=pointer]
+                - button "Add Emoji" [ref=f26e563] [cursor=pointer]
+                - button "Apps" [ref=f26e568] [cursor=pointer]
+            - generic [aria-hidden] [ref=f26e1081]:
+              - strong [ref=f26e1082]: GAIA
+              - text: is typing...
+            - generic:
+              - strong: GAIA
+              - text: is typing...
+        - complementary [ref=f26e586]:
+          - heading "Members list for work (channel)" [level=2] [ref=f26e588]
+          - list "Members" [ref=f26e589]:
+            - generic [ref=f26e590]:
+              - heading "Online, 2 members" [level=3] [ref=f26e591]:
+                - generic [aria-hidden] [ref=f26e593]:
+                  - generic [ref=f26e594]: Online
+                  - generic [ref=f26e595]: — 2
+              - listitem [ref=f26e596]:
+                - generic [ref=f26e598]:
+                  - img "awiden0370, Online" [ref=f26e948]
+                  - generic [ref=f26e603]:
+                    - generic [ref=f26e604]: Awiden
+                    - img "Server Owner" [ref=f26e609]
+                    - generic [ref=f26e611]: Server Owner
+              - listitem [ref=f26e612]:
+                - generic [ref=f26e614]:
+                  - img "GAIA, Online" [ref=f26e1083]
+                  - generic [ref=f26e619]:
+                    - generic [ref=f26e620]: GAIA
+                    - img "App" [ref=f26e625]:
+                      - generic [ref=f26e626]: APP

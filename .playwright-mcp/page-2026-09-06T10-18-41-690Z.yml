@@ -1,0 +1,135 @@
+- generic [ref=f3e3]:
+  - status
+  - generic [ref=f3e4]:
+    - banner [ref=f3e5]:
+      - generic [ref=f3e6]:
+        - link "Return to discord.dev" [ref=f3e8] [cursor=pointer]:
+          - /url: /developers/home
+        - generic [ref=f3e26]:
+          - button "Create menu" [ref=f3e27] [cursor=pointer]:
+            - generic [ref=f3e28]: Create
+          - button "Docs" [ref=f3e33] [cursor=pointer]
+          - button "Teams" [ref=f3e38] [cursor=pointer]
+          - button "Menu dell'utente" [ref=f3e48] [cursor=pointer]
+    - generic [ref=f3e42]:
+      - navigation [ref=f3e51]:
+        - generic [ref=f3e55]:
+          - link "Applicazioni" [ref=f3e56] [cursor=pointer]:
+            - /url: /developers/applications
+          - generic [ref=f3e65]:
+            - log [ref=f3e67]
+            - generic [ref=f3e68]:
+              - generic [ref=f3e69]:
+                - generic [ref=f3e71]:
+                  - generic [ref=f3e72]: G
+                  - generic [ref=f3e74]: GAIA
+                - combobox [ref=f3e75]
+              - generic [aria-hidden] [ref=f3e77] [cursor=pointer]
+          - generic [ref=f3e80]:
+            - button "Panoramica" [ref=f3e81] [cursor=pointer]
+            - list [ref=f3e87]:
+              - listitem [ref=f3e88]:
+                - link "Informazioni generali" [ref=f3e90] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/information
+              - listitem [ref=f3e92]:
+                - link "Installazione Novità" [ref=f3e94] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/installation
+                  - generic [ref=f3e96]:
+                    - text: Installazione
+                    - generic [ref=f3e97]: Novità
+              - listitem [ref=f3e100]:
+                - link "OAuth2" [ref=f3e102] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/oauth2
+              - listitem [ref=f3e104]:
+                - link "Bot" [ref=f3e106] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/bot
+              - listitem [ref=f3e108]:
+                - link "Emoji Novità" [ref=f3e110] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/emojis
+                  - generic [ref=f3e112]:
+                    - text: Emoji
+                    - generic [ref=f3e113]: Novità
+              - listitem [ref=f3e116]:
+                - link "Webhook Novità" [ref=f3e118] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/webhooks
+                  - generic [ref=f3e120]:
+                    - text: Webhook
+                    - generic [ref=f3e121]: Novità
+              - listitem [ref=f3e124]:
+                - link "Rich Presence" [ref=f3e126] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/rich-presence
+              - listitem [ref=f3e130]:
+                - link "Tester delle app" [ref=f3e132] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/testers
+              - listitem [ref=f3e134]:
+                - link "Verifica dell'app" [ref=f3e136] [cursor=pointer]:
+                  - /url: /developers/applications/1546097269613531246/verification-onboarding
+          - button "Giochi Novità" [ref=f3e142] [cursor=pointer]:
+            - generic [ref=f3e146]:
+              - text: Giochi
+              - generic [ref=f3e147]: Novità
+          - button "Attività" [ref=f3e153] [cursor=pointer]
+          - button "App premium" [ref=f3e160] [cursor=pointer]
+      - main [ref=f3e168]:
+        - generic [ref=f3e169]:
+          - generic [ref=f3e170]:
+            - heading "Installazione" [level=1] [ref=f3e171]
+            - paragraph [ref=f3e173]: Stabilisci come gli utenti potranno installare la tua app. Crea un link d'installazione, scegli quale contesto d'installazione supportare e stabilisci gli ambiti e i permessi che vuoi richiedere.
+          - generic [ref=f3e175]:
+            - heading "Contesti di installazione" [level=2] [ref=f3e177]
+            - generic [ref=f3e178]: Seleziona i contesti di installazione supportati dalla tua app. L'installazione può essere sia livello degli utenti che delle guild.
+            - group "Seleziona metodi" [ref=f3e179]:
+              - generic [ref=f3e181]:
+                - generic [aria-hidden] [ref=f3e182]: Seleziona metodi
+                - generic [ref=f3e183]: Seleziona i contesti di installazione supportati dalla tua app. L'installazione può essere sia livello degli utenti che delle guild.
+              - group "Installazione per utenti" [ref=f3e185]:
+                - generic [ref=f3e186]:
+                  - checkbox "Installazione per utenti" [checked] [ref=f3e188]
+                  - generic [ref=f3e194]: Installazione per utenti
+                - generic [ref=f3e197]:
+                  - checkbox "Installazione per guild" [checked] [ref=f3e199]
+                  - generic [ref=f3e205]: Installazione per guild
+          - generic [ref=f3e209]:
+            - heading "Link d'installazione" [level=2] [ref=f3e210]
+            - generic [ref=f3e211]: Usa il link d'installazione fornito da noi o registrane uno personalizzato. Se scegli un link personalizzato, gli utenti che aggiungono la tua app verranno reindirizzati al tuo URL invece che al flusso Aggiungi app di Discord.
+            - generic [ref=f3e212]:
+              - generic [ref=f3e216]:
+                - log [ref=f3e218]
+                - generic [ref=f3e219]:
+                  - generic [ref=f3e220]:
+                    - generic [ref=f3e221]: Link fornito da Discord
+                    - combobox "Link d'installazione" [ref=f3e222]
+                  - generic [aria-hidden] [ref=f3e224] [cursor=pointer]
+              - generic [ref=f3e229]:
+                - textbox [disabled] [ref=f3e230]: https://discord.com/oauth2/authorize?client_id=1546097269613531246
+                - button "Copia" [ref=f3e232] [cursor=pointer]
+          - generic [ref=f3e240]:
+            - heading "Impostazioni di installazione predefinite" [level=2] [ref=f3e242]
+            - generic [ref=f3e243]: Scegli l'insieme predefinito di ambiti e permessi che la tua applicazione richiederà.
+            - generic [ref=f3e244]:
+              - generic [ref=f3e245]:
+                - generic [ref=f3e246]:
+                  - heading "Installazione per utenti" [level=2] [ref=f3e247]
+                  - generic [ref=f3e248]: Gli utenti possono aggiungere la tua app al proprio account e usarla ovunque su Discord.
+                - generic [ref=f3e249]:
+                  - generic [ref=f3e250]: Ambiti
+                  - generic [ref=f3e255]:
+                    - log [ref=f3e257]
+                    - generic [ref=f3e258]:
+                      - generic [ref=f3e259]:
+                        - generic: applications.commands
+                        - combobox "Ambiti" [ref=f3e261]
+                      - generic [aria-hidden] [ref=f3e263] [cursor=pointer]
+              - generic [ref=f3e266]:
+                - generic [ref=f3e267]:
+                  - heading "Installazione per guild" [level=2] [ref=f3e268]
+                  - generic [ref=f3e269]: Gli utenti possono aggiungere la tua app a una guild, dandogli i permessi per eseguire azioni in quella guild.
+                - generic [ref=f3e270]:
+                  - generic [ref=f3e271]: Ambiti
+                  - generic [ref=f3e276]:
+                    - log [ref=f3e278]
+                    - generic [ref=f3e279]:
+                      - generic [ref=f3e280]:
+                        - generic: applications.commands
+                        - combobox "Ambiti" [ref=f3e282]
+                      - generic [aria-hidden] [ref=f3e284] [cursor=pointer]

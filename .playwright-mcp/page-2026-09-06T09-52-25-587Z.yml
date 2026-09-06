@@ -1,0 +1,61 @@
+- generic [ref=e1]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - link [ref=e8] [cursor=pointer]:
+          - /url: /developers/home
+        - generic [ref=e26]:
+          - button [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: Create
+          - button [ref=e33] [cursor=pointer]:
+            - generic [ref=e34]: Docs
+          - button [ref=e38] [cursor=pointer]:
+            - generic [ref=e41]: Teams
+    - generic [ref=e42]:
+      - navigation [ref=e43]:
+        - generic [ref=e48]:
+          - link [ref=e49] [cursor=pointer]:
+            - /url: /developers/home
+            - text: Home
+          - link [ref=e50] [cursor=pointer]:
+            - /url: /developers/applications
+            - text: Applications
+          - link [ref=e51] [cursor=pointer]:
+            - /url: /developers/embeds
+            - text: Embed Debugger
+      - main [ref=e52]:
+        - generic [ref=e53]:
+          - heading [level=1] [ref=e54]:
+            - generic [ref=e55]: Applications
+            - button [ref=e57] [cursor=pointer]:
+              - generic [ref=e58]: New Application
+          - paragraph [ref=e61]:
+            - text: Develop
+            - button [ref=e62] [cursor=pointer]: apps
+            - text: to customize and extend Discord for millions of users.
+        - generic [ref=e64]:
+          - generic [ref=e65]:
+            - generic [ref=e66]: "Sort By:"
+            - generic [ref=e70]:
+              - log [ref=e72]
+              - generic [ref=e73]:
+                - generic [ref=e74]:
+                  - generic [ref=e75]: Date Created
+                  - combobox [ref=e76]
+                - generic [aria-hidden] [ref=e78] [cursor=pointer]
+          - generic [ref=e81]:
+            - button [ref=e82] [cursor=pointer]:
+              - generic [ref=e85]: Small
+            - button [ref=e86] [cursor=pointer]:
+              - generic [ref=e89]: Large
+  - generic:
+    - dialog "Welcome to the Developer Portal":
+      - generic [ref=e90]:
+        - banner [ref=e92]:
+          - generic [ref=e93]:
+            - heading "Welcome to the Developer Portal" [level=1] [ref=e100]
+            - generic [ref=e101]: Nurture communities, level up games, and bring players together with a suite of tools built by Discord and powered by developers.
+        - contentinfo [ref=e103]:
+          - generic [ref=e105]:
+            - button "Create Account" [ref=e106] [cursor=pointer]
+            - button "Log In" [active] [ref=e110] [cursor=pointer]

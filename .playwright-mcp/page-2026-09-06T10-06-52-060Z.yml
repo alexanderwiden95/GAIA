@@ -1,0 +1,106 @@
+- generic [ref=f13e4]:
+  - dialog "GAIA awiden0370 GAIA App vuole accedere al tuo account di Discord Registrato come awiden0370Non sei tu?" [ref=f13e9]:
+    - generic [ref=f13e12]:
+      - banner
+      - main [ref=f13e15]:
+        - generic [ref=f13e16]:
+          - generic [ref=f13e17]:
+            - generic [ref=f13e18]:
+              - img "GAIA" [ref=f13e19]
+              - img "awiden0370" [ref=f13e24]
+            - generic [ref=f13e25]:
+              - text: GAIA
+              - img "App" [ref=f13e26]:
+                - generic [ref=f13e27]: APP
+            - generic [ref=f13e28]: vuole accedere al tuo account di Discord
+            - generic [ref=f13e30]:
+              - text: Registrato come awiden0370
+              - button "Non sei tu?" [ref=f13e31] [cursor=pointer]
+          - generic [ref=f13e33]:
+            - generic [ref=f13e88]:
+              - generic [ref=f13e89]:
+                - text: Conferma di voler dare a
+                - strong [ref=f13e90]: GAIA
+                - text: le seguenti autorizzazioni su
+                - strong [ref=f13e91]: GAIA
+                - text: ":"
+              - list [ref=f13e92]:
+                - listitem [ref=f13e93]:
+                  - generic [ref=f13e94]:
+                    - checkbox "Visualizzare i canali" [checked] [ref=f13e96]
+                    - generic [ref=f13e102]: Visualizzare i canali
+                - listitem [ref=f13e105]:
+                  - generic [ref=f13e106]:
+                    - checkbox "Inviare i messaggi" [checked] [ref=f13e108]
+                    - generic [ref=f13e114]: Inviare i messaggi
+                - listitem [ref=f13e117]:
+                  - generic [ref=f13e118]:
+                    - checkbox "Invia messaggi nei thread" [checked] [ref=f13e120]
+                    - generic [ref=f13e126]: Invia messaggi nei thread
+                - listitem [ref=f13e129]:
+                  - generic [ref=f13e130]:
+                    - checkbox "Crea thread pubblici" [checked] [ref=f13e132]
+                    - generic [ref=f13e138]: Crea thread pubblici
+                - listitem [ref=f13e141]:
+                  - generic [ref=f13e142]:
+                    - checkbox "Incorporare i link" [checked] [ref=f13e144]
+                    - generic [ref=f13e150]: Incorporare i link
+                - listitem [ref=f13e153]:
+                  - generic [ref=f13e154]:
+                    - checkbox "Allegare i file" [checked] [ref=f13e156]
+                    - generic [ref=f13e162]: Allegare i file
+                - listitem [ref=f13e165]:
+                  - generic [ref=f13e166]:
+                    - checkbox "Leggere la cronologia dei messaggi" [checked] [ref=f13e168]
+                    - generic [ref=f13e174]: Leggere la cronologia dei messaggi
+                - listitem [ref=f13e177]:
+                  - generic [ref=f13e178]:
+                    - checkbox "Usa comandi applicazioni" [checked] [ref=f13e180]
+                    - generic [ref=f13e186]: Usa comandi applicazioni
+            - generic [ref=f13e189]:
+              - generic [ref=f13e190]: L'informativa sulla privacy e i termini di servizio dello sviluppatore di GAIA sono validi per questa applicazione.
+              - generic [ref=f13e194]: Attivo fin dal 6 set 2026
+              - generic [ref=f13e198]: Usato in 0 server
+              - generic [ref=f13e207]:
+                - text: Questa applicazione
+                - strong [ref=f13e208]: non può
+                - text: leggere o inviare messaggi a nome tuo.
+      - contentinfo [ref=f13e76]:
+        - generic [ref=f13e78]:
+          - button "Indietro" [ref=f13e209] [cursor=pointer]
+          - button "Autorizza Caricamento" [ref=f13e211] [cursor=pointer]:
+            - generic [ref=f13e84]:
+              - generic [ref=f13e85]: Autorizza
+              - img "Caricamento" [ref=f13e213]
+  - generic:
+    - generic:
+      - dialog "Aspetta! Sei un essere umano?":
+        - generic:
+          - generic:
+            - log:
+              - generic: Caricamento
+            - log
+        - generic [ref=f13e218]:
+          - banner [ref=f13e220]:
+            - generic [ref=f13e221]:
+              - button "Chiudi" [active] [ref=f13e229] [cursor=pointer]
+              - heading "Aspetta! Sei un essere umano?" [level=1] [ref=f13e234]
+              - generic [ref=f13e235]: Conferma di non essere un robot.
+          - main [ref=f13e239]:
+            - iframe [ref=f13e242]:
+              - generic [ref=f15e2] [cursor=pointer]:
+                - checkbox "'I am human', Select in order to trigger the challenge, or to bypass it if you have an accessibility cookie" [ref=f15e7]
+                - generic [ref=f15e8]: I am human
+                - generic [ref=f15e12]:
+                  - generic "hCaptcha" [ref=f15e13]:
+                    - button "hCaptcha logo, opens new window with more information" [ref=f15e14]
+                  - generic [ref=f15e78]:
+                    - link "hCaptcha Privacy Policy, opens in a new tab" [ref=f15e79]:
+                      - /url: https://hcaptcha.com/privacy?ref=discord.com&utm_campaign=a9b5fb07-92ff-493f-86fe-352a2803b3df&utm_medium=checkbox&hl=en
+                      - text: Privacy
+                    - text: "-"
+                    - link "hCaptcha Terms of Service, opens in a new tab" [ref=f15e80]:
+                      - /url: https://hcaptcha.com/terms?ref=discord.com&utm_campaign=a9b5fb07-92ff-493f-86fe-352a2803b3df&utm_medium=checkbox&hl=en
+                      - text: Terms
+                  - generic:
+                    - img "Brand"
