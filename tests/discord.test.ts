@@ -7,6 +7,7 @@ import {
   isAllowedSource,
   parseAccessConfig,
   splitDiscordMessage,
+  specialistStatus,
   validateAttachmentBytes,
   validateDiscordAttachment,
   type DiscordSource,
@@ -124,4 +125,14 @@ test("longer Markdown fence delimiters remain balanced", () => {
   assert(chunks.every((chunk) => chunk.length <= 2_000));
   assert.equal(chunks[0]?.endsWith(`\n${delimiter}`), true);
   assert.equal(chunks[1]?.startsWith(`${delimiter}js\n`), true);
+});
+
+test("specialist status stays bounded and neutralizes Markdown and mentions", () => {
+  const status = specialistStatus(Array.from({ length: 20 }, (_, index) => ({
+    threadId: String(index), agent: "MINERVA", status: "completed", summary: "@everyone **untrusted**\n".repeat(100),
+  })));
+  assert(status.length <= 2_000);
+  assert(status.includes("latest 6 of 20"));
+  assert(!status.includes("@everyone"));
+  assert(!status.includes("**untrusted**"));
 });

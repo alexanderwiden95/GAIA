@@ -4,6 +4,7 @@ import { mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import readline from "node:readline";
+import { AGENT_NAMES, GAIA_INSTRUCTIONS, installAgents } from "./agents.ts";
 
 import type { InitializeParams } from "./protocol/InitializeParams.ts";
 import type { RequestId } from "./protocol/RequestId.ts";
@@ -14,6 +15,7 @@ import type { ThreadStartResponse } from "./protocol/v2/ThreadStartResponse.ts";
 import type { FileUpdateChange } from "./protocol/v2/FileUpdateChange.ts";
 import type { RequestPermissionProfile } from "./protocol/v2/RequestPermissionProfile.ts";
 import type { ThreadItem } from "./protocol/v2/ThreadItem.ts";
+import type { Thread } from "./protocol/v2/Thread.ts";
 import type { TurnStartResponse } from "./protocol/v2/TurnStartResponse.ts";
 import type { TurnStatus } from "./protocol/v2/TurnStatus.ts";
 import type { UserInput } from "./protocol/v2/UserInput.ts";
@@ -50,6 +52,8 @@ type TurnCollector = {
   onStarted?: (turnId: string) => void;
   onApproval?: (request: CodexApproval) => Promise<"approve" | "deny">;
   onActivity?: (activity: CodexActivity) => void;
+  onAgent?: (activity: CodexAgentActivity) => void;
+  agentEvents: Promise<void>;
   fileChanges: Map<string, FileUpdateChange[]>;
 };
 
@@ -64,11 +68,32 @@ export type TurnCallbacks = {
   onStarted?: (turnId: string) => void;
   onApproval?: (request: CodexApproval) => Promise<"approve" | "deny">;
   onActivity?: (activity: CodexActivity) => void;
+  onAgent?: (activity: CodexAgentActivity) => void;
 };
+
+export type CodexAgentActivity = {
+  threadId: string;
+  agent: string;
+  status: string;
+  summary: string;
+};
+
+type Specialist = {
+  rootId: string;
+  collector: TurnCollector;
+  agent: string;
+  turnId: string | null;
+  finalText: string;
+  lastStatus: string;
+  lastSummary: string;
+  fileChanges: Map<string, FileUpdateChange[]>;
+};
+
+const DYNAMIC_NAMES = ["HERMES", "HESTIA", "IRIS", "SELENE", "ATLAS", "EOS"];
 
 export type CodexApproval = {
   kind: "command" | "fileChange" | "permissions";
-  agent: "GAIA";
+  agent: string;
   action: string;
   target: string;
   reason: string;
@@ -76,6 +101,7 @@ export type CodexApproval = {
 };
 
 export type CodexActivity = {
+  agent?: string;
   kind: "command" | "fileChange";
   status: string;
   summary: string;
@@ -125,6 +151,8 @@ export class CodexClient {
   private readonly pending = new Map<RequestId, PendingRequest>();
   private readonly turns = new Map<string, TurnCollector>();
   private readonly resumedThreads = new Map<string, string | null>();
+  private readonly specialists = new Map<string, Specialist>();
+  private nextSpecialist = 0;
 
   async start(): Promise<void> {
     if (this.starting) {
@@ -148,16 +176,16 @@ export class CodexClient {
           approvalPolicy: "untrusted",
           approvalsReviewer: "user",
           sandbox: "workspace-write",
-          developerInstructions: WORKSPACE_INSTRUCTIONS,
-          config: { features: { shell_tool: true, unified_exec: true } },
+          developerInstructions: `${GAIA_INSTRUCTIONS}\n${WORKSPACE_INSTRUCTIONS}`,
+          config: { agents: { enabled: true }, features: { multi_agent: true, shell_tool: true, unified_exec: true } },
         } as const
       : {
           cwd: CHAT_DIRECTORY,
           approvalPolicy: "never",
           approvalsReviewer: "user",
           sandbox: "read-only",
-          developerInstructions: CHAT_INSTRUCTIONS,
-          config: { features: { shell_tool: false, unified_exec: false } },
+          developerInstructions: `${GAIA_INSTRUCTIONS}\n${CHAT_INSTRUCTIONS}\nDelegation is unavailable in conversation-only mode. Answer directly.`,
+          config: { agents: { enabled: false }, features: { multi_agent: false, shell_tool: false, unified_exec: false } },
         } as const;
     if (!threadId) {
       const started = await this.rawRequest<ThreadStartResponse>("thread/start", {
@@ -201,6 +229,7 @@ export class CodexClient {
       done: false,
       interruptRequested: false,
       fileChanges: new Map(),
+      agentEvents: Promise.resolve(),
       resolve: resolveTurn,
       reject: rejectTurn,
       ...callbacks,
@@ -222,7 +251,9 @@ export class CodexClient {
         input,
       });
       this.setTurnId(collector, started.turn.id);
-      return await this.withTimeout(completed, TURN_TIMEOUT_MS, "Codex turn");
+      const result = await this.withTimeout(completed, TURN_TIMEOUT_MS, "Codex turn");
+      await collector.agentEvents;
+      return result;
     } catch (error) {
       if (!collector.done && collector.turnId) {
         await this.rawRequest("turn/interrupt", { threadId, turnId: collector.turnId }).catch(() => undefined);
@@ -230,7 +261,12 @@ export class CodexClient {
       }
       throw error;
     } finally {
+      await collector.agentEvents;
+      await this.interruptSpecialists(threadId, collector);
       this.turns.delete(threadId);
+      for (const [id, specialist] of this.specialists) {
+        if (specialist.rootId === threadId) this.specialists.delete(id);
+      }
     }
   }
 
@@ -239,8 +275,10 @@ export class CodexClient {
     if (!collector) return false;
     collector.interruptRequested = true;
     const turnId = collector.turnId;
-    if (!turnId) return true;
-    await this.rawRequest("turn/interrupt", { threadId, turnId });
+    if (turnId) await this.rawRequest("turn/interrupt", { threadId, turnId });
+    if (this.turns.get(threadId) !== collector) return true;
+    await collector.agentEvents;
+    await this.interruptSpecialists(threadId, collector);
     return true;
   }
 
@@ -256,11 +294,18 @@ export class CodexClient {
     await this.starting?.catch(() => undefined);
     const child = this.child;
     if (!child || child.exitCode !== null || child.signalCode !== null) return;
+    const exited = once(child, "exit").then(() => undefined);
     child.kill("SIGTERM");
-    await this.withTimeout(once(child, "exit").then(() => undefined), 10_000, "Codex shutdown");
+    try {
+      await this.withTimeout(exited, 10_000, "Codex shutdown");
+    } catch {
+      child.kill("SIGKILL");
+      await this.withTimeout(exited, 5_000, "Codex forced shutdown");
+    }
   }
 
   private async spawnAndInitialize(): Promise<void> {
+    await installAgents();
     await mkdir(CHAT_DIRECTORY, { recursive: true, mode: 0o700 });
     const env: NodeJS.ProcessEnv = {};
     for (const name of ["CODEX_HOME", "HOME", "LANG", "LC_ALL", "PATH", "SHELL", "TERM", "TMPDIR", "USER"]) {
@@ -268,11 +313,16 @@ export class CodexClient {
     }
     const mcpList = spawnSync("codex", ["mcp", "list", "--json"], { env, encoding: "utf8", timeout: REQUEST_TIMEOUT_MS });
     if (mcpList.status !== 0) throw new Error("Could not enumerate Codex MCP servers");
-    let mcpNames: string[];
+    let mcpOverrides: string[];
     try {
-      const servers = JSON.parse(mcpList.stdout) as Array<{ name?: unknown }>;
-      mcpNames = servers.map((server) => server.name).filter((name): name is string => typeof name === "string");
-      if (mcpNames.some((name) => !/^[a-zA-Z0-9_-]+$/.test(name))) throw new Error("Codex MCP server name cannot be disabled safely");
+      const servers = JSON.parse(mcpList.stdout) as Array<{ name: string; transport: { type: string } }>;
+      mcpOverrides = servers.map(({ name, transport }) => {
+        if (typeof name !== "string" || !/^[a-zA-Z0-9_-]+$/.test(name)) throw new Error("Codex MCP server name cannot be disabled safely");
+        // Role config loading also parses overrides alone, so disabled entries still need a transport.
+        if (transport.type === "stdio") return `mcp_servers.${name}={enabled=false,command="/usr/bin/false"}`;
+        if (transport.type === "streamable_http") return `mcp_servers.${name}={enabled=false,url="http://127.0.0.1:1"}`;
+        throw new Error("Unsupported Codex MCP transport");
+      });
     } catch {
       throw new Error("Codex returned an invalid MCP server list");
     }
@@ -281,8 +331,11 @@ export class CodexClient {
       "--stdio",
       "-c", "notify=[]",
       "-c", 'web_search="disabled"',
-      ...mcpNames.flatMap((name) => ["-c", `mcp_servers.${name}.enabled=false`]),
-      ...["apps", "browser_use", "computer_use", "hooks", "image_generation", "in_app_local_automation", "multi_agent", "plugins", "skill_search", "sleep_tool", "view_image"].flatMap((feature) => ["--disable", feature]),
+      "-c", "agents.max_concurrent_threads_per_session=2",
+      "-c", "agents.max_depth=1",
+      "--disable", "multi_agent_v2",
+      ...mcpOverrides.flatMap((override) => ["-c", override]),
+      ...["apps", "browser_use", "computer_use", "hooks", "image_generation", "in_app_local_automation", "plugins", "skill_search", "sleep_tool", "view_image"].flatMap((feature) => ["--disable", feature]),
     ];
     const child = spawn("codex", args, { env, stdio: ["pipe", "pipe", "pipe"] });
     this.child = child;
@@ -390,14 +443,17 @@ export class CodexClient {
   }>): Promise<void> {
     const child = this.child;
     const threadId = "threadId" in request.params ? request.params.threadId : request.params.conversationId;
-    const collector = this.turns.get(threadId);
+    const root = this.turns.get(threadId);
+    const specialist = root ? undefined : await this.identifySpecialist(threadId);
+    const collector = root ?? specialist?.collector;
+    const agent = specialist?.agent ?? "GAIA";
     let approval: CodexApproval;
 
     if (request.method === "item/commandExecution/requestApproval") {
       const target = request.params.command ?? request.params.commandActions?.map((action) => action.command).join("\n") ?? "Running command";
       approval = {
         kind: "command",
-        agent: "GAIA",
+        agent,
         action: request.params.kind === "writeStdin" ? "Write to a running command" : "Run a local command",
         target,
         reason: request.params.reason ?? "Codex requested permission before execution.",
@@ -407,17 +463,17 @@ export class CodexClient {
       const target = request.params.command.join(" ");
       approval = {
         kind: "command",
-        agent: "GAIA",
+        agent,
         action: "Run a local command",
         target,
         reason: request.params.reason ?? "Codex requested permission before execution.",
         risk: isHadesAction(target) ? "HADES-class: destructive or irreversible command." : "The command may change local files or processes.",
       };
     } else if (request.method === "item/fileChange/requestApproval") {
-      const changes = collector?.fileChanges.get(request.params.itemId) ?? [];
+      const changes = (specialist ?? collector)?.fileChanges.get(request.params.itemId) ?? [];
       approval = {
         kind: "fileChange",
-        agent: "GAIA",
+        agent,
         action: "Apply file changes",
         target: fileTarget(changes.length ? changes : request.params.grantRoot ? [{ path: request.params.grantRoot, kind: { type: "update", move_path: null }, diff: "" }] : []),
         reason: request.params.reason ?? "Codex requested permission before changing files.",
@@ -433,7 +489,7 @@ export class CodexClient {
       }));
       approval = {
         kind: "fileChange",
-        agent: "GAIA",
+        agent,
         action: "Apply file changes",
         target: fileTarget(changes),
         reason: request.params.reason ?? "Codex requested permission before changing files.",
@@ -442,7 +498,7 @@ export class CodexClient {
     } else {
       approval = {
         kind: "permissions",
-        agent: "GAIA",
+        agent,
         action: "Expand sandbox permissions",
         target: permissionTarget(request.params.permissions),
         reason: request.params.reason ?? "Codex requested access beyond the current sandbox.",
@@ -450,7 +506,8 @@ export class CodexClient {
       };
     }
 
-    const approved = await collector?.onApproval?.(approval) === "approve";
+    const decision = !collector?.done && !collector?.interruptRequested && await collector?.onApproval?.(approval) === "approve";
+    const approved = decision && !collector?.done && !collector?.interruptRequested && this.turns.get(specialist?.rootId ?? threadId) === collector;
     if (child !== this.child) return;
     if (request.method === "item/permissions/requestApproval") {
       const permissions = approved ? {
@@ -466,18 +523,79 @@ export class CodexClient {
     if (!approved && collector?.turnId) {
       void this.rawRequest("turn/steer", {
         threadId,
-        expectedTurnId: collector.turnId,
+        expectedTurnId: specialist?.turnId ?? collector.turnId,
         input: [{ type: "text", text: "The owner denied that action. Continue without it and explain any limitation.", text_elements: [] }],
       }).catch(() => undefined);
     }
   }
 
   private handleNotification(notification: ServerNotification): void {
+    if (notification.method === "thread/started") {
+      this.registerSpecialist(notification.params.thread);
+      return;
+    }
     const params = notification.params as { threadId?: string; turnId?: string; turn?: { id: string } };
+    const specialist = params.threadId ? this.specialists.get(params.threadId) : undefined;
+    if (specialist && params.threadId) {
+      const parent = this.turns.get(specialist.rootId);
+      if (!parent || parent !== specialist.collector) return;
+      if (notification.method === "turn/started") {
+        specialist.turnId = notification.params.turn.id;
+        specialist.finalText = "";
+        specialist.fileChanges.clear();
+        this.reportSpecialist(params.threadId, specialist, "running", "");
+      }
+      const childTurnId = params.turnId ?? params.turn?.id;
+      if (specialist.turnId && childTurnId && specialist.turnId !== childTurnId) return;
+      if (notification.method === "item/fileChange/patchUpdated") specialist.fileChanges.set(notification.params.itemId, notification.params.changes);
+      if (notification.method === "item/started" && notification.params.item.type === "fileChange") specialist.fileChanges.set(notification.params.item.id, notification.params.item.changes);
+      if (notification.method === "item/completed") {
+        const item = notification.params.item;
+        if (item.type === "agentMessage" && item.phase !== "commentary") specialist.finalText = item.text;
+        else this.reportActivity(parent, item, specialist.agent, specialist.fileChanges);
+      }
+      if (notification.method === "turn/completed") {
+        specialist.turnId = null;
+        this.reportSpecialist(params.threadId, specialist, notification.params.turn.status, specialist.finalText);
+      }
+      return;
+    }
     const collector = params.threadId ? this.turns.get(params.threadId) : undefined;
     if (!collector) return;
     const notificationTurnId = params.turnId ?? params.turn?.id;
     if (collector.turnId && notificationTurnId && collector.turnId !== notificationTurnId) return;
+
+    if (notification.method === "item/completed" && notification.params.item.type === "subAgentActivity") {
+      const item = notification.params.item;
+      collector.agentEvents = collector.agentEvents.then(async () => {
+        if (this.turns.get(params.threadId!) !== collector) return;
+        const worker = await this.identifySpecialist(item.agentThreadId);
+        if (!worker || worker.rootId !== params.threadId) return;
+        if (item.kind === "completed") {
+          const { thread } = await this.rawRequest<{ thread: Thread }>("thread/read", { threadId: item.agentThreadId, includeTurns: true });
+          const turn = thread.turns.at(-1);
+          const result = turn?.items.findLast((entry) => entry.type === "agentMessage" && entry.phase !== "commentary");
+          this.reportSpecialist(item.agentThreadId, worker, turn?.status ?? "completed", result?.type === "agentMessage" ? result.text : worker.finalText);
+        } else if (item.kind === "interrupted" && worker.lastStatus !== "completed") {
+          this.reportSpecialist(item.agentThreadId, worker, "interrupted", "");
+        }
+      }).catch(() => console.error("Could not resolve specialist activity"));
+      return;
+    }
+
+    if (notification.method === "item/completed" && notification.params.item.type === "collabAgentToolCall") {
+      const item = notification.params.item;
+      collector.agentEvents = collector.agentEvents.then(async () => {
+        if (this.turns.get(params.threadId!) !== collector) return;
+        for (const id of item.receiverThreadIds) {
+          const worker = await this.identifySpecialist(id);
+          if (!worker || worker.rootId !== params.threadId) continue;
+          const state = item.agentsStates[id];
+          if (state) this.reportSpecialist(id, worker, state.status, state.message ?? "");
+        }
+      }).catch(() => console.error("Could not resolve specialist activity"));
+      return;
+    }
 
     if (notification.method === "turn/started") {
       this.setTurnId(collector, notification.params.turn.id);
@@ -521,22 +639,96 @@ export class CodexClient {
     }
   }
 
-  private reportActivity(collector: TurnCollector, item: ThreadItem): void {
+  private reportActivity(collector: TurnCollector, item: ThreadItem, agent = "GAIA", fileChanges = collector.fileChanges): void {
     if (item.type === "commandExecution") {
       collector.onActivity?.({
         kind: "command",
+        agent,
         status: item.status,
         summary: `${item.command}\nWorking directory: ${item.cwd}${item.exitCode === null ? "" : `\nExit code: ${item.exitCode}`}`,
       });
     } else if (item.type === "fileChange") {
-      collector.fileChanges.set(item.id, item.changes);
+      fileChanges.set(item.id, item.changes);
       collector.onActivity?.({
         kind: "fileChange",
+        agent,
         status: item.status,
         summary: fileTarget(item.changes),
         count: item.changes.length,
       });
     }
+  }
+
+  private registerSpecialist(thread: Thread, roots = this.turns): Specialist | undefined {
+    const existing = this.specialists.get(thread.id);
+    if (existing) return roots.get(existing.rootId) === existing.collector && this.turns.get(existing.rootId) === existing.collector ? existing : undefined;
+    const parentId = thread.parentThreadId ?? (typeof thread.source === "object" && "subAgent" in thread.source && typeof thread.source.subAgent === "object" && "thread_spawn" in thread.source.subAgent ? thread.source.subAgent.thread_spawn.parent_thread_id : null);
+    const collector = parentId ? roots.get(parentId) : undefined;
+    if (!parentId || !collector || this.turns.get(parentId) !== collector) return;
+    const index = this.nextSpecialist++;
+    const specialist: Specialist = {
+      rootId: parentId,
+      collector,
+      agent: thread.agentRole && AGENT_NAMES.includes(thread.agentRole) ? thread.agentRole : `${DYNAMIC_NAMES[index % DYNAMIC_NAMES.length]}-${index + 1}`,
+      turnId: null,
+      finalText: "",
+      lastStatus: "",
+      lastSummary: "",
+      fileChanges: new Map(),
+    };
+    this.specialists.set(thread.id, specialist);
+    this.reportSpecialist(thread.id, specialist, "running", "");
+    return specialist;
+  }
+
+  private async identifySpecialist(threadId: string): Promise<Specialist | undefined> {
+    const known = this.specialists.get(threadId);
+    if (known) return this.turns.get(known.rootId) === known.collector ? known : undefined;
+    const roots = new Map(this.turns);
+    for (const delay of [0, 100, 300]) {
+      if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+      try {
+        const { thread } = await this.rawRequest<{ thread: Thread }>("thread/read", { threadId, includeTurns: false });
+        return this.registerSpecialist(thread, roots);
+      } catch (error) {
+        // A spawn acknowledgement can precede the child's readable thread metadata.
+        if (delay === 300 || !(error instanceof Error) || !/^-\d+:/.test(error.message)) throw error;
+      }
+    }
+  }
+
+  private reportSpecialist(threadId: string, specialist: Specialist, status: string, summary: string): void {
+    if (status === "pendingInit") status = "running";
+    if (status === "shutdown" && specialist.lastStatus === "completed") return;
+    if (specialist.lastStatus === status && (!summary || summary === specialist.lastSummary)) return;
+    specialist.lastStatus = status;
+    specialist.lastSummary = summary;
+    if (summary) specialist.finalText = summary;
+    if (this.turns.get(specialist.rootId) === specialist.collector) specialist.collector.onAgent?.({ threadId, agent: specialist.agent, status, summary: summary.slice(0, 1_200) });
+  }
+
+  private async interruptSpecialists(rootId: string, collector: TurnCollector): Promise<void> {
+    await Promise.all([...this.specialists.entries()].filter(([, worker]) => worker.rootId === rootId && worker.collector === collector).map(async ([threadId, worker]) => {
+      try {
+        const deadline = Date.now() + 10_000;
+        let interrupted = false;
+        while (true) {
+          if (this.turns.get(rootId) !== collector) return;
+          const { thread } = await this.rawRequest<{ thread: Thread }>("thread/read", { threadId, includeTurns: true });
+          if (this.turns.get(rootId) !== collector) return;
+          const turn = thread.turns.findLast((turn) => turn.status === "inProgress");
+          if (!turn && thread.status?.type !== "active") break;
+          if (Date.now() >= deadline) throw new Error("Specialist did not stop");
+          if (turn) await this.rawRequest("turn/interrupt", { threadId, turnId: turn.id });
+          interrupted = true;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        if (interrupted) this.reportSpecialist(threadId, worker, "interrupted", "Stopped with the parent turn.");
+      } catch {
+        // Fail closed if a child cannot be stopped before its parent releases the workspace.
+        await this.stop();
+      }
+    }));
   }
 
   private setTurnId(collector: TurnCollector, turnId: string): void {
@@ -557,6 +749,7 @@ export class CodexClient {
     if (this.child !== child) return;
     this.child = null;
     this.resumedThreads.clear();
+    this.specialists.clear();
     this.rejectAll(error);
   }
 

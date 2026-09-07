@@ -78,6 +78,36 @@ Approval and action records contain only status and redacted categorical
 metadata, not command text, file contents, or credentials. Remembered approvals
 are intentionally not offered; use approve-once for every request.
 
+## Named Specialists
+
+In workspace-enrolled channels, GAIA can delegate to APOLLO (documentation),
+MINERVA (security), HEPHAESTUS (coding), AETHER (infrastructure), POSEIDON (data),
+DEMETER (frontend), ARTEMIS (testing), ELEUTHIA (accounts), and HADES (recovery).
+She delegates only when useful and consolidates the results. Conversation-only
+channels still have no shell or delegation tools.
+
+Startup installs the versioned `config/codex/agents/gaia-*.toml` files into
+`$CODEX_HOME/agents/`, or `~/.codex/agents/` by default. These are also visible to
+other Codex sessions using that home. Existing identical files are left alone;
+different files or symlinks at those names stop startup rather than being
+overwritten. Preserve and move conflicting files before retrying an update.
+GAIA's runtime instructions live in `src/agents.ts`, not this implementation plan.
+
+Codex caps spawned workers at two per session; the daemon allows two channel
+turns, so up to four specialists can work across channels. Specialist roles
+provide narrow defaults, not a way around the parent's sandbox or owner
+approvals. Nested delegation is prohibited by instructions and disabled in the
+fixed agent definitions. Temporary workers receive application display names
+such as `HERMES-1`; they do not create permanent configuration.
+
+One throttled Discord status message shows up to six recent specialists with
+bounded result excerpts. Full consolidated findings come from GAIA; individual
+tool chatter stays in the categorical audit trail. Approval prompts identify the
+requesting specialist. Cancellation checks that child turns have stopped before
+releasing the channel; an unresponsive child causes the app-server to stop.
+Some models expose interruption rather than a close-agent tool, so completed
+workers may remain in Codex history without running in the background.
+
 ## Run
 
 Install packages once, then start PostgreSQL, apply migrations, and start GAIA:
@@ -107,6 +137,18 @@ npm run test:db
 npm run typecheck
 npm audit
 ```
+
+Optional live specialist acceptance checks use the existing ChatGPT login,
+consume subscription usage, and automatically deny every requested action:
+
+```sh
+npm run test:agents
+npm run test:agents -- gpt-5.5
+```
+
+They verify two fixed specialists, a temporary worker, the configured concurrency
+cap, HADES deletion denial in a temporary workspace, and conversation-only
+boundaries. The second command exercises the older model's collaboration events.
 
 In an allowed Discord channel, send ordinary messages to talk with GAIA. Each
 channel keeps an independent Codex thread across daemon restarts. Use `/gaia

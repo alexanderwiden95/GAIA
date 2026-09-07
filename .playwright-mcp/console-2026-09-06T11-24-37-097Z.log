@@ -616,3 +616,135 @@ color: purple;
 font-weight: bold;
 color: purple;
  Finished draining message from queue LogId:947 QueueLength: 0 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[28336806ms] [LOG] %c[Routing/Utils] 
+font-weight: bold;
+color: purple;
+ transitionTo - Transitioning to /channels/1546099225727864832/1546108894965927936 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[31288747ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECT] wss://gateway-us-east1-d.discord.gg, encoding: json, version: 9, compression: zlib-stream @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[31288986ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECTED] wss://gateway-us-east1-d.discord.gg/?encoding=json&v=9&compress=zlib-stream in 238 ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[31288987ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUME] resuming session 9f9446817ff09d85fa532f99d9932627, seq: 151 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[31289178ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching CONNECTION_RESUMED @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[31289192ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUMED] took 444ms, replayed 0 events, new seq: 152 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[32385876ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECT] wss://gateway-us-east1-d.discord.gg, encoding: json, version: 9, compression: zlib-stream @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[32386096ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECTED] wss://gateway-us-east1-d.discord.gg/?encoding=json&v=9&compress=zlib-stream in 219 ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[32386098ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUME] resuming session 9f9446817ff09d85fa532f99d9932627, seq: 153 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[32386294ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching CONNECTION_RESUMED @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[32386297ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUMED] took 421ms, replayed 0 events, new seq: 154 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[34692332ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECT] wss://gateway-us-east1-d.discord.gg, encoding: json, version: 9, compression: zlib-stream @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[34692559ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECTED] wss://gateway-us-east1-d.discord.gg/?encoding=json&v=9&compress=zlib-stream in 227 ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[34692559ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUME] resuming session 9f9446817ff09d85fa532f99d9932627, seq: 155 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[34692750ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching CONNECTION_RESUMED @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[34692753ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUMED] took 421ms, replayed 0 events, new seq: 156 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[37862501ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECT] wss://gateway-us-east1-d.discord.gg, encoding: json, version: 9, compression: zlib-stream @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[37862735ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECTED] wss://gateway-us-east1-d.discord.gg/?encoding=json&v=9&compress=zlib-stream in 234 ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[37862735ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUME] resuming session 9f9446817ff09d85fa532f99d9932627, seq: 157 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[37862929ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching CONNECTION_RESUMED @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[37862932ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUMED] took 432ms, replayed 0 events, new seq: 158 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[42365146ms] [INFO] %c[libdiscore] 
+font-weight: bold;
+color: purple;
+ [BlockedDomainsStore] Successfully fetched blocked domains @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[50420340ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECT] wss://gateway-us-east1-d.discord.gg, encoding: json, version: 9, compression: zlib-stream @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[50420621ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECTED] wss://gateway-us-east1-d.discord.gg/?encoding=json&v=9&compress=zlib-stream in 280 ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[50420621ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUME] resuming session 9f9446817ff09d85fa532f99d9932627, seq: 159 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[50420813ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching CONNECTION_RESUMED @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[50420814ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUMED] took 474ms, replayed 0 events, new seq: 160 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[55392540ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECT] wss://gateway-us-east1-d.discord.gg, encoding: json, version: 9, compression: zlib-stream @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[55392777ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [CONNECTED] wss://gateway-us-east1-d.discord.gg/?encoding=json&v=9&compress=zlib-stream in 238 ms @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[55392778ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUME] resuming session 9f9446817ff09d85fa532f99d9932627, seq: 161 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[55392971ms] [LOG] %c[Flux] 
+font-weight: bold;
+color: purple;
+ Dispatching CONNECTION_RESUMED @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[55392975ms] [INFO] %c[GatewaySocket] 
+font-weight: bold;
+color: purple;
+ [RESUMED] took 435ms, replayed 0 events, new seq: 162 @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464
+[56765004ms] [INFO] %c[libdiscore] 
+font-weight: bold;
+color: purple;
+ [BlockedDomainsStore] Successfully fetched blocked domains @ https://discord.com/assets/556707.bb1a25f3c212ce8f.js:464

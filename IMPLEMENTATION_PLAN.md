@@ -5,8 +5,8 @@
 > sessions.
 
 **Document status:** Approved for implementation  
-**Last updated:** 2026-09-06  
-**Next phase:** Phase 5, GAIA and named agents
+**Last updated:** 2026-09-07
+**Next phase:** Phase 6, Shared memory
 
 ## Instructions for AI Coding Agents
 
@@ -738,7 +738,7 @@ control.
 
 ## Phase 5: GAIA and Named Agents
 
-**Status:** TODO
+**Status:** DONE
 
 **Goal:** Make GAIA a visible orchestrator with the fixed specialist roster.
 
@@ -760,6 +760,57 @@ control.
 - Subagent noise does not flood the primary conversation.
 - A dynamic one-off specialist works without creating permanent configuration.
 - HADES cannot perform a destructive operation without owner confirmation.
+
+**Implementation record (2026-09-07):**
+
+- Added GAIA's orchestration instructions in `src/agents.ts` and all nine scoped
+  specialist TOMLs under `config/codex/agents/`. Startup installs identical,
+  versioned definitions into `CODEX_HOME/agents` or `~/.codex/agents`; conflicting
+  files and symlinks fail safely without overwriting user configuration.
+- Enabled delegation only in enrolled workspace channels, preserving no-shell,
+  no-delegation conversation-only channels. Set Codex's concurrency cap to two
+  spawned threads per session (up to four across the two active channels).
+  Fixed definitions disable nested delegation; role defaults never replace the
+  parent's sandbox or strict `untrusted` approval boundary.
+- Added both legacy collaboration and native child-lifecycle event handling,
+  verified thread ancestry, fixed-role identities, and mythology-inspired
+  application names for generic one-off workers. No permanent dynamic-agent
+  configuration, database migration, or dependency was added.
+- Routed child command/file/permission approvals to the correct owner's channel
+  with the actual agent name. Kept child text, turn completion, and patch targets
+  separate from the parent; guarded stale approvals and asynchronous ancestry
+  lookups against collector replacement and cancellation. Cancellation checks
+  terminal child state before releasing the channel, stopping the app-server
+  if a child cannot be stopped safely.
+- Added one throttled, edited Discord specialist status message with the latest
+  six agents and bounded result excerpts; GAIA consolidates full findings.
+  Specialist tool chatter remains categorical audit data. Final status content
+  is persisted as a system message. Fixed a Discord nonce-length error found by
+  the live check and retried child metadata reads that race spawn persistence.
+- Kept configured MCP servers disabled using self-contained, transport-valid
+  CLI overrides after standalone config loading rejected partial disabled
+  entries. The user's Codex config and credentials were not changed.
+- Live Codex checks passed with the default model and `gpt-5.5`: APOLLO and
+  MINERVA returned actual named results, a generic worker returned a result,
+  HADES deletion was denied and its temporary target survived, the runtime
+  reported a cap of two, and conversation-only tools remained unavailable.
+  Live Discord checks in `work` showed named/dynamic results in one status
+  message, a HADES-labeled owner approval, useful denial, and an intact target.
+- Checks passed under Node `24.8.0`: unit tests, database integration tests,
+  typecheck, live `test:agents` checks, audit, Compose validation, and scoped
+  whitespace checks. Unit regressions cover ancestry/channel isolation, stale
+  approvals, reused child turns, terminal cancellation, result recovery,
+  installation conflicts, and bounded Discord rendering.
+- Deliberate limits: specialist delegation requires an enrolled workspace;
+  narrow role defaults are not independent security compartments. Some models
+  expose interruption but no close-agent tool; completed child histories remain
+  in Codex, and the daemon verifies no child turn remains active at completion.
+  Physical Discord mobile-app testing was not repeated; messages and approval
+  buttons use the existing native Discord components.
+- Files changed: `src/agents.ts`, `src/codex.ts`, `src/discord.ts`, nine agent
+  TOMLs, `tests/agents.test.ts`, `tests/codex.test.ts`,
+  `tests/agents.integration.ts`, `tests/discord.test.ts`, `package.json`,
+  `README.md`, and this plan. No commit was requested or made; Phase 6 is next.
 
 ## Phase 6: Shared Memory
 
@@ -925,6 +976,7 @@ not delete prior rows.
 | 2026-09-06 | Phase 2 | DONE | Added persistent per-channel Codex chat, durable visible messages and turn IDs, throttled streaming, safe Markdown splitting, bounded queues, `/gaia new`, `/gaia stop`, and process recovery; added and configured the private `work` channel | Node 24 `npm run typecheck`; `npm test`; `npm run test:db`; `npm audit`; Compose validation; live two-channel concurrency/isolation, daemon resume, cancellation/recovery, `/gaia new`, and Codex child restart | Chat is read-only until Phase 4; idempotent Discord operations retry but message creation is not blindly retried; next is Phase 3; directory is not yet a Git repository |
 | 2026-09-06 | Phase 3 | DONE | Hardened reconnects, nonce retries, mentions, Markdown, attachment validation/download/cleanup, shutdown draining, Codex environment and tool isolation, and private Discord setup documentation | Node 24 typecheck/unit/DB/audit/Compose checks; live text/image acceptance, ZIP rejection, forced Gateway resume with replay deduplication, shutdown cleanup, mobile viewport, secret-env and listener checks | Text context is capped at 256 KiB; image validation uses signatures; durable outbox remains Phase 9 territory; next is Phase 4; directory is not yet a Git repository |
 | 2026-09-06 | Phase 4 | DONE | Added canonical per-channel workspace enrollment, isolated workspace/read-only thread settings, Discord approve-once/deny components for command/file/permission requests, HADES labeling, bounded activity summaries, and redacted idempotent audit records | Node 24 typecheck/unit/DB/audit/Compose/diff/listener checks; direct app-server workspace, outside-boundary, command/file approve-deny, and HADES probes; live Discord enrollment, approve, deny, and activity checks | Workspace changes start fresh context; strict `untrusted` replaced `on-request` after a live `rm` bypass; broad remembered approvals deferred; next is Phase 5 |
+| 2026-09-07 | Phase 5 | DONE | Added GAIA runtime instructions, nine installed specialists, dynamic display names, bounded Discord status/results, child-aware approvals, isolated event routing, and terminal cancellation checks | Node 24 unit/DB/typecheck/audit/Compose/scoped diff checks; live default-model and gpt-5.5 delegation, dynamic worker, cap configuration, HADES denial and conversation-only checks; live Discord named results and HADES deny with target preservation | Delegation is workspace-only; two workers per session; no broad grants or new dependencies; some models have interruption but no close tool; next is Phase 6 |
 
 ## Authoritative References
 

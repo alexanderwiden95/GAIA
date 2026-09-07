@@ -22,7 +22,7 @@ import {
 } from "discord.js";
 import type { Pool } from "pg";
 
-import { CodexClient, type CodexActivity, type CodexApproval, type CodexAttachment } from "./codex.ts";
+import { CodexClient, type CodexActivity, type CodexAgentActivity, type CodexApproval, type CodexAttachment } from "./codex.ts";
 import {
   createApproval,
   decideApproval,
@@ -364,6 +364,14 @@ function replyWithRetry(message: Message, content: string, nonce: string): Promi
   return retryDiscord(() => message.reply({ content, allowedMentions: NO_MENTIONS, nonce, enforceNonce: true }));
 }
 
+export function specialistStatus(agents: readonly CodexAgentActivity[]): string {
+  const lines = agents.slice(-6).map(({ agent, status, summary }) => {
+    const excerpt = summary.replaceAll(/[`*_~<>@]/g, "").replaceAll(/\s+/g, " ").trim();
+    return `**${agent}: ${status}**${excerpt ? `\n${excerpt.slice(0, 230)}${excerpt.length > 230 ? "..." : ""}` : ""}`;
+  });
+  return `**Specialists**${agents.length > 6 ? ` (latest 6 of ${agents.length})` : ""}\n${lines.join("\n\n")}`;
+}
+
 class DiscordChat {
   private readonly queue = new ChannelTaskQueue();
   private readonly activeThreads = new Map<string, string>();
@@ -457,6 +465,19 @@ class DiscordChat {
       let startedTurnId: string | undefined;
       let turnIdSave = Promise.resolve();
       let activitySends = Promise.resolve();
+      const agents = new Map<string, CodexAgentActivity>();
+      let agentMessage: Message | undefined;
+      let agentTimer: NodeJS.Timeout | undefined;
+      const flushAgents = (): void => {
+        if (agentTimer) clearTimeout(agentTimer);
+        agentTimer = undefined;
+        if (!agents.size) return;
+        const content = specialistStatus([...agents.values()]);
+        activitySends = activitySends.then(async () => {
+          if (agentMessage) await retryDiscord(() => agentMessage!.edit({ content, allowedMentions: NO_MENTIONS }));
+          else agentMessage = await replyWithRetry(message, content, `${message.id}-a`);
+        }).catch(() => console.error("Failed to display specialist status"));
+      };
 
       const queueEdit = (): void => {
         editTimer = null;
@@ -486,6 +507,10 @@ class DiscordChat {
           onActivity: (activity) => {
             activitySends = activitySends.then(() => this.showActivity(message, activity)).catch(() => undefined);
           },
+          onAgent: (activity) => {
+            agents.set(activity.threadId, activity);
+            if (!agentTimer) agentTimer = setTimeout(flushAgents, STREAM_EDIT_INTERVAL_MS);
+          },
         }, downloaded.files);
         await turnIdSave;
         await activitySends;
@@ -499,8 +524,12 @@ class DiscordChat {
         console.error("Failed to complete a Discord turn");
       }
       try {
+        flushAgents();
+        await activitySends;
+        if (agentMessage) await saveMessage(this.pool, { discordId: agentMessage.id, channelId, role: "system", content: specialistStatus([...agents.values()]), turnId: responseTurnId }).catch(() => console.error("Failed to persist specialist status"));
         await this.finishResponse(placeholder, channelId, response, responseTurnId, edits, editTimer);
       } finally {
+        if (agentTimer) clearTimeout(agentTimer);
         clearInterval(typing);
         if (editTimer) clearTimeout(editTimer);
         this.activeThreads.delete(channelId);
@@ -574,7 +603,8 @@ class DiscordChat {
   private async showActivity(message: Message, activity: CodexActivity): Promise<void> {
     const label = activity.kind === "command" ? "Command" : "File changes";
     const nonce = randomUUID().replaceAll("-", "").slice(0, 25);
-    await retryDiscord(() => message.reply({
+    // Specialist tool chatter stays in the audit trail; one edited status message carries their results.
+    if (!activity.agent || activity.agent === "GAIA") await retryDiscord(() => message.reply({
       content: `**${label} ${activity.status}**\n${this.limit(activity.summary, 1_500)}`,
       allowedMentions: NO_MENTIONS,
       nonce,
@@ -582,7 +612,7 @@ class DiscordChat {
     }));
     await logAction(this.pool, {
       channelId: message.channelId,
-      agent: "GAIA",
+      agent: activity.agent ?? "GAIA",
       action: `${activity.kind}_${activity.status}`,
       details: activity.count === undefined ? {} : { files: activity.count },
     });
