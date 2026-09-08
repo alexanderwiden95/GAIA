@@ -111,14 +111,18 @@ export class IntegrationService {
   private accessToken: { value: string; expiresAt: number } | null = null;
   private readonly approvedDrafts = new Map<string, string>();
 
-  status(): string {
+  async status(): Promise<string> {
     try {
       const credentials = loadGoogleCredentials();
-      if (!credentials) return "login required - run `npm run google:login -- /path/to/client.json`";
+      if (!credentials) return "ERROR - login required; run `npm run google:login -- /path/to/client.json`";
       const missing = GOOGLE_SCOPES.filter((scope) => !credentials.scopes.includes(scope));
-      return missing.length ? "ERROR - reconnect Google to grant Gmail, Calendar, and Tasks scopes" : "OK - credentials in Keychain";
-    } catch {
-      return "ERROR - unlock macOS Keychain";
+      if (missing.length) return "ERROR - reconnect Google to grant Gmail, Calendar, and Tasks scopes";
+      await this.token();
+      return "OK - login verified";
+    } catch (error) {
+      return error instanceof Error && error.message.startsWith("Google ")
+        ? `ERROR - ${error.message}`
+        : "ERROR - unlock macOS Keychain";
     }
   }
 

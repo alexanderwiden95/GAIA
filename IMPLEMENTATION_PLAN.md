@@ -6,7 +6,7 @@
 
 **Document status:** Approved for implementation  
 **Last updated:** 2026-09-08
-**Next phase:** Phase 9, Local operations and recovery
+**Next phase:** None; version 1 implementation is complete
 
 ## Instructions for AI Coding Agents
 
@@ -1019,7 +1019,7 @@ proactive monitoring.
 
 ## Phase 9: Local Operations and Recovery
 
-**Status:** TODO
+**Status:** DONE
 
 **Goal:** Make GAIA dependable for daily local use.
 
@@ -1045,6 +1045,55 @@ proactive monitoring.
 - Logs rotate and contain no known secrets.
 - Required automated checks pass.
 - The full product works without exposing any inbound public network interface.
+
+**Implementation record (2026-09-08):**
+
+- Added a generated owner-only per-user LaunchAgent pinned to Node `24.8.0`,
+  absolute repository paths, and fixed system/Homebrew command paths. PostgreSQL
+  now uses `restart: unless-stopped`; the installer starts it before bootstrap.
+  A forced `SIGKILL` changed the daemon PID and launchd restarted GAIA after its
+  ten-second throttle. The running daemon and PostgreSQL remain loopback-only,
+  and the Node process has no listening TCP socket.
+- Added standard-library JSONL logging under `~/Library/Logs/GAIA`, with 1 MiB
+  rotation, five retained generations, persisted recent failures, bounded
+  messages, and centralized secret redaction. Codex stderr now passes through
+  this boundary. Existing records parsed as JSON and contained none of the
+  configured secret values.
+- Added owner-only PostgreSQL custom-format backup, retention, verification, and
+  explicit destructive restore commands. Backups are atomically published only
+  after completion; the newest 14 are retained. Restore verifies the dump in a
+  clean temporary database, then refuses while either the LaunchAgent or any
+  tagged GAIA database process is active. A real backup restored cleanly with all
+  six migrations.
+- Shutdown now stops scheduler delivery, denies outstanding approvals, interrupts
+  and drains Discord turns while the gateway remains available, then closes
+  memory, Codex, and PostgreSQL without one cleanup failure skipping the others.
+  Startup expires stale approvals and enforces Codex CLI `0.153.4`.
+- `/gaia status` now derives overall health from migrations, backup age, Discord,
+  Codex, Playwright configuration, a real Google token refresh, scheduler health,
+  and redacted recent failures. A live formatter check reported all components
+  `OK`.
+- Added focused log redaction/rotation, LaunchAgent, backup retention, stale
+  approval recovery, and memory ranking checks. Existing authorization, channel
+  isolation, approval mapping, scheduler deduplication, and recovery tests remain
+  passing.
+- MINERVA iteratively reviewed the diff and identified unsafe restore ordering,
+  partial backup publication, incomplete redaction, incomplete daemon detection,
+  an unscoped fixture mutation, and an unsafe temporary review harness. Production
+  findings were fixed and the temporary harness was deleted. ARTEMIS inspected
+  the scripts and passed 40 unit tests, four database tests, typecheck, Compose
+  validation, and whitespace checks without modifying files.
+- Checks passed under Node `24.8.0`: `npm test`, `npm run test:db`,
+  `npm run test:memory`, `npm run typecheck`, `npm audit`, Compose and whitespace
+  checks, Google refresh, structured-log and permission inspection, clean restore,
+  forced crash restart, database process tagging, and listener inspection.
+- Deliberate limit: Discord delivery still uses persisted state and stable nonces
+  rather than a general durable outbox. Add reconciliation only after a measured
+  failure outside Discord's nonce window. The user-deferred Discord web-session
+  rotation remains recorded in Phase 1.
+- Files changed: `src/logger.ts`, `src/operations.ts`, daemon services and focused
+  tests, `package.json`, `compose.yaml`, `README.md`, and this plan. No commit was
+  requested or made.
 
 ## Deferred Until Requested
 
@@ -1105,6 +1154,7 @@ not delete prior rows.
 | 2026-09-08 | Phase 6 | DONE | Added local multilingual message/memory embeddings, hybrid cross-channel retrieval, source-linked summaries, startup backfill, bounded prompt context, and explicit remember/inspect/correct/forget commands | Node 24 typecheck; 30 unit tests; three DB tests; live local-model exact, paraphrase, source, mutation, deletion, and backfill checks; clean audit; Compose/diff checks; daemon startup and 52-message backfill | Exact vector scans fit the initial dataset; vectors retain model identity; no ANN index, vector framework, queue service, or repeated physical mobile pass; next is Phase 7 |
 | 2026-09-08 | Phase 7 | DONE | Added Codex-recorded conversation follow-ups, durable due scheduling and daily digests, timezone/quiet hours, one proactive Discord channel, and complete/snooze/dismiss controls | Node 24 typecheck; 33 unit and four DB tests; memory/audit/Compose/diff checks; live all-category dynamic-tool calls, real Discord reminder, migration, cleanup, and repeated daemon startup | Uses pinned experimental dynamic tools and one-time fresh Codex contexts; stable Discord nonces instead of a general outbox; digest stays limited to conversation-derived open loops; next is Phase 8 |
 | 2026-09-08 | Phase 8 | DONE | Added approved Git/GitHub access, isolated local Playwright MCP, Keychain-backed Google Desktop OAuth, and Gmail/Calendar/Tasks read, draft, send, and mutation tools | Node 24 typecheck; 37 unit and four DB tests; memory/audit/Compose/diff checks; live GitHub, browser navigation/denied submit, Google reads, Gmail draft/self-send, and reversible Calendar/Tasks mutations | Desktop OAuth scopes are requested together because Google does not support incremental auth; all browser writes and external mutations use approve-once, deletes show HADES; no proactive polling; next is Phase 9 |
+| 2026-09-08 | Phase 9 | DONE | Added launchd crash recovery, rotating redacted logs, verified database backup/restore/retention, stale-approval and shutdown recovery, pinned runtime checks, and deeper status | Node 24 typecheck; 40 unit and four DB tests; memory/audit/Compose/diff checks; clean restore, crash restart, Google refresh, log/permission/secret and listener checks; MINERVA and ARTEMIS | Version 1 complete; stable Discord nonces remain instead of a general outbox until measured failures require one |
 
 ## Authoritative References
 

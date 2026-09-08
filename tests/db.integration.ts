@@ -5,6 +5,7 @@ import {
   createApproval,
   createPool,
   decideApproval,
+  expirePendingApprovals,
   getOrCreateChannel,
   logAction,
   messageExists,
@@ -162,4 +163,9 @@ test("channel threads and visible messages persist without duplicates", async (c
     request: { kind: "command", agent: "GAIA", risk: "local command" },
     decision: { status: "approved" },
   });
+
+  const staleApprovalId = "99999999-9999-4999-8999-999999999998";
+  await createApproval(pool, { requestId: staleApprovalId, channelId, kind: "command", agent: "GAIA", risk: "local command" });
+  assert.equal(await expirePendingApprovals(pool, staleApprovalId), 1);
+  assert.equal((await pool.query("SELECT status FROM approvals WHERE request_id = $1", [staleApprovalId])).rows[0].status, "expired");
 });

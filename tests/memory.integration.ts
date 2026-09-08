@@ -32,6 +32,12 @@ try {
   assert(semantic.some((item) => item.type === "memory" && item.id === id), "local vector search should recall a paraphrased concept");
   assert.equal((await pool.query<{ dimensions: number }>("SELECT vector_dims(embedding) AS dimensions FROM memories WHERE id = $1", [id])).rows[0]?.dimensions, EMBEDDING_DIMENSIONS);
 
+  const rankingMessage = await pool.query<{ id: string }>("INSERT INTO messages (channel_id, role, content) VALUES ($1, 'user', 'rankzebra') RETURNING id::text", [sourceChannel]);
+  await pool.query("INSERT INTO memories (kind, content, source_channel_id, source_message_start_id, source_message_end_id) VALUES ('summary', 'rankzebra', $1, $2, $2)", [sourceChannel, rankingMessage.rows[0]!.id]);
+  await memory.remember(sourceChannel, "rankzebra");
+  const ranked = (await memory.retrieve("rankzebra")).filter((item) => item.content === "rankzebra");
+  assert.deepEqual(ranked.slice(0, 2).map((item) => item.kind), ["explicit", "summary"]);
+
   assert.equal(await memory.correct(id, "Project Borealis was renamed Aurora and launches from Tromso."), true);
   assert((await memory.retrieve("Aurora Tromso")).some((item) => item.id === id));
   assert.equal(await memory.forget(id), true);

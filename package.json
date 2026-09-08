@@ -17,6 +17,12 @@
     "test:memory": "node --env-file-if-exists=.env tests/memory.integration.ts",
     "test:agents": "node tests/agents.integration.ts",
     "google:login": "node src/google-login.ts",
+    "service:install": "node src/operations.ts install",
+    "service:uninstall": "node src/operations.ts uninstall",
+    "backup": "node src/operations.ts backup",
+    "backup:prune": "node src/operations.ts prune",
+    "backup:verify": "node src/operations.ts verify",
+    "restore": "node src/operations.ts restore",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

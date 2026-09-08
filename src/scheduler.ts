@@ -1,4 +1,5 @@
 import type { Pool } from "pg";
+import { logError, redact } from "./logger.ts";
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -76,6 +77,8 @@ export class ProactivityService {
   private readonly clock: Clock;
   private timer: NodeJS.Timeout | undefined;
   private running: Promise<void> | null = null;
+  private lastSuccessAt: Date | null = null;
+  private lastError: string | null = null;
 
   constructor(pool: Pool, config: ProactivityConfig, deliver: Deliver, clock: Clock = () => new Date()) {
     this.pool = pool;
@@ -85,8 +88,8 @@ export class ProactivityService {
   }
 
   start(): void {
-    void this.runOnce().catch(() => console.error("Failed to run proactive scheduler"));
-    this.timer = setInterval(() => void this.runOnce().catch(() => console.error("Failed to run proactive scheduler")), POLL_INTERVAL_MS);
+    void this.runOnce().catch((error) => logError("scheduler", error));
+    this.timer = setInterval(() => void this.runOnce().catch((error) => logError("scheduler", error)), POLL_INTERVAL_MS);
   }
 
   async close(): Promise<void> {
@@ -132,14 +135,20 @@ export class ProactivityService {
 
   async runOnce(): Promise<void> {
     if (this.running) return this.running;
-    this.running = this.tick().finally(() => {
-      this.running = null;
-    });
+    this.running = this.tick().then(() => {
+      this.lastSuccessAt = this.clock();
+      this.lastError = null;
+    }, (error) => {
+      this.lastError = redact(error instanceof Error ? error.message : "scheduler failure");
+      throw error;
+    }).finally(() => { this.running = null; });
     return this.running;
   }
 
   status(): string {
-    return this.timer ? `OK - ${this.config.timezone}; digest ${this.config.digestTime}` : "ERROR - scheduler stopped";
+    if (!this.timer) return "ERROR - scheduler stopped";
+    if (this.lastError) return `ERROR - ${this.lastError}`;
+    return `OK - ${this.config.timezone}; digest ${this.config.digestTime}${this.lastSuccessAt ? `; checked ${this.lastSuccessAt.toISOString()}` : ""}`;
   }
 
   currentTimeContext(): string {

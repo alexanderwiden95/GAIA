@@ -27,6 +27,7 @@ import { CodexClient, type CodexActivity, type CodexAgentActivity, type CodexApp
 import {
   createApproval,
   decideApproval,
+  migrationStatus,
   getOrCreateChannel,
   logAction,
   messageExists,
@@ -37,6 +38,8 @@ import {
 } from "./db.ts";
 import { formatMemoryContext, MemoryService, type MemoryResult } from "./memory.ts";
 import type { IntegrationService } from "./integrations.ts";
+import { logError, logInfo, logger, logWarn } from "./logger.ts";
+import { latestBackupStatus } from "./operations.ts";
 import { ProactivityService, type ProactiveDelivery, type ProactivityConfig } from "./scheduler.ts";
 
 const execFile = promisify(execFileCallback);
@@ -344,11 +347,19 @@ async function codexHealth(codex: CodexClient): Promise<string> {
   }
 }
 
-async function statusText(client: Client, pool: Pool, codex: CodexClient, integrations: IntegrationService, proactivity: ProactivityService): Promise<string> {
-  const database = await pool.query("SELECT 1").then(() => "OK").catch(() => "ERROR - run `docker compose up -d --wait` and `npm run migrate`");
+export async function statusText(client: Pick<Client, "isReady">, pool: Pool, codex: CodexClient, integrations: IntegrationService, proactivity: ProactivityService): Promise<string> {
+  const [database, codexStatus, google, backup] = await Promise.all([
+    migrationStatus(pool).catch(() => "ERROR - run `docker compose up -d --wait` and `npm run migrate`"),
+    codexHealth(codex),
+    integrations.status(),
+    latestBackupStatus(),
+  ]);
   const discord = client.isReady() ? "OK - gateway ready" : "ERROR - gateway disconnected";
-  const codexStatus = await codexHealth(codex);
-  return ["GAIA: OK", `Database: ${database}`, `Discord: ${discord}`, `Codex: ${codexStatus}`, `Browser: ${codex.isReady() ? "OK - local Playwright MCP configured" : "ERROR - Codex app-server stopped"}`, `Google: ${integrations.status()}`, `Scheduler: ${proactivity.status()}`].join("\n");
+  const checks = [`Database: ${database}`, `Backup: ${backup}`, `Discord: ${discord}`, `Codex: ${codexStatus}`, `Browser: ${codex.isReady() ? "OK - local Playwright MCP configured" : "ERROR - Codex app-server stopped"}`, `Google: ${google}`, `Scheduler: ${proactivity.status()}`];
+  const failures = logger.recentFailures();
+  return [checks.some((check) => check.includes("ERROR")) ? "GAIA: ERROR" : "GAIA: OK", ...checks,
+    `Recent failures: ${failures.length ? failures.map((failure) => `${failure.timestamp} ${failure.component}: ${failure.message}`).join(" | ") : "none"}`,
+  ].join("\n").slice(0, 2_000);
 }
 
 async function retryDiscord<T>(operation: () => Promise<T>): Promise<T> {
@@ -385,6 +396,8 @@ class DiscordChat {
   private readonly memory: MemoryService;
   private readonly proactivity: ProactivityService;
   private closing = false;
+  private closeApprovals!: () => void;
+  private readonly approvalsClosing = new Promise<void>((resolvePromise) => { this.closeApprovals = resolvePromise; });
 
   constructor(pool: Pool, codex: CodexClient, config: AccessConfig, memory: MemoryService, proactivity: ProactivityService) {
     this.pool = pool;
@@ -433,6 +446,7 @@ class DiscordChat {
 
   async close(): Promise<void> {
     this.closing = true;
+    this.closeApprovals();
     const idle = this.queue.onIdle().then(() => true);
     while (!await Promise.race([idle, new Promise<false>((resolve) => setTimeout(() => resolve(false), 100))])) {
       await Promise.all([...this.activeThreads.values()].map((threadId) => this.codex.interrupt(threadId).catch(() => false)));
@@ -487,7 +501,7 @@ class DiscordChat {
         activitySends = activitySends.then(async () => {
           if (agentMessage) await retryDiscord(() => agentMessage!.edit({ content, allowedMentions: NO_MENTIONS }));
           else agentMessage = await replyWithRetry(message, content, `${message.id}-a`);
-        }).catch(() => console.error("Failed to display specialist status"));
+        }).catch((error) => logError("discord", error));
       };
 
       const queueEdit = (): void => {
@@ -539,15 +553,15 @@ class DiscordChat {
           ? `${result.text}${result.text ? "\n\n" : ""}_Turn stopped._`
           : result.text;
         responseTurnId = result.turnId;
-      } catch {
+      } catch (error) {
         response = "GAIA could not complete that turn. Try again; if it persists, run `/gaia status`.";
         responseTurnId = startedTurnId;
-        console.error("Failed to complete a Discord turn");
+        logError("discord", error);
       }
       try {
         flushAgents();
         await activitySends;
-        if (agentMessage) await saveMessage(this.pool, { discordId: agentMessage.id, channelId, role: "system", content: specialistStatus([...agents.values()]), turnId: responseTurnId }).catch(() => console.error("Failed to persist specialist status"));
+        if (agentMessage) await saveMessage(this.pool, { discordId: agentMessage.id, channelId, role: "system", content: specialistStatus([...agents.values()]), turnId: responseTurnId }).catch((error) => logError("discord", error));
         await this.finishResponse(placeholder, channelId, response, responseTurnId, edits, editTimer);
       } finally {
         if (agentTimer) clearTimeout(agentTimer);
@@ -589,7 +603,7 @@ class DiscordChat {
       const nonce = requestId.replaceAll("-", "").slice(0, 25);
       const sent = await retryDiscord(() => message.reply({ content: details, components, allowedMentions: NO_MENTIONS, nonce, enforceNonce: true }));
       prompt = sent;
-      const interaction = await sent.awaitMessageComponent({
+      const interaction = await Promise.race([sent.awaitMessageComponent({
         componentType: ComponentType.Button,
         time: APPROVAL_TIMEOUT_MS,
         filter: (candidate) => {
@@ -603,7 +617,7 @@ class DiscordChat {
           void candidate.reply({ content: "Only the configured GAIA owner can decide approvals.", flags: MessageFlags.Ephemeral }).catch(() => undefined);
           return false;
         },
-      });
+      }), this.approvalsClosing.then(() => { throw new Error("GAIA is shutting down"); })]);
       const approved = interaction.customId === approveId;
       const status = approved ? "approved" : "denied";
       if (!await decideApproval(this.pool, requestId, status)) {
@@ -845,27 +859,27 @@ export async function startDiscord(pool: Pool, codex: CodexClient, memory: Memor
       isBot: message.author.bot,
       webhookId: message.webhookId,
     }, config)) return;
-    void chat.enqueue(message).catch(() => console.error("Failed to queue Discord message"));
+    void chat.enqueue(message).catch((error) => logError("discord", error));
   });
   client.on(Events.InteractionCreate, (interaction) => {
     if (interaction.isChatInputCommand()) {
-      const task = handleInteraction(interaction, client, pool, codex, chat, memory, integrations, proactivity, config).catch(async () => {
-        console.error("Failed to handle Discord interaction");
+      const task = handleInteraction(interaction, client, pool, codex, chat, memory, integrations, proactivity, config).catch(async (error) => {
+        logError("discord", error);
         if (interaction.deferred || interaction.replied) await interaction.editReply("GAIA could not complete that command. Try again.").catch(() => undefined);
       });
       interactions.add(task);
       void task.finally(() => interactions.delete(task));
     } else if (interaction.isButton() && interaction.customId.startsWith("gaia-followup:")) {
-      const task = handleFollowupButton(interaction, proactivity, config).catch(() => console.error("Failed to handle follow-up action"));
+      const task = handleFollowupButton(interaction, proactivity, config).catch((error) => logError("discord", error));
       interactions.add(task);
       void task.finally(() => interactions.delete(task));
     }
   });
-  client.on(Events.Error, () => console.error("Discord client error"));
-  client.on(Events.ShardDisconnect, (event, shardId) => console.warn(`Discord shard ${shardId} disconnected with code ${event.code}`));
-  client.on(Events.ShardReconnecting, (shardId) => console.warn(`Discord shard ${shardId} reconnecting`));
-  client.on(Events.ShardResume, (shardId, replayedEvents) => console.log(`Discord shard ${shardId} resumed; replayed ${replayedEvents} events`));
-  client.rest.on(RESTEvents.RateLimited, (rateLimit) => console.warn(`Discord REST rate limited; retrying in ${Math.ceil(rateLimit.timeToReset)} ms`));
+  client.on(Events.Error, (error) => logError("discord", error));
+  client.on(Events.ShardDisconnect, (event, shardId) => logWarn("discord", `Shard ${shardId} disconnected with code ${event.code}`));
+  client.on(Events.ShardReconnecting, (shardId) => logWarn("discord", `Shard ${shardId} reconnecting`));
+  client.on(Events.ShardResume, (shardId, replayedEvents) => logInfo("discord", `Shard ${shardId} resumed; replayed ${replayedEvents} events`));
+  client.rest.on(RESTEvents.RateLimited, (rateLimit) => logWarn("discord", `REST rate limited; retrying in ${Math.ceil(rateLimit.timeToReset)} ms`));
 
   try {
     await client.login(token);
@@ -903,10 +917,10 @@ export async function startDiscord(pool: Pool, codex: CodexClient, memory: Memor
     return {
       client,
       close: async () => {
-        client.destroy();
-        await chat.close();
         await proactivity.close();
+        await chat.close();
         await Promise.all(interactions);
+        client.destroy();
       },
     };
   } catch (error) {

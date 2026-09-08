@@ -1,5 +1,6 @@
 import { pipeline } from "@huggingface/transformers";
 import type { Pool } from "pg";
+import { logError } from "./logger.ts";
 
 export const DEFAULT_EMBEDDING_MODEL = "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
 export const EMBEDDING_DIMENSIONS = 384;
@@ -66,8 +67,8 @@ export class MemoryService {
         try {
           await this.indexMessage(message.id, message.content);
           await this.summarizeIfNeeded(message.channel_id);
-        } catch {
-          console.error("Failed to backfill one shared-memory message");
+        } catch (error) {
+          logError("memory", error);
         }
       }
       const memories = await this.pool.query<{ id: string; content: string }>(`
@@ -76,11 +77,11 @@ export class MemoryService {
       for (const memory of memories.rows) {
         try {
           await this.pool.query("UPDATE memories SET embedding = $2::vector, embedding_model = $3, embedded_at = now() WHERE id = $1 AND content = $4", [memory.id, vectorLiteral(await this.embed(memory.content)), this.model, memory.content]);
-        } catch {
-          console.error("Failed to backfill one explicit or summary memory");
+        } catch (error) {
+          logError("memory", error);
         }
       }
-    }).catch(() => console.error("Failed to backfill shared memory"));
+    }).catch((error) => logError("memory", error));
   }
 
   enqueueMessage(discordMessageId: string, channelId: string): void {
@@ -93,7 +94,7 @@ export class MemoryService {
       if (!message) return;
       await this.indexMessage(message.id, message.content);
       await this.summarizeIfNeeded(channelId);
-    }).catch(() => console.error("Failed to index shared memory"));
+    }).catch((error) => logError("memory", error));
   }
 
   async retrieve(query: string, excludeDiscordMessageId?: string): Promise<MemoryResult[]> {

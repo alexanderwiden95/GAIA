@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import readline from "node:readline";
 import { AGENT_NAMES, GAIA_INSTRUCTIONS, installAgents } from "./agents.ts";
 import { INTEGRATION_TOOLS, type IntegrationService } from "./integrations.ts";
+import { logWarn } from "./logger.ts";
 
 import type { InitializeParams } from "./protocol/InitializeParams.ts";
 import type { RequestId } from "./protocol/RequestId.ts";
@@ -26,6 +27,7 @@ import type { TurnStatus } from "./protocol/v2/TurnStatus.ts";
 import type { UserInput } from "./protocol/v2/UserInput.ts";
 
 const REQUEST_TIMEOUT_MS = 30_000;
+const CODEX_VERSION = "0.153.4";
 const TURN_TIMEOUT_MS = 30 * 60_000;
 const CHAT_DIRECTORY = join(tmpdir(), "gaia-codex-chat");
 const PLAYWRIGHT_CLI = fileURLToPath(new URL("../node_modules/@playwright/mcp/cli.js", import.meta.url));
@@ -390,6 +392,8 @@ export class CodexClient {
     for (const name of ["CODEX_HOME", "HOME", "LANG", "LC_ALL", "PATH", "SHELL", "TERM", "TMPDIR", "USER"]) {
       if (process.env[name]) env[name] = process.env[name];
     }
+    const version = spawnSync("codex", ["--version"], { env, encoding: "utf8", timeout: REQUEST_TIMEOUT_MS });
+    if (version.status !== 0 || !version.stdout.includes(CODEX_VERSION)) throw new Error(`GAIA requires Codex CLI ${CODEX_VERSION}`);
     const mcpList = spawnSync("codex", ["mcp", "list", "--json"], { env, encoding: "utf8", timeout: REQUEST_TIMEOUT_MS });
     if (mcpList.status !== 0) throw new Error("Could not enumerate Codex MCP servers");
     let mcpOverrides: string[];
@@ -420,7 +424,7 @@ export class CodexClient {
     ];
     const child = spawn("codex", args, { env, stdio: ["pipe", "pipe", "pipe"] });
     this.child = child;
-    child.stderr.pipe(process.stderr);
+    readline.createInterface({ input: child.stderr }).on("line", (line) => logWarn("codex", line));
     readline.createInterface({ input: child.stdout }).on("line", (line) => this.receive(line));
     child.on("error", (error) => this.processEnded(child, error));
     child.on("exit", (code, signal) => {

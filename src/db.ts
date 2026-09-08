@@ -8,7 +8,7 @@ const DEFAULT_DATABASE_URL = "postgresql://gaia:gaia-local@127.0.0.1:5432/gaia";
 const MIGRATIONS_DIRECTORY = join(dirname(fileURLToPath(import.meta.url)), "..", "migrations");
 
 export function createPool(connectionString = process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL): Pool {
-  return new Pool({ connectionString, max: 5 });
+  return new Pool({ connectionString, max: 5, application_name: "gaia-daemon" });
 }
 
 export type ChannelState = { threadId: string | null; workspacePath: string | null };
@@ -59,6 +59,21 @@ export async function decideApproval(
     WHERE request_id = $1 AND status = 'pending'
   `, [requestId, status, { status }]);
   return result.rowCount === 1;
+}
+
+export async function expirePendingApprovals(pool: Pool, requestId?: string): Promise<number> {
+  const result = requestId
+    ? await pool.query(`UPDATE approvals SET status = 'expired', decision = '{"status":"expired"}'::jsonb, decided_at = now() WHERE status = 'pending' AND request_id = $1`, [requestId])
+    : await pool.query(`UPDATE approvals SET status = 'expired', decision = '{"status":"expired"}'::jsonb, decided_at = now() WHERE status = 'pending'`);
+  return result.rowCount ?? 0;
+}
+
+export async function migrationStatus(pool: Pool): Promise<string> {
+  const expected = (await readdir(MIGRATIONS_DIRECTORY)).filter((filename) => /^\d+_[a-z0-9_-]+\.sql$/.test(filename)).sort();
+  const applied = await pool.query<{ version: string }>("SELECT version FROM schema_migrations ORDER BY version");
+  return applied.rows.map(({ version }) => version).join("\n") === expected.join("\n")
+    ? `OK - ${expected.length} migrations applied`
+    : "ERROR - run `npm run migrate`";
 }
 
 export async function logAction(

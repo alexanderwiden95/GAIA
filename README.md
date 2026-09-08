@@ -232,6 +232,48 @@ They verify two fixed specialists, a temporary worker, the configured concurrenc
 cap, HADES deletion denial in a temporary workspace, and conversation-only
 boundaries. The second command exercises the older model's collaboration events.
 
+## Local Service and Recovery
+
+Install GAIA as a per-user LaunchAgent after selecting Node 24. The installer
+starts the pinned PostgreSQL container, writes an owner-only plist with absolute
+Node and repository paths, and configures launchd to restart GAIA after crashes:
+
+```sh
+nvm use
+npm run service:install
+```
+
+Logs are redacted JSON lines under `~/Library/Logs/GAIA/gaia.jsonl`. They rotate
+at 1 MiB with five retained generations. `/gaia status` verifies migrations,
+Codex and Google authentication, scheduler health, backup age, and recent local
+failures. Remove the service with `npm run service:uninstall`.
+
+Create and verify an owner-only PostgreSQL custom-format backup with:
+
+```sh
+npm run backup
+npm run backup:verify -- "/path/reported/by/backup.dump"
+```
+
+Backups live under `~/Library/Application Support/GAIA/backups`; backup creation
+retains the newest 14. `npm run backup:prune` applies retention independently.
+To restore, first stop GAIA, verify the selected dump, and then explicitly allow
+replacement of the local `gaia` database:
+
+```sh
+npm run service:uninstall
+npm run backup:verify -- "/path/to/gaia.dump"
+npm run restore -- "/path/to/gaia.dump" --confirm
+npm run service:install
+```
+
+For updates, create and verify a backup, record the current Git revision, stop
+the service, update source and dependencies, run migrations and checks, then
+install the service again. To roll back, stop the service, return to the recorded
+revision without discarding unrelated work, restore the matching verified dump,
+run migrations, and reinstall. Database migrations are forward-only; source
+rollback without its matching backup is unsupported.
+
 In an allowed Discord channel, send ordinary messages to talk with GAIA. Each
 channel keeps an independent Codex thread across daemon restarts. Use `/gaia
 new` to clear that channel's context, `/gaia stop` to interrupt its active turn,
