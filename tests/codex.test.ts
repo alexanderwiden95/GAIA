@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { CodexClient, type CodexActivity, type CodexAgentActivity, type CodexApproval, type TurnResult } from "../src/codex.ts";
+import { CodexClient, type CodexActivity, type CodexAgentActivity, type CodexApproval, type CodexFollowup, type TurnResult } from "../src/codex.ts";
+import { integrationApproval, type IntegrationService } from "../src/integrations.ts";
+import type { DynamicToolCallParams } from "../src/protocol/v2/DynamicToolCallParams.ts";
 
 type Internals = {
   turns: CodexClient["turns"];
@@ -10,12 +12,14 @@ type Internals = {
   send: CodexClient["send"];
   receive: CodexClient["receive"];
   resolveApproval: CodexClient["resolveApproval"];
+  resolveMcpApproval: CodexClient["resolveMcpApproval"];
+  resolveDynamicTool: CodexClient["resolveDynamicTool"];
 };
 type Collector = NonNullable<ReturnType<Internals["turns"]["get"]>>;
 type ApprovalRequest = Parameters<Internals["resolveApproval"]>[0];
 
-function harness() {
-  const client = new CodexClient();
+function harness(integrations: IntegrationService | null = null) {
+  const client = new CodexClient(integrations);
   const internal = client as unknown as Internals;
   const sent: Parameters<Internals["send"]>[0][] = [];
   const calls: { method: string; params: unknown }[] = [];
@@ -92,6 +96,86 @@ test("child approvals resolve ancestry and reach only the correct root with spec
   assert.equal(parent.approvals[1]?.agent, "MINERVA");
   assert.deepEqual(h.sent[1], { id: 1, result: { permissions: { network: { enabled: true } }, scope: "turn" } });
   assert.equal(h.calls.length, 1, "known specialists do not need another ancestry lookup");
+});
+
+test("the follow-up tool accepts only the active root turn and validates arguments", async () => {
+  const h = harness();
+  const root = h.root("parent");
+  const recorded: CodexFollowup[] = [];
+  root.collector.onFollowup = async (followup) => {
+    recorded.push(followup);
+    return "42";
+  };
+  const params: DynamicToolCallParams = {
+    threadId: "parent",
+    turnId: "parent-turn",
+    callId: "call-1",
+    namespace: null,
+    tool: "record_followup",
+    arguments: { kind: "promise", title: "Send the contract", dueAt: null },
+  };
+  assert.deepEqual(await h.internal.resolveDynamicTool(params), {
+    success: true,
+    contentItems: [{ type: "inputText", text: "Follow-up 42 recorded." }],
+  });
+  assert.deepEqual(recorded, [{ callId: "call-1", kind: "promise", title: "Send the contract", dueAt: null }]);
+  assert.equal((await h.internal.resolveDynamicTool({ ...params, threadId: "worker" })).success, false);
+  await assert.rejects(h.internal.resolveDynamicTool({ ...params, arguments: { kind: "unknown", title: "Bad", dueAt: null } }));
+});
+
+test("integration reads run directly while mutations require live owner approval", async () => {
+  const executed: string[] = [];
+  const integrations = { approval: async (tool: string, input: unknown) => integrationApproval(tool, input), execute: async (tool: string) => { executed.push(tool); return `${tool} result`; } } as unknown as IntegrationService;
+  const h = harness(integrations);
+  const root = h.root("parent");
+  const params: DynamicToolCallParams = { threadId: "parent", turnId: "parent-turn", callId: "call-1", namespace: null, tool: "gmail_search", arguments: { query: "invoice" } };
+  assert.equal((await h.internal.resolveDynamicTool(params)).success, true);
+  assert.deepEqual(executed, ["gmail_search"]);
+  root.collector.onApproval = async (approval) => { root.approvals.push(approval); return "deny"; };
+  assert.equal((await h.internal.resolveDynamicTool({ ...params, tool: "gmail_send_draft", arguments: { draftId: "draft-1" } })).success, false);
+  assert.deepEqual(executed, ["gmail_search"]);
+  assert.deepEqual(root.approvals[0], {
+    kind: "external", agent: "GAIA", action: "Send email", target: "Gmail draft draft-1",
+    reason: "The requested draft will be sent externally.", risk: "Sends an external communication that cannot be recalled reliably.",
+  });
+  root.collector.onApproval = async () => "approve";
+  assert.equal((await h.internal.resolveDynamicTool({ ...params, tool: "gmail_send_draft", arguments: { draftId: "draft-1" } })).success, true);
+  assert.deepEqual(executed, ["gmail_search", "gmail_send_draft"]);
+});
+
+test("integration approval cannot outlive its active root turn", async () => {
+  let executions = 0;
+  const h = harness({ approval: async (tool: string, input: unknown) => integrationApproval(tool, input), execute: async () => { executions++; return "unexpected"; } } as unknown as IntegrationService);
+  const root = h.root("parent");
+  const decision = Promise.withResolvers<"approve" | "deny">();
+  root.collector.onApproval = () => decision.promise;
+  const call = h.internal.resolveDynamicTool({ threadId: "parent", turnId: "parent-turn", callId: "call-1", namespace: null, tool: "tasks_delete", arguments: { taskId: "task-1" } });
+  h.internal.turns.delete("parent");
+  decision.resolve("approve");
+  assert.equal((await call).success, false);
+  assert.equal(executions, 0);
+});
+
+test("Playwright MCP requests are restricted to the active root and use owner approval", async () => {
+  const h = harness();
+  const root = h.root("parent");
+  await h.internal.resolveMcpApproval({ id: 9, method: "mcpServer/elicitation/request", params: {
+    threadId: "parent", turnId: "parent-turn", serverName: "gaia_playwright", mode: "form",
+    _meta: { codex_approval_kind: "mcp_tool_call", tool_description: "Click", tool_params: { target: "submit", text: "secret" } },
+    message: "Allow the gaia_playwright MCP server to run tool \"browser_click\"?", requestedSchema: { type: "object", properties: {} },
+  } });
+  assert.equal(root.approvals[0]?.kind, "external");
+  assert.equal(root.approvals[0]?.target, "browser_click (target)");
+  assert.doesNotMatch(root.approvals[0]!.target, /secret/);
+  assert.match(root.approvals[0]!.risk, /submit a form/);
+  assert.deepEqual(h.sent, [{ id: 9, result: { action: "accept", content: {}, _meta: null } }]);
+  await h.internal.resolveMcpApproval({ id: 10, method: "mcpServer/elicitation/request", params: {
+    threadId: "parent", turnId: "wrong-turn", serverName: "gaia_playwright", mode: "form",
+    _meta: { codex_approval_kind: "mcp_tool_call", tool_params: { target: "submit" } },
+    message: "Allow the gaia_playwright MCP server to run tool \"browser_click\"?", requestedSchema: { type: "object", properties: {} },
+  } });
+  assert.equal(root.approvals.length, 1);
+  assert.deepEqual(h.sent[1], { id: 10, result: { action: "decline", content: null, _meta: null } });
 });
 
 test("unknown ancestry and failed lookup fail closed for every approval protocol", async () => {

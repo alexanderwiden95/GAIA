@@ -17,6 +17,7 @@ import {
   RESTEvents,
   SlashCommandBuilder,
   type Attachment,
+  type ButtonInteraction,
   type ChatInputCommandInteraction,
   type Message,
 } from "discord.js";
@@ -34,6 +35,9 @@ import {
   setChannelWorkspace,
   setMessageTurn,
 } from "./db.ts";
+import { formatMemoryContext, MemoryService, type MemoryResult } from "./memory.ts";
+import type { IntegrationService } from "./integrations.ts";
+import { ProactivityService, type ProactiveDelivery, type ProactivityConfig } from "./scheduler.ts";
 
 const execFile = promisify(execFileCallback);
 const KEYCHAIN_ACCOUNT = "gaia";
@@ -340,11 +344,11 @@ async function codexHealth(codex: CodexClient): Promise<string> {
   }
 }
 
-async function statusText(client: Client, pool: Pool, codex: CodexClient): Promise<string> {
+async function statusText(client: Client, pool: Pool, codex: CodexClient, integrations: IntegrationService, proactivity: ProactivityService): Promise<string> {
   const database = await pool.query("SELECT 1").then(() => "OK").catch(() => "ERROR - run `docker compose up -d --wait` and `npm run migrate`");
   const discord = client.isReady() ? "OK - gateway ready" : "ERROR - gateway disconnected";
   const codexStatus = await codexHealth(codex);
-  return ["GAIA: OK", `Database: ${database}`, `Discord: ${discord}`, `Codex: ${codexStatus}`].join("\n");
+  return ["GAIA: OK", `Database: ${database}`, `Discord: ${discord}`, `Codex: ${codexStatus}`, `Browser: ${codex.isReady() ? "OK - local Playwright MCP configured" : "ERROR - Codex app-server stopped"}`, `Google: ${integrations.status()}`, `Scheduler: ${proactivity.status()}`].join("\n");
 }
 
 async function retryDiscord<T>(operation: () => Promise<T>): Promise<T> {
@@ -378,12 +382,16 @@ class DiscordChat {
   private readonly pool: Pool;
   private readonly codex: CodexClient;
   private readonly config: AccessConfig;
+  private readonly memory: MemoryService;
+  private readonly proactivity: ProactivityService;
   private closing = false;
 
-  constructor(pool: Pool, codex: CodexClient, config: AccessConfig) {
+  constructor(pool: Pool, codex: CodexClient, config: AccessConfig, memory: MemoryService, proactivity: ProactivityService) {
     this.pool = pool;
     this.codex = codex;
     this.config = config;
+    this.memory = memory;
+    this.proactivity = proactivity;
   }
 
   enqueue(message: Message): Promise<void> {
@@ -448,6 +456,8 @@ class DiscordChat {
       const sent = await replyWithRetry(message, response, message.id);
       await saveMessage(this.pool, { discordId: message.id, channelId, role: "user", content: storedContent });
       await saveMessage(this.pool, { discordId: sent.id, channelId, role: "gaia", content: response });
+      this.memory.enqueueMessage(message.id, channelId);
+      this.memory.enqueueMessage(sent.id, channelId);
       return;
     }
 
@@ -456,6 +466,7 @@ class DiscordChat {
       const placeholder = await replyWithRetry(message, "Thinking...", message.id);
       // ponytail: nonce retries cover REST failures; add a durable outbox with Phase 9 crash recovery if needed.
       if (!await saveMessage(this.pool, { discordId: message.id, channelId, role: "user", content: storedContent })) return;
+      this.memory.enqueueMessage(message.id, channelId);
       const typing = setInterval(() => {
         void retryDiscord(() => message.channel.sendTyping()).catch(() => undefined);
       }, 8_000);
@@ -495,7 +506,9 @@ class DiscordChat {
         const codexThreadId = await this.codex.openThread(channel.threadId, channel.workspacePath);
         if (!channel.threadId) await setChannelThread(this.pool, channelId, codexThreadId);
         this.activeThreads.set(channelId, codexThreadId);
-        const result = await this.codex.runTurn(codexThreadId, content, {
+        const memory = content ? formatMemoryContext(await this.memory.retrieve(content, message.id)) : "";
+        const input = `${memory ? `${memory}\n\n` : ""}Current time and owner timezone: ${this.proactivity.currentTimeContext()}\nCurrent owner request:\n${content}`;
+        const result = await this.codex.runTurn(codexThreadId, input, {
           onText: scheduleEdit,
           onStarted: (turnId) => {
             startedTurnId = turnId;
@@ -504,6 +517,14 @@ class DiscordChat {
             if (this.closing) void this.codex.interrupt(codexThreadId).catch(() => undefined);
           },
           onApproval: (approval) => this.requestApproval(message, approval),
+          onFollowup: (followup) => this.proactivity.record({
+            channelId,
+            sourceDiscordId: message.id,
+            toolCallId: followup.callId,
+            kind: followup.kind,
+            title: followup.title,
+            dueAt: followup.dueAt,
+          }),
           onActivity: (activity) => {
             activitySends = activitySends.then(() => this.showActivity(message, activity)).catch(() => undefined);
           },
@@ -636,9 +657,11 @@ class DiscordChat {
     const chunks = splitDiscordMessage(text);
     const first = await retryDiscord(() => placeholder.edit({ content: chunks[0]!, allowedMentions: NO_MENTIONS }));
     await saveMessage(this.pool, { discordId: first.id, channelId, role: "gaia", content: chunks[0]!, turnId });
+    this.memory.enqueueMessage(first.id, channelId);
     for (const [index, chunk] of chunks.slice(1).entries()) {
       const sent = await replyWithRetry(placeholder, chunk, `${placeholder.id}-${index}`);
       await saveMessage(this.pool, { discordId: sent.id, channelId, role: "gaia", content: chunk, turnId });
+      this.memory.enqueueMessage(sent.id, channelId);
     }
   }
 }
@@ -654,6 +677,9 @@ async function handleInteraction(
   pool: Pool,
   codex: CodexClient,
   chat: DiscordChat,
+  memory: MemoryService,
+  integrations: IntegrationService,
+  proactivity: ProactivityService,
   config: AccessConfig,
 ): Promise<void> {
   if (!isAllowedSource({
@@ -667,7 +693,7 @@ async function handleInteraction(
   if (!subcommand) return;
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
   if (subcommand === "status") {
-    await interaction.editReply(await statusText(client, pool, codex));
+    await interaction.editReply(await statusText(client, pool, codex, integrations, proactivity));
   } else if (subcommand === "new") {
     await chat.newConversation(interaction.channelId, interactionChannelName(interaction));
     await interaction.editReply("Started a new conversation for this channel.");
@@ -684,7 +710,83 @@ async function handleInteraction(
   } else if (subcommand === "unworkspace") {
     await chat.removeWorkspace(interaction.channelId, interactionChannelName(interaction));
     await interaction.editReply("Removed this channel's workspace and started fresh conversation-only context.");
+  } else if (subcommand === "remember") {
+    await getOrCreateChannel(pool, interaction.channelId, interactionChannelName(interaction));
+    const text = interaction.options.getString("text", true).trim();
+    if (!text) {
+      await interaction.editReply("Memory text cannot be blank.");
+      return;
+    }
+    const id = await memory.remember(interaction.channelId, text, interaction.id);
+    await interaction.editReply(`Remembered as memory ${id}.`);
+  } else if (subcommand === "memories") {
+    const results = await memory.inspect(interaction.options.getString("query")?.trim());
+    await interaction.editReply(results.length ? results.map(formatMemoryResult).join("\n\n").slice(0, 2_000) : "No matching memories.");
+  } else if (subcommand === "correct") {
+    const id = requiredMemoryId(interaction.options.getString("id", true));
+    if (!id) {
+      await interaction.editReply("Memory ID must be numeric.");
+      return;
+    }
+    const text = interaction.options.getString("text", true).trim();
+    if (!text) {
+      await interaction.editReply("Memory text cannot be blank.");
+      return;
+    }
+    const changed = await memory.correct(id, text);
+    await interaction.editReply(changed ? `Corrected memory ${id}.` : `Memory ${id} was not found.`);
+  } else if (subcommand === "forget") {
+    const id = requiredMemoryId(interaction.options.getString("id", true));
+    if (!id) {
+      await interaction.editReply("Memory ID must be numeric.");
+      return;
+    }
+    await interaction.editReply(await memory.forget(id) ? `Forgot memory ${id}. Discord history is unchanged.` : `Memory ${id} was not found.`);
+  } else if (subcommand === "followup") {
+    const id = requiredMemoryId(interaction.options.getString("id", true));
+    if (!id) {
+      await interaction.editReply("Follow-up ID must be numeric.");
+      return;
+    }
+    const action = interaction.options.getString("action", true) as "complete" | "dismiss" | "snooze";
+    const changed = await proactivity.update(id, action);
+    await interaction.editReply(changed ? followupActionText(id, action) : `Open follow-up ${id} was not found.`);
   }
+}
+
+function followupActionText(id: string, action: "complete" | "dismiss" | "snooze"): string {
+  return action === "snooze" ? `Snoozed follow-up ${id} for 24 hours.` : `${action === "complete" ? "Completed" : "Dismissed"} follow-up ${id}.`;
+}
+
+async function handleFollowupButton(interaction: ButtonInteraction, proactivity: ProactivityService, config: AccessConfig): Promise<void> {
+  if (!isAllowedSource({
+    guildId: interaction.guildId,
+    channelId: interaction.channelId,
+    userId: interaction.user.id,
+    isBot: interaction.user.bot,
+  }, config)) return;
+  const match = /^gaia-followup:(\d+):(complete|dismiss|snooze)$/.exec(interaction.customId);
+  if (!match) return;
+  await interaction.deferUpdate();
+  const id = match[1]!;
+  const action = match[2] as "complete" | "dismiss" | "snooze";
+  const changed = await proactivity.update(id, action);
+  await interaction.editReply({
+    content: `${interaction.message.content}\n\n${changed ? followupActionText(id, action) : `Follow-up ${id} was already resolved.`}`.slice(0, 2_000),
+    components: [],
+    allowedMentions: NO_MENTIONS,
+  });
+}
+
+function requiredMemoryId(value: string): string | null {
+  if (!/^\d+$/.test(value)) return null;
+  return BigInt(value) <= 9_223_372_036_854_775_807n ? value : null;
+}
+
+function formatMemoryResult(result: MemoryResult): string {
+  const range = result.sourceDiscordId ? `, Discord interaction ${result.sourceDiscordId}` : result.sourceStartId ? `, messages ${result.sourceStartId}-${result.sourceEndId}` : "";
+  const text = result.content.replaceAll("@", "(at)").slice(0, 500);
+  return `**Memory ${result.id}** (${result.kind}, #${result.channelName} ${result.channelId}${range})\n${text}${result.content.length > 500 ? "..." : ""}`;
 }
 
 export type DiscordService = {
@@ -692,12 +794,49 @@ export type DiscordService = {
   close: () => Promise<void>;
 };
 
-export async function startDiscord(pool: Pool, codex: CodexClient, config: AccessConfig, token: string): Promise<DiscordService> {
+function followupButtons(id: string): ActionRowBuilder<ButtonBuilder> {
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder().setCustomId(`gaia-followup:${id}:complete`).setLabel("Complete").setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId(`gaia-followup:${id}:snooze`).setLabel("Snooze 24h").setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId(`gaia-followup:${id}:dismiss`).setLabel("Dismiss").setStyle(ButtonStyle.Danger),
+  );
+}
+
+async function sendProactive(client: Client, channelId: string, delivery: ProactiveDelivery): Promise<void> {
+  const channel = await client.channels.fetch(channelId);
+  if (!channel?.isSendable()) throw new Error("Configured proactive Discord channel is unavailable or not sendable");
+  if (delivery.type === "followup") {
+    const title = delivery.followup.title.replaceAll("@", "(at)").slice(0, 500);
+    await retryDiscord(async () => {
+      await channel.send({
+        content: `**Follow-up ${delivery.followup.id}**\n${title}`,
+        components: [followupButtons(delivery.followup.id)],
+        allowedMentions: NO_MENTIONS,
+        nonce: delivery.key,
+        enforceNonce: true,
+      });
+    });
+    return;
+  }
+  const lines = delivery.followups.map((item) => `- **${item.id}** ${item.title.replaceAll("@", "(at)").slice(0, 240)}`);
+  await retryDiscord(async () => {
+    await channel.send({
+      content: `**Daily follow-up digest**\n${lines.length ? lines.join("\n") : "No open follow-ups."}`.slice(0, 2_000),
+      allowedMentions: NO_MENTIONS,
+      nonce: delivery.key,
+      enforceNonce: true,
+    });
+  });
+}
+
+export async function startDiscord(pool: Pool, codex: CodexClient, memory: MemoryService, integrations: IntegrationService, config: AccessConfig, token: string, proactivityConfig: ProactivityConfig): Promise<DiscordService> {
   const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
   });
 
-  const chat = new DiscordChat(pool, codex, config);
+  const proactivity = new ProactivityService(pool, proactivityConfig, (delivery) => sendProactive(client, proactivityConfig.channelId, delivery));
+  const chat = new DiscordChat(pool, codex, config, memory, proactivity);
+  const interactions = new Set<Promise<void>>();
   client.on(Events.MessageCreate, (message) => {
     if (!isAllowedSource({
       guildId: message.guildId,
@@ -710,9 +849,16 @@ export async function startDiscord(pool: Pool, codex: CodexClient, config: Acces
   });
   client.on(Events.InteractionCreate, (interaction) => {
     if (interaction.isChatInputCommand()) {
-      void handleInteraction(interaction, client, pool, codex, chat, config).catch(() => {
+      const task = handleInteraction(interaction, client, pool, codex, chat, memory, integrations, proactivity, config).catch(async () => {
         console.error("Failed to handle Discord interaction");
+        if (interaction.deferred || interaction.replied) await interaction.editReply("GAIA could not complete that command. Try again.").catch(() => undefined);
       });
+      interactions.add(task);
+      void task.finally(() => interactions.delete(task));
+    } else if (interaction.isButton() && interaction.customId.startsWith("gaia-followup:")) {
+      const task = handleFollowupButton(interaction, proactivity, config).catch(() => console.error("Failed to handle follow-up action"));
+      interactions.add(task);
+      void task.finally(() => interactions.delete(task));
     }
   });
   client.on(Events.Error, () => console.error("Discord client error"));
@@ -734,13 +880,33 @@ export async function startDiscord(pool: Pool, codex: CodexClient, config: Acces
         .addSubcommand((command) => command.setName("workspace").setDescription("Enroll an existing local workspace for this channel")
           .addStringOption((option) => option.setName("path").setDescription("Absolute path or ~/path").setRequired(true)))
         .addSubcommand((command) => command.setName("unworkspace").setDescription("Remove this channel's enrolled workspace"))
+        .addSubcommand((command) => command.setName("remember").setDescription("Store an explicit shared memory")
+          .addStringOption((option) => option.setName("text").setDescription("Fact to remember").setRequired(true).setMinLength(1).setMaxLength(2_000)))
+        .addSubcommand((command) => command.setName("memories").setDescription("Inspect shared memories and their sources")
+          .addStringOption((option) => option.setName("query").setDescription("Optional semantic search").setMaxLength(500)))
+        .addSubcommand((command) => command.setName("correct").setDescription("Correct an existing shared memory")
+          .addStringOption((option) => option.setName("id").setDescription("Numeric memory ID").setRequired(true))
+          .addStringOption((option) => option.setName("text").setDescription("Corrected fact").setRequired(true).setMinLength(1).setMaxLength(2_000)))
+        .addSubcommand((command) => command.setName("forget").setDescription("Delete a shared memory locally")
+          .addStringOption((option) => option.setName("id").setDescription("Numeric memory ID").setRequired(true)))
+        .addSubcommand((command) => command.setName("followup").setDescription("Resolve or snooze an open follow-up")
+          .addStringOption((option) => option.setName("id").setDescription("Numeric follow-up ID").setRequired(true))
+          .addStringOption((option) => option.setName("action").setDescription("Action").setRequired(true)
+            .addChoices(
+              { name: "Complete", value: "complete" },
+              { name: "Dismiss", value: "dismiss" },
+              { name: "Snooze 24 hours", value: "snooze" },
+            )))
         .toJSON(),
     ], config.guildId);
+    proactivity.start();
     return {
       client,
       close: async () => {
         client.destroy();
         await chat.close();
+        await proactivity.close();
+        await Promise.all(interactions);
       },
     };
   } catch (error) {

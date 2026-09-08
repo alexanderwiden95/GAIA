@@ -1,2 +1,4 @@
 .env
+.playwright-mcp/
+client-secret.json
 node_modules/

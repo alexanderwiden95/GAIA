@@ -5,8 +5,8 @@
 > sessions.
 
 **Document status:** Approved for implementation  
-**Last updated:** 2026-09-07
-**Next phase:** Phase 6, Shared memory
+**Last updated:** 2026-09-08
+**Next phase:** Phase 9, Local operations and recovery
 
 ## Instructions for AI Coding Agents
 
@@ -814,7 +814,7 @@ control.
 
 ## Phase 6: Shared Memory
 
-**Status:** TODO
+**Status:** DONE
 
 **Goal:** Recall relevant information across channels without replaying all prior
 messages.
@@ -839,9 +839,44 @@ messages.
 - Correcting or deleting a memory changes subsequent retrieval.
 - Embeddings are produced locally without an OpenAI API key.
 
+**Implementation record (2026-09-08):**
+
+- Added generated `simple` full-text vectors and GIN indexes for visible messages
+  and memories, plus source-linked explicit and extractive-summary memories. The
+  initial database contained 52 visible messages, so pgvector uses exact cosine
+  scans; no ANN index or vector framework was added.
+- Selected `Xenova/paraphrase-multilingual-MiniLM-L12-v2` through pinned
+  Transformers.js `3.8.1`, producing 384-dimensional normalized embeddings
+  locally. The model name is configurable in one environment value, stored with
+  every vector, and a changed model triggers background re-embedding rather than
+  mixing vector spaces. A patched `sharp` override keeps the dependency audit
+  clean without exposing image processing to memory content.
+- Added startup backfill and serialized in-process asynchronous indexing with
+  bounded retries and graceful shutdown draining. New owner and GAIA messages
+  are embedded without a queue service; every 50 visible channel messages create
+  a bounded extractive summary linked to the exact source message range.
+- Added hybrid global retrieval with explicit memories weighted above summaries
+  and messages, small recency signals, a five-result/6,000-character prompt cap,
+  and current-message exclusion. Recalled data carries Discord channel and
+  interaction/message references and is marked untrusted in both runtime
+  instructions and the per-turn data envelope.
+- Added owner-only `/gaia remember`, `/gaia memories`, `/gaia correct`, and
+  `/gaia forget` controls. Corrections replace content and vectors atomically;
+  deletion removes local memory while clearly leaving Discord history intact.
+- Checks passed under Node `24.8.0`: typecheck, 30 unit tests, three database
+  integration tests, live local-model exact/semantic/source/correction/deletion
+  and backfill checks, clean npm audit, Compose validation, whitespace checks,
+  and daemon startup with all 52 existing visible messages backfilled. The daemon
+  is running; no physical mobile-client pass was repeated because commands use
+  the existing native Discord slash-command transport.
+- Files changed: `src/memory.ts`, `src/discord.ts`, `src/index.ts`,
+  `src/agents.ts`, migrations `002`-`005`, memory and database tests,
+  `package.json`, `package-lock.json`, `tsconfig.json`, `.env.example`,
+  `README.md`, and this plan. No commit was requested or made; Phase 7 is next.
+
 ## Phase 7: Conversation-Based Proactivity
 
-**Status:** TODO
+**Status:** DONE
 
 **Goal:** Let GAIA follow up without waiting for a new user message.
 
@@ -864,9 +899,50 @@ messages.
 - One daily digest is sent at the configured time, not during quiet hours.
 - No email, calendar, GitHub, browser, or system-health polling occurs.
 
+**Implementation record (2026-09-08):**
+
+- Added durable source-linked follow-ups for explicit dates, promises, unresolved
+  questions, and stalled topics. GAIA records them through Codex's pinned
+  app-server dynamic-tool protocol; calls are accepted only from the active root
+  turn, validated at the application boundary, and idempotent by tool call ID.
+- Added an in-process PostgreSQL scheduler that checks overdue rows at startup
+  and every 30 seconds, respects IANA timezone and overnight quiet-hour settings,
+  retries failed delivery, and sends at most one non-empty digest per local day.
+  Stable Discord nonces plus persisted notification timestamps prevent duplicate
+  delivery during normal retries and restarts.
+- Added concise reminders in one configured allowed Discord channel with
+  owner-only Complete, Snooze 24h, and Dismiss buttons. The same durable actions
+  are available through `/gaia followup`; snoozing safely wins a race with the
+  scheduler's post-delivery update.
+- Configured the ignored local environment for the first allowed channel at
+  `08:30 Europe/Stockholm`, with quiet hours from `22:00` to `07:00`. The five
+  proactive settings are required and fail startup validation rather than using
+  invented defaults. `/gaia status` now reports scheduler health.
+- Live Codex checks recorded correctly timezone-qualified examples of all four
+  categories. A real overdue test reminder was delivered to Discord and then
+  dismissed. Integration checks exercised due-time delivery, one daily digest,
+  restart deduplication, idempotent recording, every owner action, and the
+  delivery/snooze race; native Discord buttons reuse the already validated
+  owner-only interaction transport.
+- Checks passed under Node `24.8.0`: typecheck, 33 unit tests, four database
+  integration tests, local embedding acceptance, clean npm audit, Compose
+  validation, whitespace checks, migration state/cleanup checks, and repeated
+  daemon startup. The daemon is running with migration `006` applied.
+- Deliberate limits: digest entries are concise conversation-derived follow-up
+  records rather than broad memory excerpts. Delivery uses persisted state and
+  Discord nonce idempotency, not a general durable outbox; add outbox
+  reconciliation in Phase 9 if failures outside Discord's nonce window occur.
+  Dynamic tools require the pinned experimental app-server capability, so this
+  phase starts one fresh Codex context per existing channel while preserving
+  Discord history and shared memory.
+- Files changed for Phase 7: `src/scheduler.ts`, `src/codex.ts`, `src/discord.ts`,
+  `src/index.ts`, `src/agents.ts`, migration `006`, scheduler/Codex/database tests,
+  `.env.example`, the ignored `.env`, `README.md`, and this plan. No commit was
+  requested or made; Phase 8 is next.
+
 ## Phase 8: Interactive Integrations
 
-**Status:** TODO
+**Status:** DONE
 
 **Goal:** Add the requested tools for user-initiated work without expanding
 proactive monitoring.
@@ -891,6 +967,55 @@ proactive monitoring.
 - Sending email requires explicit approval.
 - GAIA can read Calendar and Tasks; mutations require explicit approval.
 - No Google credential or message content appears in logs.
+
+**Implementation record (2026-09-08):**
+
+- Verified local Git `2.50.1` and the existing Keychain-authenticated `gh` CLI
+  through an enrolled Codex workspace. A live read-only turn inspected repository
+  state and reported the GitHub repository name and visibility through the normal
+  command/network approval path; no duplicate GitHub client was added.
+- Added pinned Playwright MCP `0.0.80` as GAIA's reserved local MCP server. It is
+  available only in enrolled workspaces, runs headless with an isolated profile,
+  writes artifacts under the system temporary directory, receives no GAIA or
+  Google credentials, and leaves every unrelated user-configured MCP disabled.
+- Routed Playwright's native MCP elicitation requests through the existing durable
+  owner-only Discord approve-once flow. Requests are accepted only for the exact
+  active root turn and validated tool metadata; prompts show safe operation and
+  target detail while redacting form values, scripts, and dropped data. All
+  browser writes require approval. Live navigation returned `Example Domain`;
+  a form was filled after approval and its submit click was denied and blocked.
+- Added native-fetch Gmail, Calendar, and Tasks dynamic tools without a Google SDK
+  or integration framework. Reads and Gmail draft creation are automatic for an
+  active owner turn. Gmail send and every Calendar/Tasks mutation require approval;
+  external deletes are presented as HADES. Approval cannot outlive cancellation,
+  completion, or collector replacement.
+- Added a PKCE/state-protected Google Desktop OAuth login using a random loopback
+  callback and system browser. The downloaded Desktop client, refresh token, and
+  granted scopes are stored under `gaia.google.oauth` in macOS Keychain; access
+  tokens remain memory-only and never enter Codex, Playwright, action records, or
+  application logs. The user chose to retain the downloaded `client-secret.json`
+  locally, and its exact filename is ignored by Git.
+- Google Desktop clients do not support incremental authorization, despite the
+  original work-item wording, so Gmail read/compose, Calendar events, and Tasks
+  scopes are requested together and verified after consent. The user created the
+  required Cloud client and enabled all three APIs. Live checks passed for Gmail
+  search/read, unsent draft creation, owner-approved self-send, Calendar read and
+  owner-approved create/update/delete, and Tasks read and owner-approved
+  create/complete/delete. Temporary Calendar and Tasks records were removed.
+- External API results are bounded and explicitly marked untrusted before model
+  use. As required for useful summaries, selected results remain part of Codex's
+  private conversation execution history; GAIA's database action log and process
+  output contain no Google message content or credentials. No proactive external
+  polling was added.
+- Checks passed under Node `24.8.0`: typecheck, 37 unit tests, four database tests,
+  local embedding acceptance, clean npm audit, Compose validation, and whitespace
+  checks. Live checks covered Git/GitHub, browser navigation and denied submission,
+  Google auth/status, all requested reads, Gmail draft/send, and reversible
+  Calendar/Tasks mutations. Files changed for Phase 8: `.gitignore`,
+  `src/integrations.ts`, `src/google-login.ts`, `src/codex.ts`, `src/discord.ts`,
+  `src/index.ts`, `src/agents.ts`, integration/Codex tests, `package.json`,
+  `package-lock.json`, `README.md`, and this plan. No commit was requested or made;
+  Phase 9 is next.
 
 ## Phase 9: Local Operations and Recovery
 
@@ -977,6 +1102,9 @@ not delete prior rows.
 | 2026-09-06 | Phase 3 | DONE | Hardened reconnects, nonce retries, mentions, Markdown, attachment validation/download/cleanup, shutdown draining, Codex environment and tool isolation, and private Discord setup documentation | Node 24 typecheck/unit/DB/audit/Compose checks; live text/image acceptance, ZIP rejection, forced Gateway resume with replay deduplication, shutdown cleanup, mobile viewport, secret-env and listener checks | Text context is capped at 256 KiB; image validation uses signatures; durable outbox remains Phase 9 territory; next is Phase 4; directory is not yet a Git repository |
 | 2026-09-06 | Phase 4 | DONE | Added canonical per-channel workspace enrollment, isolated workspace/read-only thread settings, Discord approve-once/deny components for command/file/permission requests, HADES labeling, bounded activity summaries, and redacted idempotent audit records | Node 24 typecheck/unit/DB/audit/Compose/diff/listener checks; direct app-server workspace, outside-boundary, command/file approve-deny, and HADES probes; live Discord enrollment, approve, deny, and activity checks | Workspace changes start fresh context; strict `untrusted` replaced `on-request` after a live `rm` bypass; broad remembered approvals deferred; next is Phase 5 |
 | 2026-09-07 | Phase 5 | DONE | Added GAIA runtime instructions, nine installed specialists, dynamic display names, bounded Discord status/results, child-aware approvals, isolated event routing, and terminal cancellation checks | Node 24 unit/DB/typecheck/audit/Compose/scoped diff checks; live default-model and gpt-5.5 delegation, dynamic worker, cap configuration, HADES denial and conversation-only checks; live Discord named results and HADES deny with target preservation | Delegation is workspace-only; two workers per session; no broad grants or new dependencies; some models have interruption but no close tool; next is Phase 6 |
+| 2026-09-08 | Phase 6 | DONE | Added local multilingual message/memory embeddings, hybrid cross-channel retrieval, source-linked summaries, startup backfill, bounded prompt context, and explicit remember/inspect/correct/forget commands | Node 24 typecheck; 30 unit tests; three DB tests; live local-model exact, paraphrase, source, mutation, deletion, and backfill checks; clean audit; Compose/diff checks; daemon startup and 52-message backfill | Exact vector scans fit the initial dataset; vectors retain model identity; no ANN index, vector framework, queue service, or repeated physical mobile pass; next is Phase 7 |
+| 2026-09-08 | Phase 7 | DONE | Added Codex-recorded conversation follow-ups, durable due scheduling and daily digests, timezone/quiet hours, one proactive Discord channel, and complete/snooze/dismiss controls | Node 24 typecheck; 33 unit and four DB tests; memory/audit/Compose/diff checks; live all-category dynamic-tool calls, real Discord reminder, migration, cleanup, and repeated daemon startup | Uses pinned experimental dynamic tools and one-time fresh Codex contexts; stable Discord nonces instead of a general outbox; digest stays limited to conversation-derived open loops; next is Phase 8 |
+| 2026-09-08 | Phase 8 | DONE | Added approved Git/GitHub access, isolated local Playwright MCP, Keychain-backed Google Desktop OAuth, and Gmail/Calendar/Tasks read, draft, send, and mutation tools | Node 24 typecheck; 37 unit and four DB tests; memory/audit/Compose/diff checks; live GitHub, browser navigation/denied submit, Google reads, Gmail draft/self-send, and reversible Calendar/Tasks mutations | Desktop OAuth scopes are requested together because Google does not support incremental auth; all browser writes and external mutations use approve-once, deletes show HADES; no proactive polling; next is Phase 9 |
 
 ## Authoritative References
 

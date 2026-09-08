@@ -7,6 +7,7 @@ Private local daemon connecting one Discord owner to Codex and PostgreSQL.
 - Node.js 24 (`nvm use` reads `.nvmrc`)
 - Docker Desktop with Compose
 - Codex CLI `0.153.4`, authenticated with `codex login`
+- GitHub CLI, authenticated with `gh auth login`
 - A private Discord server and bot
 
 ## Discord Setup
@@ -108,6 +109,86 @@ releasing the channel; an unresponsive child causes the app-server to stop.
 Some models expose interruption rather than a close-agent tool, so completed
 workers may remain in Codex history without running in the background.
 
+## Shared Memory
+
+GAIA indexes owner and GAIA messages asynchronously and retrieves up to five
+relevant excerpts across all configured channels. Exact names use PostgreSQL
+full-text search; paraphrases use local 384-dimensional embeddings from
+`Xenova/paraphrase-multilingual-MiniLM-L12-v2`. The model downloads from
+Hugging Face on first use and is then read from the local Transformers.js cache.
+No OpenAI API key or hosted embedding call is used. Set `GAIA_EMBEDDING_MODEL`
+only to a compatible 384-dimensional model.
+
+Use `/gaia remember text:<fact>` to store an explicit memory, `/gaia memories`
+to inspect recent memories and source channels, `/gaia memories query:<text>` to
+search them, `/gaia correct id:<id> text:<fact>` to replace one, and `/gaia
+forget id:<id>` to delete one locally. Forgetting local memory does not delete
+the original Discord message. Every recalled excerpt carries its source channel
+and source interaction, message, or summary range and is injected as bounded
+untrusted data.
+
+Every 50 new visible messages in a channel produce a bounded extractive summary
+linked to that exact database message range. The initial local dataset uses
+exact pgvector scans; add an ANN index only after row counts and query latency
+show that one is needed.
+
+## Proactive Follow-ups
+
+Set `GAIA_PROACTIVE_CHANNEL_ID` to one ID already listed in `GAIA_CHANNEL_IDS`,
+then configure `GAIA_TIMEZONE` with an IANA timezone and the digest and quiet-hour
+values as 24-hour `HH:MM` times. All five values are required; startup fails with
+an actionable error rather than inventing notification times.
+
+GAIA records genuine dates, promises, unresolved questions, and stalled topics
+through a local Codex dynamic tool. Due reminders are retried after restart with
+stable Discord nonces, while one digest of up to ten open items is sent per local
+day after the configured time and never during quiet hours. Reminders include
+**Complete**, **Snooze 24h**, and **Dismiss** buttons. Any open item can also be
+changed with `/gaia followup id:<id> action:<action>`.
+
+Only conversation-derived PostgreSQL rows are scheduled. GAIA does not poll
+email, calendars, GitHub, browsers, or system health. Upgrading to this phase
+starts one fresh Codex context per channel so the thread-level tool is available;
+visible Discord history and shared memory remain intact.
+
+## Interactive Integrations
+
+Workspace-enrolled channels can use local `git`, the existing authenticated `gh`
+CLI, and the pinned local Playwright MCP server. Every unrelated MCP server from
+the user's Codex configuration remains disabled. Playwright runs headless with an
+isolated temporary profile; actions marked as browser writes, including form
+fills and clicks that may submit, use the same owner-only approve-once Discord
+flow. Browser content is untrusted data and browser automation never runs
+proactively. Conversation-only channels have no browser MCP tools.
+
+Google Workspace setup requires a human-created OAuth client:
+
+1. In Google Cloud, create or select a project and enable Gmail API, Google
+   Calendar API, and Google Tasks API.
+2. Configure the OAuth consent screen and create a **Desktop app** OAuth client.
+   Add the owner as a test user when the app remains in Testing. Workspace policy
+   may require administrator approval.
+3. Download the client JSON, authorize in the system browser, and store the OAuth
+   client and refresh token directly in macOS Keychain:
+
+```sh
+npm run google:login -- /path/to/client_secret.json
+```
+
+The login command uses PKCE, random state, and a temporary `127.0.0.1` callback;
+it opens no public listener. Delete the downloaded JSON after successful setup.
+GAIA requests Gmail read/compose, Calendar events, and Tasks scopes together
+because Google Desktop apps do not support incremental authorization. Credentials
+stay in Keychain and access tokens stay in memory; neither Codex nor Playwright
+receives them.
+
+GAIA can search/read Gmail and create an unsent draft automatically. Sending a
+draft requires owner approval. Calendar and Tasks reads are automatic, while
+every create, update, completion, or deletion requires approval; external deletes
+are HADES-class. All returned email, event, task, and browser content is bounded
+and explicitly marked as untrusted. These integrations run only for an active
+owner request and are never polled by the scheduler.
+
 ## Run
 
 Install packages once, then start PostgreSQL, apply migrations, and start GAIA:
@@ -134,6 +215,7 @@ listener. PostgreSQL is the only published port and is bound to
 ```sh
 npm test
 npm run test:db
+npm run test:memory
 npm run typecheck
 npm audit
 ```
