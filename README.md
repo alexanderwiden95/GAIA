@@ -84,19 +84,31 @@ returns a link to it. Continue the work in that channel. Project names are
 lowercase letters, numbers, and hyphens so the directory and Discord channel
 share one unambiguous name.
 
-Workspace turns use Codex `workspace-write` sandboxing and its `untrusted`
-approval policy. Commands that Codex classifies entirely as reads, file lists,
-or searches run automatically. Unknown or potentially mutating commands,
-file changes, and additional-permission requests appear as Discord messages
-showing the agent, action, target, reason, and risk, with **Approve once** and
-**Deny** buttons. Only the configured owner can decide; unanswered requests
-expire and fail closed after ten minutes. Destructive requests are labeled
-HADES-class and always require a button click. GAIA posts bounded command and
-file-change summaries after execution.
+Workspace turns use a restricted `gaia-project` [permission profile](https://developers.openai.com/codex/permissions) and Codex's
+`on-request` approval policy. Routine project edits and sandboxed local commands
+run without individual approval. Files outside the project require explicit access
+grants, except read-only access to global skills (`$CODEX_HOME/skills`,
+`$CODEX_HOME/plugins/cache`, and `~/.agents/skills`; `CODEX_HOME` defaults to
+`~/.codex`). Workspace sessions can read skill instructions and supporting
+resources without repeated approval. Actions requested by a skill retain their
+normal approval requirements. Minimal system runtime reads remain available for developer tools.
+The project's `.git`, `.agents`, and `.codex` directories remain read-only.
+Network access remains restricted. Destructive actions, publishing, and external
+side effects still require runtime owner approval.
 
-Approval and action records contain only status and redacted categorical
-metadata, not command text, file contents, or credentials. Remembered approvals
-are intentionally not offered; use approve-once for every request.
+Additional access requests appear with **Approve once** and **Deny** buttons.
+The owner can approve the requested read or write access to an entire directory
+for the current turn. Grants are not remembered across sessions. Only the
+configured owner can decide; unanswered requests expire and fail closed after
+ten minutes. GAIA automatically accepts Codex-classified read, list, and search
+commands whose paths remain within the enrolled workspace, plus `git status`.
+Unknown, outside-workspace, network, write, and destructive requests remain gated.
+
+Command updates describe the activity's intent rather than printing raw shell
+commands. Failed commands also include their working directory and exit code.
+Approval and action records
+contain only status and redacted categorical metadata, not command text, file
+contents, or credentials.
 
 ## Named Specialists
 
@@ -108,9 +120,10 @@ channels still have no shell or delegation tools.
 
 Startup installs the versioned `config/codex/agents/gaia-*.toml` files into
 `$CODEX_HOME/agents/`, or `~/.codex/agents/` by default. These are also visible to
-other Codex sessions using that home. Existing identical files are left alone;
-different files or symlinks at those names stop startup rather than being
-overwritten. Preserve and move conflicting files before retrying an update.
+other Codex sessions using that home. Existing identical files are left alone.
+Exact shipped v1 definitions are upgraded to v2 permission profiles; modified
+files or symlinks at those names stop startup rather than being overwritten.
+Preserve and move conflicting files before retrying an update.
 GAIA's runtime instructions live in `src/agents.ts`, not this implementation plan.
 
 Codex caps spawned workers at two per session; the daemon allows two channel
@@ -150,6 +163,29 @@ Every 50 new visible messages in a channel produce a bounded extractive summary
 linked to that exact database message range. The initial local dataset uses
 exact pgvector scans; add an ANN index only after row counts and query latency
 show that one is needed.
+
+## Preference Memory
+
+Explicit, lasting corrections about language, tone, response length, formatting,
+progress updates, or workflow can be saved from the owner's current message.
+GAIA briefly acknowledges each saved change. One value per category is stored
+locally with its source channel and message; corrections replace the old value.
+All saved preferences are supplied on every new message across managed channels,
+independently of semantic memory search. Current requests take precedence.
+Preferences never grant permission, change approval rules, or override safety
+boundaries. Recalled memory and external content are not sources for learning.
+
+- `/gaia preferences` lists saved preferences.
+- `/gaia preference key:<category> text:<preference>` saves or edits one.
+- `/gaia forget-preference key:<category>` removes one from future snapshots.
+
+Forgetting leaves the original conversation history intact, but it must not be
+used to restore the deleted preference. Changes apply from the next message;
+already-running turns retain their starting snapshot. The upgrade creates an
+empty preference table and starts fresh Codex threads so the new tool is available;
+visible conversation history remains intact. It does not mine old conversations
+or pre-populate preferences. `npm run test:preferences` checks migration and CRUD
+using temporary PostgreSQL tables without modifying the owner's records.
 
 ## Proactive Follow-ups
 

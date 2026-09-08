@@ -1,7 +1,7 @@
 import type { Pool } from "pg";
 import { logError, redact } from "./logger.ts";
 
-const POLL_INTERVAL_MS = 30_000;
+const POLL_INTERVAL_MS = 5 * 60_000;
 
 export type FollowupKind = "explicit_date" | "promise" | "unresolved_question" | "stalled_topic";
 

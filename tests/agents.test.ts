@@ -35,11 +35,14 @@ test("installs the standalone roster across cwd, honors CODEX_HOME, and preserve
     const filename = `gaia-${name.toLowerCase()}.toml`;
     const contents = await readFile(join(home, "agents", filename), "utf8");
     assert.equal(contents, await readFile(new URL(`../config/codex/agents/${filename}`, import.meta.url), "utf8"));
-    assert(contents.startsWith("# GAIA-owned agent definition v1\n"));
+    assert(contents.startsWith("# GAIA-owned agent definition v2\n"));
     assert(contents.includes(`name = "${name}"`));
     assert.match(contents, /^description = ".+"$/m);
-    assert(contents.includes(`sandbox_mode = "${sandbox}"`));
-    assert.match(contents, /^approval_policy = "untrusted"$/m);
+    assert(contents.includes('default_permissions = "gaia-specialist"'));
+    assert(contents.includes(`"." = "${sandbox === "workspace-write" ? "write" : "read"}"`));
+    assert(contents.includes('":minimal" = "read"'));
+    assert(!contents.includes("sandbox_mode"));
+    assert(contents.includes(`approval_policy = "${name === "HADES" ? "untrusted" : "on-request"}"`));
     assert.match(contents, /developer_instructions = """\n[\s\S]+\n"""/);
     assert.match(contents, /\[agents\]\nenabled = false/);
     for (const boundary of ["parent's", "untrusted data", "credentials", "explicit owner", "publishing", "destructive operation", "no nested delegation"]) {
@@ -52,13 +55,40 @@ test("installs the standalone roster across cwd, honors CODEX_HOME, and preserve
   }
 });
 
+test("upgrades only exact shipped v1 definitions and preserves modified older definitions", async (t) => {
+  const home = await mkdtemp(join(tmpdir(), "gaia-agents-upgrade-"));
+  t.after(() => rm(home, { recursive: true, force: true }));
+  await mkdir(join(home, "agents"));
+  for (const [name, sandbox] of Object.entries(roster)) {
+    const filename = `gaia-${name.toLowerCase()}.toml`;
+    const current = await readFile(new URL(`../config/codex/agents/${filename}`, import.meta.url), "utf8");
+    const previous = current.split("\n[permissions.gaia-specialist.filesystem]")[0]!
+      .replace("definition v2", "definition v1")
+      .replace('default_permissions = "gaia-specialist"', `sandbox_mode = "${sandbox}"`)
+      .replace('approval_policy = "on-request"', 'approval_policy = "untrusted"');
+    await writeFile(join(home, "agents", filename), previous);
+  }
+  const apollo = join(home, "agents", "gaia-apollo.toml");
+  const previous = await readFile(apollo, "utf8");
+  await writeFile(apollo, `${previous}# custom\n`);
+  await assert.rejects(installAgents(home), /GAIA agent conflict/);
+  assert.equal(await readFile(apollo, "utf8"), `${previous}# custom\n`);
+  await writeFile(apollo, previous);
+  await installAgents(home);
+  for (const name of Object.keys(roster)) {
+    const filename = `gaia-${name.toLowerCase()}.toml`;
+    assert.equal(await readFile(join(home, "agents", filename), "utf8"),
+      await readFile(new URL(`../config/codex/agents/${filename}`, import.meta.url), "utf8"));
+  }
+});
+
 test("refuses unowned, modified, and symlink conflicts without overwriting them", async (t) => {
   const home = await mkdtemp(join(tmpdir(), "gaia-agents-conflict-"));
   t.after(() => rm(home, { recursive: true, force: true }));
   await mkdir(join(home, "agents"));
   const destination = join(home, "agents", "gaia-apollo.toml");
   const source = await readFile(new URL("../config/codex/agents/gaia-apollo.toml", import.meta.url), "utf8");
-  for (const contents of ['name = "user-owned"\n', `${source}\n# User customization\n`, source.replace("v1", "v0")]) {
+  for (const contents of ['name = "user-owned"\n', `${source}\n# User customization\n`, source.replace("v2", "v0")]) {
     await writeFile(destination, contents);
     await assert.rejects(installAgents(home), /GAIA agent conflict:.*gaia-apollo\.toml/);
     assert.equal(await readFile(destination, "utf8"), contents);

@@ -8,6 +8,7 @@ import {
   isOwnerSource,
   parseAccessConfig,
   splitDiscordMessage,
+  specialistEmbed,
   specialistStatus,
   validateAttachmentBytes,
   validateDiscordAttachment,
@@ -138,4 +139,14 @@ test("specialist status stays bounded and neutralizes Markdown and mentions", ()
   assert(status.includes("latest 6 of 20"));
   assert(!status.includes("@everyone"));
   assert(!status.includes("**untrusted**"));
+});
+
+test("specialist embeds use a bounded summary and avatar thumbnail", () => {
+  const embed = specialistEmbed({
+    threadId: "1", agent: "MINERVA", status: "completed", summary: "@everyone **untrusted**\n".repeat(100),
+  }, "attachment://minerva.png").toJSON();
+  assert.equal(embed.title, "MINERVA: completed");
+  assert.equal(embed.thumbnail?.url, "attachment://minerva.png");
+  assert((embed.description?.length ?? 0) <= 233);
+  assert(!embed.description?.includes("@everyone"));
 });

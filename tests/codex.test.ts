@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
 
 import { CodexClient, type CodexActivity, type CodexAgentActivity, type CodexApproval, type CodexFollowup, type TurnResult } from "../src/codex.ts";
 import { integrationApproval, type IntegrationService } from "../src/integrations.ts";
@@ -7,6 +9,7 @@ import type { DynamicToolCallParams } from "../src/protocol/v2/DynamicToolCallPa
 
 type Internals = {
   turns: CodexClient["turns"];
+  resumedThreads: CodexClient["resumedThreads"];
   specialists: CodexClient["specialists"];
   rawRequest: CodexClient["rawRequest"];
   send: CodexClient["send"];
@@ -98,31 +101,137 @@ test("child approvals resolve ancestry and reach only the correct root with spec
   assert.equal(h.calls.length, 1, "known specialists do not need another ancestry lookup");
 });
 
-test("read-only parsed commands run without owner approval while unknown commands still ask", async () => {
+test("workspace reads and git status run automatically while unsafe approvals reach the owner", async () => {
   const h = harness();
   const parent = h.root("parent");
+  const workspace = process.cwd();
+  h.internal.resumedThreads.set("parent", workspace);
   await h.approve("item/commandExecution/requestApproval", "parent", {
-    command: "rg needle src && sed -n '1,20p' src/index.ts",
-    commandActions: [
-      { type: "search", command: "rg needle src", query: "needle", path: "src" },
-      { type: "read", command: "sed -n '1,20p' src/index.ts", name: "src/index.ts", path: "src/index.ts" },
-    ],
+    cwd: workspace,
+    command: "rg needle src",
+    commandActions: [{ type: "search", command: "rg needle src", query: "needle", path: `${workspace}/src` }],
   });
   assert.equal(parent.approvals.length, 0);
   assert.deepEqual(h.sent[0], { id: 1, result: { decision: "accept" } });
 
   await h.approve("item/commandExecution/requestApproval", "parent", {
-    command: "rg needle src > matches.txt",
-    commandActions: [{ type: "unknown", command: "rg needle src > matches.txt" }],
+    cwd: workspace,
+    command: "git status --short --branch",
+    commandActions: [{ type: "unknown", command: "git status --short --branch" }],
   });
-  assert.equal(parent.approvals.length, 1);
+  assert.equal(parent.approvals.length, 0);
   assert.deepEqual(h.sent[1], { id: 1, result: { decision: "accept" } });
 
   await h.approve("item/commandExecution/requestApproval", "parent", {
+    cwd: workspace,
+    command: "cat /outside/project.txt",
+    commandActions: [
+      { type: "read", command: "cat /outside/project.txt", name: "project.txt", path: "/outside/project.txt" },
+    ],
+  });
+  assert.equal(parent.approvals.length, 1);
+  assert.deepEqual(h.sent[2], { id: 1, result: { decision: "accept" } });
+
+  await h.approve("item/commandExecution/requestApproval", "parent", {
+    cwd: workspace,
+    command: "rg needle src > matches.txt",
+    commandActions: [{ type: "unknown", command: "rg needle src > matches.txt" }],
+  });
+  assert.equal(parent.approvals.length, 2);
+  assert.deepEqual(h.sent[3], { id: 1, result: { decision: "accept" } });
+
+  await h.approve("item/commandExecution/requestApproval", "parent", {
+    cwd: workspace,
     command: "rm old.txt",
     commandActions: [{ type: "read", command: "rm old.txt", name: "old.txt", path: "old.txt" }],
   });
-  assert.equal(parent.approvals.length, 2, "HADES commands never trust a permissive parser classification");
+  assert.equal(parent.approvals.length, 3, "HADES commands never trust a permissive parser classification");
+});
+
+test("workspace start and resume allow project edits with restricted outside access", async () => {
+  const h = harness();
+  h.client.start = async () => {};
+  h.internal.rawRequest = async <T>(method: string, params?: unknown): Promise<T> => {
+    h.calls.push({ method, params });
+    return { thread: { id: "new" } } as T;
+  };
+  await h.client.openThread(null, "/project");
+  await h.client.openThread("existing", "/project");
+  const codexHome = resolve(process.env.CODEX_HOME || join(homedir(), ".codex"));
+  for (const call of h.calls) {
+    const params = call.params as Record<string, any>;
+    assert.equal(params.approvalPolicy, "on-request");
+    assert.equal(params.approvalsReviewer, "user");
+    assert.equal(params.sandbox, undefined);
+    assert.equal(params.config.default_permissions, "gaia-project");
+    assert.deepEqual(params.config.permissions["gaia-project"], {
+      filesystem: {
+        ":minimal": "read", "/opt/homebrew": "read",
+        [join(codexHome, "skills")]: "read",
+        [join(codexHome, "plugins", "cache")]: "read",
+        [join(homedir(), ".agents", "skills")]: "read",
+        ":workspace_roots": { ".": "write", ".git": "read", ".agents": "read", ".codex": "read" },
+      },
+      network: { enabled: false },
+    });
+    assert.match(params.developerInstructions, /Reading global skill instructions and supporting resources.*authorized without further approval/);
+    assert.equal(params.config.permissions["gaia-project"].filesystem[codexHome], undefined);
+  }
+  await h.client.openThread(null, null);
+  const chat = h.calls.at(-1)!.params as Record<string, any>;
+  assert.equal(chat.approvalPolicy, "never");
+  assert.equal(chat.sandbox, "read-only");
+  assert.equal(chat.config.features.shell_tool, false);
+  assert.equal(chat.config.permissions, undefined);
+});
+
+test("directory permission grants require owner approval and expire after the turn", async () => {
+  const h = harness();
+  const parent = h.root("parent");
+  const permissions = { fileSystem: { entries: [{ path: { type: "path", path: "/shared/project" }, access: "write" }] } };
+  await h.approve("item/permissions/requestApproval", "parent", { permissions });
+  assert.match(parent.approvals[0]!.target, /Filesystem write: \/shared\/project/);
+  assert.deepEqual(h.sent[0], { id: 1, result: { permissions, scope: "turn" } });
+  parent.collector.onApproval = async () => "deny";
+  await h.approve("item/permissions/requestApproval", "parent", { permissions });
+  assert.deepEqual(h.sent[1], { id: 1, result: { permissions: {}, scope: "turn" } });
+});
+
+test("successful command updates omit metadata while failures retain diagnostics", () => {
+  const h = harness();
+  const parent = h.root("parent");
+  for (const exitCode of [0, 1]) {
+    h.notify("item/completed", { threadId: "parent", item: {
+      type: "commandExecution", id: `command-${exitCode}`, command: "npm test", cwd: "/project",
+      status: exitCode === 0 ? "completed" : "failed", exitCode, commandActions: [],
+    } });
+  }
+  assert.equal(parent.activities[0]!.summary, "Running project tests");
+  assert.equal(parent.activities[1]!.summary, "Running project tests\nWorking directory: /project\nExit code: 1");
+  h.notify("item/completed", { threadId: "parent", item: {
+    type: "commandExecution", id: "search", command: "rg integration src", cwd: "/project", status: "completed", exitCode: 0,
+    commandActions: [{ type: "search", command: "rg integration src", query: "existing integration", path: "src" }],
+  } });
+  assert.equal(parent.activities[2]!.summary, "Searching for existing integration");
+});
+
+test("preference learning is available only to the active root turn", async () => {
+  const h = harness();
+  const root = h.root("parent");
+  const saved: unknown[] = [];
+  root.collector.onPreference = async (preference) => { saved.push(preference); };
+  const params: DynamicToolCallParams = {
+    threadId: "parent", turnId: "parent-turn", callId: "preference-1", namespace: null,
+    tool: "save_preference", arguments: { key: "tone", value: "Direct", evidence: "Be direct from now on" },
+  };
+  assert.equal((await h.internal.resolveDynamicTool(params)).success, true);
+  assert.deepEqual(saved, [params.arguments]);
+  for (const override of [{ threadId: "worker" }, { turnId: "old" }, { namespace: "external" }]) {
+    assert.equal((await h.internal.resolveDynamicTool({ ...params, ...override })).success, false);
+  }
+  root.collector.interruptRequested = true;
+  assert.equal((await h.internal.resolveDynamicTool(params)).success, false);
+  assert.equal(saved.length, 1);
 });
 
 test("the follow-up tool accepts only the active root turn and validates arguments", async () => {

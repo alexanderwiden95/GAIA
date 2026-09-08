@@ -3,14 +3,17 @@ import { randomUUID } from "node:crypto";
 import { mkdir, mkdtemp, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 import {
   ActionRowBuilder,
+  AttachmentBuilder,
   ButtonBuilder,
   ButtonStyle,
   Client,
   ComponentType,
+  EmbedBuilder,
   Events,
   GatewayIntentBits,
   MessageFlags,
@@ -23,6 +26,7 @@ import {
 } from "discord.js";
 import type { Pool } from "pg";
 
+import { AGENT_NAMES } from "./agents.ts";
 import { CodexClient, type CodexActivity, type CodexAgentActivity, type CodexApproval, type CodexAttachment } from "./codex.ts";
 import {
   createApproval,
@@ -41,6 +45,7 @@ import type { IntegrationService } from "./integrations.ts";
 import { logError, logInfo, logger, logWarn } from "./logger.ts";
 import { latestBackupStatus } from "./operations.ts";
 import { ProactivityService, type ProactiveDelivery, type ProactivityConfig } from "./scheduler.ts";
+import { PREFERENCE_KEYS, forgetPreference, formatPreferenceContext, learnPreference, listPreferences, savePreference } from "./preferences.ts";
 
 const execFile = promisify(execFileCallback);
 const KEYCHAIN_ACCOUNT = "gaia";
@@ -49,6 +54,7 @@ const SNOWFLAKE = /^\d{17,20}$/;
 const DISCORD_MESSAGE_LIMIT = 2_000;
 const STREAM_EDIT_INTERVAL_MS = 1_500;
 const GLOBAL_TURN_LIMIT = 2;
+const AVATAR_DIRECTORY = fileURLToPath(new URL("../avatar-images/", import.meta.url));
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 const MAX_TEXT_ATTACHMENT_BYTES = 256 * 1024;
 const ALLOWED_ATTACHMENT_TYPES = new Set([
@@ -395,6 +401,14 @@ export function specialistStatus(agents: readonly CodexAgentActivity[]): string 
   return `**Specialists**${agents.length > 6 ? ` (latest 6 of ${agents.length})` : ""}\n${lines.join("\n\n")}`;
 }
 
+export function specialistEmbed({ agent, status, summary }: CodexAgentActivity, thumbnail?: string): EmbedBuilder {
+  const excerpt = summary.replaceAll(/[`*_~<>@]/g, "").replaceAll(/\s+/g, " ").trim();
+  const embed = new EmbedBuilder().setTitle(`${agent}: ${status}`);
+  if (excerpt) embed.setDescription(`${excerpt.slice(0, 230)}${excerpt.length > 230 ? "..." : ""}`);
+  if (thumbnail) embed.setThumbnail(thumbnail);
+  return embed;
+}
+
 class DiscordChat {
   private readonly queue = new ChannelTaskQueue();
   private readonly activeThreads = new Map<string, string>();
@@ -499,16 +513,35 @@ class DiscordChat {
       let turnIdSave = Promise.resolve();
       let activitySends = Promise.resolve();
       const agents = new Map<string, CodexAgentActivity>();
-      let agentMessage: Message | undefined;
+      const agentMessages = new Map<string, Message>();
+      const pendingAgents = new Set<string>();
       let agentTimer: NodeJS.Timeout | undefined;
       const flushAgents = (): void => {
         if (agentTimer) clearTimeout(agentTimer);
         agentTimer = undefined;
-        if (!agents.size) return;
-        const content = specialistStatus([...agents.values()]);
+        const updates = [...pendingAgents].map((threadId) => agents.get(threadId)).filter((activity): activity is CodexAgentActivity => activity !== undefined);
+        pendingAgents.clear();
+        if (!updates.length) return;
         activitySends = activitySends.then(async () => {
-          if (agentMessage) await retryDiscord(() => agentMessage!.edit({ content, allowedMentions: NO_MENTIONS }));
-          else agentMessage = await sendWithRetry(message, content, `${message.id}-a`);
+          for (const activity of updates) {
+            const existing = agentMessages.get(activity.threadId);
+            const filename = `${activity.agent.toLowerCase()}.png`;
+            if (existing) {
+              const thumbnail = existing.attachments.find((attachment) => attachment.name === filename)?.url;
+              await retryDiscord(() => existing.edit({ embeds: [specialistEmbed(activity, thumbnail)], allowedMentions: NO_MENTIONS }));
+            } else {
+              if (!message.channel.isSendable()) throw new Error("Discord channel is not sendable");
+              const named = AGENT_NAMES.includes(activity.agent);
+              const sent = await retryDiscord(() => message.channel.send({
+                embeds: [specialistEmbed(activity, named ? `attachment://${filename}` : undefined)],
+                files: named ? [new AttachmentBuilder(join(AVATAR_DIRECTORY, filename)).setName(filename)] : [],
+                allowedMentions: NO_MENTIONS,
+                nonce: randomUUID().replaceAll("-", "").slice(0, 25),
+                enforceNonce: true,
+              }));
+              agentMessages.set(activity.threadId, sent);
+            }
+          }
         }).catch((error) => logError("discord", error));
       };
 
@@ -529,7 +562,8 @@ class DiscordChat {
         if (!channel.threadId) await setChannelThread(this.pool, channelId, codexThreadId);
         this.activeThreads.set(channelId, codexThreadId);
         const memory = content ? formatMemoryContext(await this.memory.retrieve(content, message.id)) : "";
-        const input = `${memory ? `${memory}\n\n` : ""}Current time and owner timezone: ${this.proactivity.currentTimeContext()}\nCurrent owner request:\n${content}`;
+        const preferences = formatPreferenceContext(await listPreferences(this.pool));
+        const input = `${preferences}\n\n${memory ? `${memory}\n\n` : ""}Current time and owner timezone: ${this.proactivity.currentTimeContext()}\nCurrent owner request:\n${content}`;
         const result = await this.codex.runTurn(codexThreadId, input, {
           onText: scheduleEdit,
           onStarted: (turnId) => {
@@ -539,6 +573,7 @@ class DiscordChat {
             if (this.closing) void this.codex.interrupt(codexThreadId).catch(() => undefined);
           },
           onApproval: (approval) => this.requestApproval(message, approval),
+          onPreference: (preference) => learnPreference(this.pool, preference, content, channelId, message.id),
           onFollowup: (followup) => this.proactivity.record({
             channelId,
             sourceDiscordId: message.id,
@@ -553,6 +588,7 @@ class DiscordChat {
           },
           onAgent: (activity) => {
             agents.set(activity.threadId, activity);
+            pendingAgents.add(activity.threadId);
             if (!agentTimer) agentTimer = setTimeout(flushAgents, STREAM_EDIT_INTERVAL_MS);
           },
         }, downloaded.files);
@@ -570,7 +606,10 @@ class DiscordChat {
       try {
         flushAgents();
         await activitySends;
-        if (agentMessage) await saveMessage(this.pool, { discordId: agentMessage.id, channelId, role: "system", content: specialistStatus([...agents.values()]), turnId: responseTurnId }).catch((error) => logError("discord", error));
+        for (const [threadId, agentMessage] of agentMessages) {
+          const activity = agents.get(threadId);
+          if (activity) await saveMessage(this.pool, { discordId: agentMessage.id, channelId, role: "system", content: specialistStatus([activity]), turnId: responseTurnId }).catch((error) => logError("discord", error));
+        }
         await this.finishResponse(placeholder, channelId, response, responseTurnId, edits, editTimer);
       } finally {
         if (agentTimer) clearTimeout(agentTimer);
@@ -749,6 +788,22 @@ async function handleInteraction(
   } else if (subcommand === "unworkspace") {
     await chat.removeWorkspace(interaction.channelId, interactionChannelName(interaction));
     await interaction.editReply("Removed this channel's workspace and started fresh conversation-only context.");
+  } else if (subcommand === "preferences") {
+    const preferences = await listPreferences(pool);
+    await interaction.editReply({ content: preferences.length
+      ? preferences.map(({ key, value }) => `${key}: ${value}`).join("\n\n")
+      : "No saved preferences.", allowedMentions: NO_MENTIONS });
+  } else if (subcommand === "preference") {
+    await getOrCreateChannel(pool, interaction.channelId, interactionChannelName(interaction));
+    const key = interaction.options.getString("key", true);
+    const value = interaction.options.getString("text", true).trim();
+    if (!value) { await interaction.editReply("Preference text cannot be blank."); return; }
+    await savePreference(pool, { key: key as typeof PREFERENCE_KEYS[number], value }, interaction.channelId, interaction.id);
+    await interaction.editReply(`Saved ${key} preference. It applies across conversations from the next message.`);
+  } else if (subcommand === "forget-preference") {
+    const key = interaction.options.getString("key", true);
+    await interaction.editReply(await forgetPreference(pool, key)
+      ? `Forgot ${key} preference. Conversation history is unchanged.` : "No preference saved for that category.");
   } else if (subcommand === "remember") {
     await getOrCreateChannel(pool, interaction.channelId, interactionChannelName(interaction));
     const text = interaction.options.getString("text", true).trim();
@@ -919,6 +974,14 @@ export async function startDiscord(pool: Pool, codex: CodexClient, memory: Memor
         .addSubcommand((command) => command.setName("workspace").setDescription("Enroll an existing local workspace for this channel")
           .addStringOption((option) => option.setName("path").setDescription("Absolute path or ~/path").setRequired(true)))
         .addSubcommand((command) => command.setName("unworkspace").setDescription("Remove this channel's enrolled workspace"))
+        .addSubcommand((command) => command.setName("preferences").setDescription("View your saved communication and workflow preferences"))
+        .addSubcommand((command) => command.setName("preference").setDescription("Save or replace a preference across conversations")
+          .addStringOption((option) => option.setName("key").setDescription("Preference category").setRequired(true)
+            .addChoices(...PREFERENCE_KEYS.map((key) => ({ name: key, value: key }))))
+          .addStringOption((option) => option.setName("text").setDescription("Your lasting preference, never permission for an action").setRequired(true).setMinLength(1).setMaxLength(240)))
+        .addSubcommand((command) => command.setName("forget-preference").setDescription("Remove a saved preference")
+          .addStringOption((option) => option.setName("key").setDescription("Preference category").setRequired(true)
+            .addChoices(...PREFERENCE_KEYS.map((key) => ({ name: key, value: key })))))
         .addSubcommand((command) => command.setName("remember").setDescription("Store an explicit shared memory")
           .addStringOption((option) => option.setName("text").setDescription("Fact to remember").setRequired(true).setMinLength(1).setMaxLength(2_000)))
         .addSubcommand((command) => command.setName("memories").setDescription("Inspect shared memories and their sources")
