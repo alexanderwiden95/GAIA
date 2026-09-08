@@ -12,6 +12,7 @@
     "protocol:generate": "codex app-server generate-ts --out src/protocol",
     "spike": "node src/codex-spike.ts",
     "start": "node --env-file-if-exists=.env src/index.ts",
+    "restart": "node src/operations.ts restart",
     "test": "node --test tests/*.test.ts",
     "test:db": "node --env-file-if-exists=.env --test tests/db.integration.ts",
     "test:memory": "node --env-file-if-exists=.env tests/memory.integration.ts",

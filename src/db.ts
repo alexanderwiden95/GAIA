@@ -13,11 +13,16 @@ export function createPool(connectionString = process.env.DATABASE_URL ?? DEFAUL
 
 export type ChannelState = { threadId: string | null; workspacePath: string | null };
 
+export async function managedChannelIds(pool: Pool): Promise<string[]> {
+  const result = await pool.query<{ discord_channel_id: string }>("SELECT discord_channel_id FROM channels WHERE NOT is_archived");
+  return result.rows.map(({ discord_channel_id }) => discord_channel_id);
+}
+
 export async function getOrCreateChannel(pool: Pool, channelId: string, name: string): Promise<ChannelState> {
   const result = await pool.query<{ codex_thread_id: string | null; workspace_path: string | null }>(`
     INSERT INTO channels (discord_channel_id, name)
     VALUES ($1, $2)
-    ON CONFLICT (discord_channel_id) DO UPDATE SET name = EXCLUDED.name, updated_at = now()
+    ON CONFLICT (discord_channel_id) DO UPDATE SET name = EXCLUDED.name, is_archived = false, updated_at = now()
     RETURNING codex_thread_id, workspace_path
   `, [channelId, name]);
   return {

@@ -98,6 +98,33 @@ test("child approvals resolve ancestry and reach only the correct root with spec
   assert.equal(h.calls.length, 1, "known specialists do not need another ancestry lookup");
 });
 
+test("read-only parsed commands run without owner approval while unknown commands still ask", async () => {
+  const h = harness();
+  const parent = h.root("parent");
+  await h.approve("item/commandExecution/requestApproval", "parent", {
+    command: "rg needle src && sed -n '1,20p' src/index.ts",
+    commandActions: [
+      { type: "search", command: "rg needle src", query: "needle", path: "src" },
+      { type: "read", command: "sed -n '1,20p' src/index.ts", name: "src/index.ts", path: "src/index.ts" },
+    ],
+  });
+  assert.equal(parent.approvals.length, 0);
+  assert.deepEqual(h.sent[0], { id: 1, result: { decision: "accept" } });
+
+  await h.approve("item/commandExecution/requestApproval", "parent", {
+    command: "rg needle src > matches.txt",
+    commandActions: [{ type: "unknown", command: "rg needle src > matches.txt" }],
+  });
+  assert.equal(parent.approvals.length, 1);
+  assert.deepEqual(h.sent[1], { id: 1, result: { decision: "accept" } });
+
+  await h.approve("item/commandExecution/requestApproval", "parent", {
+    command: "rm old.txt",
+    commandActions: [{ type: "read", command: "rm old.txt", name: "old.txt", path: "old.txt" }],
+  });
+  assert.equal(parent.approvals.length, 2, "HADES commands never trust a permissive parser classification");
+});
+
 test("the follow-up tool accepts only the active root turn and validates arguments", async () => {
   const h = harness();
   const root = h.root("parent");
@@ -121,6 +148,27 @@ test("the follow-up tool accepts only the active root turn and validates argumen
   assert.deepEqual(recorded, [{ callId: "call-1", kind: "promise", title: "Send the contract", dueAt: null }]);
   assert.equal((await h.internal.resolveDynamicTool({ ...params, threadId: "worker" })).success, false);
   await assert.rejects(h.internal.resolveDynamicTool({ ...params, arguments: { kind: "unknown", title: "Bad", dueAt: null } }));
+});
+
+test("project creation requires live approval and delegates only valid names", async () => {
+  const h = harness();
+  const root = h.root("parent");
+  const projects: string[] = [];
+  root.collector.onProject = async ({ name }) => {
+    projects.push(name);
+    return "Created <#123>";
+  };
+  const params: DynamicToolCallParams = {
+    threadId: "parent", turnId: "parent-turn", callId: "call-1", namespace: null,
+    tool: "create_project", arguments: { name: "my-project" },
+  };
+  assert.equal((await h.internal.resolveDynamicTool(params)).success, true);
+  assert.deepEqual(projects, ["my-project"]);
+  assert.equal(root.approvals[0]?.action, "Create project");
+  root.collector.onApproval = async () => "deny";
+  assert.equal((await h.internal.resolveDynamicTool(params)).success, false);
+  assert.deepEqual(projects, ["my-project"]);
+  await assert.rejects(h.internal.resolveDynamicTool({ ...params, arguments: { name: "../escape" } }), /Invalid project name/);
 });
 
 test("integration reads run directly while mutations require live owner approval", async () => {

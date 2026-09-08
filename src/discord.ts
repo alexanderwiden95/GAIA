@@ -1,6 +1,6 @@
 import { execFile as execFileCallback } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdtemp, realpath, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -79,7 +79,8 @@ const APPROVAL_TIMEOUT_MS = 10 * 60_000;
 export type AccessConfig = {
   ownerId: string;
   guildId: string;
-  channelIds: ReadonlySet<string>;
+  channelIds: Set<string>;
+  projectsDirectory: string;
 };
 
 export type DiscordSource = {
@@ -196,21 +197,25 @@ function requiredSnowflake(env: NodeJS.ProcessEnv, name: string): string {
 }
 
 export function parseAccessConfig(env: NodeJS.ProcessEnv = process.env): AccessConfig {
-  const channelIds = new Set((env.GAIA_CHANNEL_IDS ?? "").split(",").map((id) => id.trim()).filter(Boolean));
-  if (!channelIds.size) throw new Error("GAIA_CHANNEL_IDS must contain at least one Discord channel ID");
-  for (const id of channelIds) {
-    if (!SNOWFLAKE.test(id)) throw new Error("GAIA_CHANNEL_IDS must contain only Discord snowflakes");
-  }
+  const configuredProjectsDirectory = env.GAIA_PROJECTS_DIRECTORY?.trim() || "~/Projects";
+  const projectsDirectory = configuredProjectsDirectory === "~" ? homedir()
+    : configuredProjectsDirectory.startsWith("~/") ? join(homedir(), configuredProjectsDirectory.slice(2))
+      : resolve(configuredProjectsDirectory);
   return {
     ownerId: requiredSnowflake(env, "GAIA_OWNER_ID"),
     guildId: requiredSnowflake(env, "GAIA_GUILD_ID"),
-    channelIds,
+    channelIds: new Set(),
+    projectsDirectory,
   };
 }
 
-export function isAllowedSource(source: DiscordSource, config: AccessConfig): boolean {
+export function isOwnerSource(source: DiscordSource, config: AccessConfig): boolean {
   return !source.isBot && !source.webhookId && source.userId === config.ownerId &&
-    source.guildId === config.guildId && config.channelIds.has(source.channelId);
+    source.guildId === config.guildId;
+}
+
+export function isAllowedSource(source: DiscordSource, config: AccessConfig): boolean {
+  return isOwnerSource(source, config) && config.channelIds.has(source.channelId);
 }
 
 export async function canonicalizeWorkspace(input: string): Promise<string> {
@@ -375,8 +380,11 @@ async function retryDiscord<T>(operation: () => Promise<T>): Promise<T> {
   throw lastError;
 }
 
-function replyWithRetry(message: Message, content: string, nonce: string): Promise<Message> {
-  return retryDiscord(() => message.reply({ content, allowedMentions: NO_MENTIONS, nonce, enforceNonce: true }));
+function sendWithRetry(message: Message, content: string, nonce: string, components?: ActionRowBuilder<ButtonBuilder>[]): Promise<Message> {
+  return retryDiscord<Message>(() => {
+    if (!message.channel.isSendable()) throw new Error("Discord channel is not sendable");
+    return message.channel.send({ content, components, allowedMentions: NO_MENTIONS, nonce, enforceNonce: true });
+  });
 }
 
 export function specialistStatus(agents: readonly CodexAgentActivity[]): string {
@@ -467,7 +475,7 @@ class DiscordChat {
       downloaded = await downloadDiscordAttachments(message.attachments.values());
     } catch (error) {
       const response = error instanceof AttachmentError ? error.message : "Discord attachment download failed. Try uploading it again.";
-      const sent = await replyWithRetry(message, response, message.id);
+      const sent = await sendWithRetry(message, response, message.id);
       await saveMessage(this.pool, { discordId: message.id, channelId, role: "user", content: storedContent });
       await saveMessage(this.pool, { discordId: sent.id, channelId, role: "gaia", content: response });
       this.memory.enqueueMessage(message.id, channelId);
@@ -477,7 +485,7 @@ class DiscordChat {
 
     try {
       await retryDiscord(() => message.channel.sendTyping());
-      const placeholder = await replyWithRetry(message, "Thinking...", message.id);
+      const placeholder = await sendWithRetry(message, "Thinking...", message.id);
       // ponytail: nonce retries cover REST failures; add a durable outbox with Phase 9 crash recovery if needed.
       if (!await saveMessage(this.pool, { discordId: message.id, channelId, role: "user", content: storedContent })) return;
       this.memory.enqueueMessage(message.id, channelId);
@@ -500,7 +508,7 @@ class DiscordChat {
         const content = specialistStatus([...agents.values()]);
         activitySends = activitySends.then(async () => {
           if (agentMessage) await retryDiscord(() => agentMessage!.edit({ content, allowedMentions: NO_MENTIONS }));
-          else agentMessage = await replyWithRetry(message, content, `${message.id}-a`);
+          else agentMessage = await sendWithRetry(message, content, `${message.id}-a`);
         }).catch((error) => logError("discord", error));
       };
 
@@ -539,6 +547,7 @@ class DiscordChat {
             title: followup.title,
             dueAt: followup.dueAt,
           }),
+          onProject: ({ name }) => this.createProject(message, name),
           onActivity: (activity) => {
             activitySends = activitySends.then(() => this.showActivity(message, activity)).catch(() => undefined);
           },
@@ -574,6 +583,20 @@ class DiscordChat {
     }
   }
 
+  private async createProject(message: Message<true>, name: string): Promise<string> {
+    if (!message.channel.parentId) throw new Error("Project channels must be created from a channel inside a Discord category");
+    await mkdir(this.config.projectsDirectory, { recursive: true, mode: 0o700 });
+    const root = await realpath(this.config.projectsDirectory);
+    const workspace = join(root, name);
+    await mkdir(workspace, { recursive: true, mode: 0o700 });
+    const channel = await message.guild.channels.create({ name, parent: message.channel.parentId, reason: "Created by GAIA for the owner" });
+    await getOrCreateChannel(this.pool, channel.id, channel.name);
+    await setChannelWorkspace(this.pool, channel.id, workspace);
+    this.config.channelIds.add(channel.id);
+    await logAction(this.pool, { channelId: message.channelId, agent: "GAIA", action: "project_created", details: { projectChannelId: channel.id } });
+    return `Created <#${channel.id}> with workspace ${workspace}.`;
+  }
+
   private async requestApproval(message: Message, approval: CodexApproval): Promise<"approve" | "deny"> {
     const requestId = randomUUID();
     const approveId = `gaia-approval:${requestId}:approve`;
@@ -601,7 +624,7 @@ class DiscordChat {
     let prompt: Message | null = null;
     try {
       const nonce = requestId.replaceAll("-", "").slice(0, 25);
-      const sent = await retryDiscord(() => message.reply({ content: details, components, allowedMentions: NO_MENTIONS, nonce, enforceNonce: true }));
+      const sent = await sendWithRetry(message, details, nonce, components);
       prompt = sent;
       const interaction = await Promise.race([sent.awaitMessageComponent({
         componentType: ComponentType.Button,
@@ -639,12 +662,7 @@ class DiscordChat {
     const label = activity.kind === "command" ? "Command" : "File changes";
     const nonce = randomUUID().replaceAll("-", "").slice(0, 25);
     // Specialist tool chatter stays in the audit trail; one edited status message carries their results.
-    if (!activity.agent || activity.agent === "GAIA") await retryDiscord(() => message.reply({
-      content: `**${label} ${activity.status}**\n${this.limit(activity.summary, 1_500)}`,
-      allowedMentions: NO_MENTIONS,
-      nonce,
-      enforceNonce: true,
-    }));
+    if (!activity.agent || activity.agent === "GAIA") await sendWithRetry(message, `**${label} ${activity.status}**\n${this.limit(activity.summary, 1_500)}`, nonce);
     await logAction(this.pool, {
       channelId: message.channelId,
       agent: activity.agent ?? "GAIA",
@@ -669,14 +687,15 @@ class DiscordChat {
     if (editTimer) clearTimeout(editTimer);
     await pendingEdits;
     const chunks = splitDiscordMessage(text);
-    const first = await retryDiscord(() => placeholder.edit({ content: chunks[0]!, allowedMentions: NO_MENTIONS }));
+    const first = await sendWithRetry(placeholder, chunks[0]!, `${placeholder.id}-f`);
     await saveMessage(this.pool, { discordId: first.id, channelId, role: "gaia", content: chunks[0]!, turnId });
     this.memory.enqueueMessage(first.id, channelId);
     for (const [index, chunk] of chunks.slice(1).entries()) {
-      const sent = await replyWithRetry(placeholder, chunk, `${placeholder.id}-${index}`);
+      const sent = await sendWithRetry(placeholder, chunk, `${placeholder.id}-${index}`);
       await saveMessage(this.pool, { discordId: sent.id, channelId, role: "gaia", content: chunk, turnId });
       this.memory.enqueueMessage(sent.id, channelId);
     }
+    await retryDiscord(() => placeholder.delete());
   }
 }
 
@@ -696,16 +715,21 @@ async function handleInteraction(
   proactivity: ProactivityService,
   config: AccessConfig,
 ): Promise<void> {
-  if (!isAllowedSource({
+  const source = {
     guildId: interaction.guildId,
     channelId: interaction.channelId,
     userId: interaction.user.id,
     isBot: interaction.user.bot,
-  }, config)) return;
+  };
+  if (!isOwnerSource(source, config)) return;
   if (interaction.commandName !== "gaia") return;
   const subcommand = interaction.options.getSubcommand(false);
   if (!subcommand) return;
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  if (!config.channelIds.has(interaction.channelId) && subcommand !== "status" && subcommand !== "workspace") {
+    await interaction.editReply("This channel is not managed by GAIA. Enroll a workspace here first with `/gaia workspace`.");
+    return;
+  }
   if (subcommand === "status") {
     await interaction.editReply(await statusText(client, pool, codex, integrations, proactivity));
   } else if (subcommand === "new") {
@@ -716,6 +740,7 @@ async function handleInteraction(
   } else if (subcommand === "workspace") {
     try {
       const workspace = await chat.enrollWorkspace(interaction.channelId, interactionChannelName(interaction), interaction.options.getString("path", true));
+      config.channelIds.add(interaction.channelId);
       await interaction.editReply({ content: `Enrolled workspace and started fresh context for this channel: ${workspace.replaceAll("@", "(at)")}`, allowedMentions: NO_MENTIONS });
     } catch (error) {
       if (!(error instanceof WorkspaceError)) throw error;

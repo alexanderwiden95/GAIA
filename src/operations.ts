@@ -161,13 +161,23 @@ async function uninstall(): Promise<void> {
   await rm(LAUNCH_AGENT, { force: true });
 }
 
+async function restart(): Promise<void> {
+  if (!await serviceLoaded()) throw new Error("GAIA service is not loaded; run npm run service:install first");
+  const domain = `gui/${process.getuid?.()}`;
+  await run("launchctl", ["bootout", domain, LAUNCH_AGENT]);
+  await docker(["restart", "postgres"]);
+  await docker(["up", "-d", "--wait"]);
+  await run("launchctl", ["bootstrap", domain, LAUNCH_AGENT]);
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const command = process.argv[2];
   if (command === "install") await install();
   else if (command === "uninstall") await uninstall();
+  else if (command === "restart") await restart();
   else if (command === "backup") console.log(await backupDatabase());
   else if (command === "prune") console.log(`Removed ${(await pruneBackups()).length} old backups`);
   else if (command === "restore" && process.argv[3]) await restoreDatabase(process.argv[3], process.argv.includes("--confirm"));
   else if (command === "verify" && process.argv[3]) await verifyBackup(process.argv[3]);
-  else throw new Error("Usage: operations.ts install|uninstall|backup|prune|restore <dump> --confirm|verify <dump>");
+  else throw new Error("Usage: operations.ts install|uninstall|restart|backup|prune|restore <dump> --confirm|verify <dump>");
 }

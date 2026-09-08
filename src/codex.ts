@@ -69,6 +69,7 @@ type TurnCollector = {
   onActivity?: (activity: CodexActivity) => void;
   onAgent?: (activity: CodexAgentActivity) => void;
   onFollowup?: (request: CodexFollowup) => Promise<string>;
+  onProject?: (request: CodexProject) => Promise<string>;
   agentEvents: Promise<void>;
   fileChanges: Map<string, FileUpdateChange[]>;
 };
@@ -86,6 +87,7 @@ export type TurnCallbacks = {
   onActivity?: (activity: CodexActivity) => void;
   onAgent?: (activity: CodexAgentActivity) => void;
   onFollowup?: (request: CodexFollowup) => Promise<string>;
+  onProject?: (request: CodexProject) => Promise<string>;
 };
 
 export type CodexFollowup = {
@@ -93,6 +95,10 @@ export type CodexFollowup = {
   kind: "explicit_date" | "promise" | "unresolved_question" | "stalled_topic";
   title: string;
   dueAt: string | null;
+};
+
+export type CodexProject = {
+  name: string;
 };
 
 export type CodexAgentActivity = {
@@ -126,6 +132,19 @@ const FOLLOWUP_TOOL = {
       kind: { type: "string", enum: ["explicit_date", "promise", "unresolved_question", "stalled_topic"] },
       title: { type: "string", minLength: 1, maxLength: 240 },
       dueAt: { anyOf: [{ type: "string", format: "date-time" }, { type: "null" }] },
+    },
+  },
+} as const;
+const PROJECT_TOOL = {
+  type: "function",
+  name: "create_project",
+  description: "Create a local project directory and a dedicated Discord channel, then enroll that channel in the project workspace.",
+  inputSchema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["name"],
+    properties: {
+      name: { type: "string", pattern: "^[a-z0-9][a-z0-9-]{0,99}$" },
     },
   },
 } as const;
@@ -256,7 +275,7 @@ export class CodexClient {
           approvalsReviewer: "user",
           sandbox: "workspace-write",
           developerInstructions: `${GAIA_INSTRUCTIONS}\n${WORKSPACE_INSTRUCTIONS}`,
-          dynamicTools: [FOLLOWUP_TOOL, ...(this.integrations ? INTEGRATION_TOOLS : [])],
+          dynamicTools: [FOLLOWUP_TOOL, PROJECT_TOOL, ...(this.integrations ? INTEGRATION_TOOLS : [])],
           config: { agents: { enabled: true }, features: { multi_agent: true, shell_tool: true, unified_exec: true }, mcp_servers: { gaia_playwright: { ...PLAYWRIGHT_MCP, enabled: true } } },
         } as const
       : {
@@ -265,7 +284,7 @@ export class CodexClient {
           approvalsReviewer: "user",
           sandbox: "read-only",
           developerInstructions: `${GAIA_INSTRUCTIONS}\n${CHAT_INSTRUCTIONS}\nDelegation is unavailable in conversation-only mode. Answer directly.`,
-          dynamicTools: [FOLLOWUP_TOOL, ...(this.integrations ? INTEGRATION_TOOLS : [])],
+          dynamicTools: [FOLLOWUP_TOOL, PROJECT_TOOL, ...(this.integrations ? INTEGRATION_TOOLS : [])],
           config: { agents: { enabled: false }, features: { multi_agent: false, shell_tool: false, unified_exec: false }, mcp_servers: { gaia_playwright: { ...PLAYWRIGHT_MCP, enabled: false } } },
         } as const;
     if (!threadId) {
@@ -543,6 +562,25 @@ export class CodexClient {
     if (!collector || collector.done || collector.interruptRequested || collector.turnId !== params.turnId || params.namespace !== null) {
       return { success: false, contentItems: [{ type: "inputText", text: "This tool is unavailable for this turn." }] };
     }
+    if (params.tool === "create_project") {
+      const input = params.arguments;
+      const name = input && !Array.isArray(input) && typeof input === "object" ? (input as Record<string, unknown>).name : null;
+      if (typeof name !== "string" || !/^[a-z0-9][a-z0-9-]{0,99}$/.test(name)) throw new Error("Invalid project name");
+      if (!collector.onProject) return { success: false, contentItems: [{ type: "inputText", text: "Project creation is unavailable." }] };
+      const decision = await collector.onApproval?.({
+        kind: "external",
+        agent: "GAIA",
+        action: "Create project",
+        target: name,
+        reason: "Creates a local project directory and a Discord channel.",
+        risk: "Changes the local filesystem and Discord server structure.",
+      });
+      if (decision !== "approve" || collector.done || collector.interruptRequested || this.turns.get(params.threadId) !== collector) {
+        return { success: false, contentItems: [{ type: "inputText", text: "The owner denied project creation. Continue without it." }] };
+      }
+      const result = await collector.onProject({ name });
+      return { success: true, contentItems: [{ type: "inputText", text: result.slice(0, 2_000) }] };
+    }
     if (params.tool !== "record_followup") {
       if (!this.integrations || !INTEGRATION_TOOLS.some((tool) => tool.type === "function" && tool.name === params.tool)) {
         return { success: false, contentItems: [{ type: "inputText", text: "This integration tool is unavailable." }] };
@@ -594,6 +632,12 @@ export class CodexClient {
     const specialist = root ? undefined : await this.identifySpecialist(threadId);
     const collector = root ?? specialist?.collector;
     const agent = specialist?.agent ?? "GAIA";
+    const commandTarget = request.method === "item/commandExecution/requestApproval"
+      ? request.params.command ?? request.params.commandActions?.map((action) => action.command).join("\n") ?? ""
+      : request.method === "execCommandApproval" ? request.params.command.join(" ") : "";
+    const readOnlyCommand = !isHadesAction(commandTarget) && (request.method === "item/commandExecution/requestApproval"
+      ? request.params.kind !== "writeStdin" && !!request.params.commandActions?.length && request.params.commandActions.every((action) => action.type !== "unknown")
+      : request.method === "execCommandApproval" && !!request.params.parsedCmd?.length && request.params.parsedCmd.every((action) => action.type !== "unknown"));
     let approval: CodexApproval;
 
     if (request.method === "item/commandExecution/requestApproval") {
@@ -653,7 +697,7 @@ export class CodexClient {
       };
     }
 
-    const decision = !collector?.done && !collector?.interruptRequested && await collector?.onApproval?.(approval) === "approve";
+    const decision = !collector?.done && !collector?.interruptRequested && (readOnlyCommand || await collector?.onApproval?.(approval) === "approve");
     const approved = decision && !collector?.done && !collector?.interruptRequested && this.turns.get(specialist?.rootId ?? threadId) === collector;
     if (child !== this.child) return;
     if (request.method === "item/permissions/requestApproval") {

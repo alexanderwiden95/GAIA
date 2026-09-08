@@ -5,6 +5,7 @@ import {
   canonicalizeWorkspace,
   ChannelTaskQueue,
   isAllowedSource,
+  isOwnerSource,
   parseAccessConfig,
   splitDiscordMessage,
   specialistStatus,
@@ -17,8 +18,10 @@ import { isHadesAction } from "../src/codex.ts";
 const access = parseAccessConfig({
   GAIA_OWNER_ID: "123456789012345678",
   GAIA_GUILD_ID: "223456789012345678",
-  GAIA_CHANNEL_IDS: "323456789012345678, 423456789012345678",
+  GAIA_PROJECTS_DIRECTORY: "~/Projects",
 });
+access.channelIds.add("323456789012345678");
+access.channelIds.add("423456789012345678");
 const allowed: DiscordSource = {
   guildId: "223456789012345678",
   channelId: "323456789012345678",
@@ -29,6 +32,7 @@ const allowed: DiscordSource = {
 
 test("only the configured owner, guild, and channels are accepted", () => {
   assert.equal(isAllowedSource(allowed, access), true);
+  assert.equal(isOwnerSource({ ...allowed, channelId: "999456789012345678" }, access), true);
   for (const source of [
     { ...allowed, userId: "999456789012345678" },
     { ...allowed, guildId: "999456789012345678" },
@@ -40,11 +44,10 @@ test("only the configured owner, guild, and channels are accepted", () => {
 });
 
 test("invalid authorization configuration fails closed", () => {
-  assert.throws(() => parseAccessConfig({}), /GAIA_CHANNEL_IDS/);
+  assert.throws(() => parseAccessConfig({}), /GAIA_OWNER_ID/);
   assert.throws(() => parseAccessConfig({
     GAIA_OWNER_ID: "not-an-id",
     GAIA_GUILD_ID: "223456789012345678",
-    GAIA_CHANNEL_IDS: "323456789012345678",
   }), /GAIA_OWNER_ID/);
 });
 

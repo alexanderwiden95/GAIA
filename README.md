@@ -18,18 +18,21 @@ Private local daemon connecting one Discord owner to Codex and PostgreSQL.
    Server Members intents are not needed.
 3. Install the application into a private server with only the `bot` and
    `applications.commands` scopes. Grant View Channels, Read Message History,
-   Send Messages, and Use Application Commands. Add future permissions only
-   when a feature starts using them.
-4. Create a dedicated GAIA category and text channels. Remove server-wide View
-   Channels from the bot role, then explicitly allow View Channel, Read Message
-   History, Send Messages, and Use Application Commands on the GAIA category.
-   This prevents the bot from seeing unrelated channels. Ordinary conversation
-   is mention-free inside configured channels.
+   Send Messages, Use Application Commands, and Manage Channels. Leave
+   Administrator disabled.
+4. Create a dedicated GAIA category and one initial text channel. Remove
+   server-wide View Channels and Manage Channels from the bot role, then
+   explicitly allow View Channel, Read Message History, Send Messages, Use
+   Application Commands, and Manage Channels on the GAIA category. GAIA can
+   then create project channels only inside that category and cannot see or
+   manage unrelated channels.
 5. Keep the bot token out of Discord messages, shell history, and files. If it
    is exposed, reset it in the Developer Portal and replace the Keychain entry.
 
 Enable Developer Mode in Discord, then copy the owner user ID, server ID, and
-allowed channel IDs into an ignored local environment file:
+the initial channel ID into an ignored local environment file. Use the initial
+channel as `GAIA_PROACTIVE_CHANNEL_ID`; it bootstraps the database-backed channel
+allowlist:
 
 ```sh
 cp .env.example .env
@@ -61,19 +64,35 @@ the turn finishes.
 
 ## Workspaces and Approvals
 
-Channels remain conversation-only until the owner enrolls an existing local
-directory with `/gaia workspace path:<absolute path or ~/path>`. GAIA resolves
+Managed channel IDs, workspace paths, and Codex threads live in PostgreSQL rather
+than environment configuration. The configured owner may bootstrap an existing
+channel with `/gaia workspace path:<absolute path or ~/path>`. GAIA resolves
 symlinks and stores the canonical path, rejects missing paths and the filesystem
 root, and starts fresh Codex context whenever the workspace boundary changes.
 Use `/gaia unworkspace` to return the channel to conversation-only mode.
 
-Workspace turns use Codex `workspace-write` sandboxing and its strict
-`untrusted` approval policy. Command, file-change, and additional-permission
-requests appear as Discord messages showing the agent, action, target, reason,
-and risk, with **Approve once** and **Deny** buttons. Only the configured owner
-can decide; unanswered requests expire and fail closed after ten minutes.
-Destructive requests are labeled HADES-class and always require a button click.
-GAIA posts bounded command and file-change summaries after execution.
+To start a project without leaving Discord, ask GAIA in any managed channel:
+
+```text
+Create a new project called invoice-dashboard.
+```
+
+After owner approval, GAIA creates `invoice-dashboard` under
+`GAIA_PROJECTS_DIRECTORY` (default `~/Projects`), creates a sibling channel in
+the current Discord category, stores its ID and workspace in PostgreSQL, and
+returns a link to it. Continue the work in that channel. Project names are
+lowercase letters, numbers, and hyphens so the directory and Discord channel
+share one unambiguous name.
+
+Workspace turns use Codex `workspace-write` sandboxing and its `untrusted`
+approval policy. Commands that Codex classifies entirely as reads, file lists,
+or searches run automatically. Unknown or potentially mutating commands,
+file changes, and additional-permission requests appear as Discord messages
+showing the agent, action, target, reason, and risk, with **Approve once** and
+**Deny** buttons. Only the configured owner can decide; unanswered requests
+expire and fail closed after ten minutes. Destructive requests are labeled
+HADES-class and always require a button click. GAIA posts bounded command and
+file-change summaries after execution.
 
 Approval and action records contain only status and redacted categorical
 metadata, not command text, file contents, or credentials. Remembered approvals
@@ -134,10 +153,10 @@ show that one is needed.
 
 ## Proactive Follow-ups
 
-Set `GAIA_PROACTIVE_CHANNEL_ID` to one ID already listed in `GAIA_CHANNEL_IDS`,
-then configure `GAIA_TIMEZONE` with an IANA timezone and the digest and quiet-hour
-values as 24-hour `HH:MM` times. All five values are required; startup fails with
-an actionable error rather than inventing notification times.
+Set `GAIA_PROACTIVE_CHANNEL_ID` to the initial GAIA channel, then configure
+`GAIA_TIMEZONE` with an IANA timezone and the digest and quiet-hour values as
+24-hour `HH:MM` times. All five values are required; startup fails with an
+actionable error rather than inventing notification times.
 
 GAIA records genuine dates, promises, unresolved questions, and stalled topics
 through a local Codex dynamic tool. Due reminders are retried after restart with
@@ -242,6 +261,11 @@ Node and repository paths, and configures launchd to restart GAIA after crashes:
 nvm use
 npm run service:install
 ```
+
+Run `npm run restart` to stop the installed daemon, restart PostgreSQL, wait for
+database health, and start the daemon with the latest code. This interrupts active
+work. If the database restart fails, the daemon stays stopped; resolve the error
+and run `npm run service:install` to bring it back up.
 
 Logs are redacted JSON lines under `~/Library/Logs/GAIA/gaia.jsonl`. They rotate
 at 1 MiB with five retained generations. `/gaia status` verifies migrations,

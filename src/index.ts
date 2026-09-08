@@ -1,5 +1,5 @@
 import { CodexClient } from "./codex.ts";
-import { createPool, expirePendingApprovals, runMigrations } from "./db.ts";
+import { createPool, expirePendingApprovals, getOrCreateChannel, managedChannelIds, runMigrations } from "./db.ts";
 import { loadDiscordToken, parseAccessConfig, startDiscord, type DiscordService } from "./discord.ts";
 import { IntegrationService } from "./integrations.ts";
 import { MemoryService } from "./memory.ts";
@@ -40,7 +40,8 @@ try {
   memory.start();
   const config = parseAccessConfig();
   const proactivityConfig = parseProactivityConfig();
-  if (!config.channelIds.has(proactivityConfig.channelId)) throw new Error("GAIA_PROACTIVE_CHANNEL_ID must also appear in GAIA_CHANNEL_IDS");
+  await getOrCreateChannel(pool, proactivityConfig.channelId, "proactive");
+  for (const channelId of await managedChannelIds(pool)) config.channelIds.add(channelId);
   await codex.start();
   discord = await startDiscord(pool, codex, memory, integrations, config, await loadDiscordToken(), proactivityConfig);
   logInfo("daemon", `${applied.length ? `Ready; applied ${applied.join(", ")}` : "Ready"}${expired ? `; expired ${expired} stale approvals` : ""}`);

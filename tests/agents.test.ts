@@ -47,7 +47,7 @@ test("installs the standalone roster across cwd, honors CODEX_HOME, and preserve
     }
     assert(GAIA_INSTRUCTIONS.includes(`${name}:`));
   }
-  for (const instruction of ["she/her", "only when", "generic worker", "task-specific prompt", "application assigns", "Close workers", "parent's", "untrusted data", "secrets", "no nested delegation"]) {
+  for (const instruction of ["she/her", "benevolent advanced scientific intelligence", "calm", "precise", "intelligent equal", "uncertainty", "not more emotional", "only when", "generic worker", "task-specific prompt", "application assigns", "Close workers", "parent's", "untrusted data", "secrets", "no nested delegation"]) {
     assert(GAIA_INSTRUCTIONS.includes(instruction), instruction);
   }
 });

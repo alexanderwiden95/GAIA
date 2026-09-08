@@ -8,6 +8,7 @@ import {
   expirePendingApprovals,
   getOrCreateChannel,
   logAction,
+  managedChannelIds,
   messageExists,
   runMigrations,
   saveMessage,
@@ -137,6 +138,7 @@ test("channel threads and visible messages persist without duplicates", async (c
   });
 
   assert.deepEqual(await getOrCreateChannel(pool, channelId, "phase-2-test"), { threadId: null, workspacePath: null });
+  assert((await managedChannelIds(pool)).includes(channelId));
   await setChannelThread(pool, channelId, "thread-test");
   await setChannelWorkspace(pool, channelId, "/tmp/gaia-workspace-test");
   assert.deepEqual(await getOrCreateChannel(pool, channelId, "renamed"), {
